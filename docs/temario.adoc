@@ -1,0 +1,311 @@
+= CURSO DE MODEL CONTEXT PROTOCOL (MCP)
+:author: Formación Continua
+:duration: 25 horas lectivas
+:modalidad: Presencial
+:nivel: Intermedio
+:requisitos: Conocimientos de programación (Python o JavaScript), APIs REST y conceptos básicos de LLMs
+
+== INFORMACIÓN GENERAL
+
+[cols="2,5"]
+|===
+| Modalidad | Presencial
+| Nivel | Intermedio
+| Requisitos | Conocimientos de programación (Python o JavaScript), APIs REST y conceptos básicos de LLMs
+|===
+
+== OBJETIVOS DEL CURSO
+
+Al finalizar el curso, el alumno será capaz de:
+
+* Comprender la arquitectura y propósito del protocolo MCP.
+* Implementar servidores MCP con herramientas y recursos personalizados.
+* Conectar modelos de lenguaje con fuentes de datos externas.
+* Desarrollar clientes que consuman servidores MCP.
+* Aplicar buenas prácticas de seguridad y diseño.
+* Integrar MCP con frameworks populares (Claude, OpenAI, LangChain).
+
+== MÓDULO 1: INTRODUCCIÓN Y CONCEPTOS (3 horas)
+
+=== 1.1. ¿Qué es MCP?
+
+* Definición: Model Context Protocol
+* Origen: Anthropic y la necesidad de estandarización
+* Problema que resuelve: fragmentación de integraciones
+* Comparación con alternativas: Function Calling, Plugins, Tool Use
+* El ecosistema MCP: servidores, clientes, registry
+
+=== 1.2. Arquitectura del protocolo
+
+* Modelo cliente-servidor
+* Transporte: stdio, HTTP/SSE, WebSocket
+* Protocolo JSON-RPC 2.0
+* Ciclo de vida de una conexión MCP
+* Descubrimiento de capacidades
+
+=== 1.3. Conceptos fundamentales
+
+* *Resources*: datos y contenido accesible
+* *Tools*: funciones ejecutables
+* *Prompts*: plantillas de instrucciones
+* *Sampling*: solicitudes de generación del modelo
+* *Roots*: sistema de archivos accesible
+
+=== 1.4. Instalación y configuración
+
+* Instalación de SDK oficiales (Python, TypeScript)
+* Configuración de Claude Desktop
+* Configuración de Claude Code
+* Inspector MCP: herramienta de depuración
+* Estructura de un proyecto MCP
+
+== MÓDULO 2: RECURSOS EN MCP (4 horas)
+
+=== 2.1. Definición de Resources
+
+* ¿Qué es un Resource en MCP?
+* URIs y esquemas personalizados
+* Tipos de contenido MIME
+* Recursos estáticos vs dinámicos
+
+=== 2.2. Implementación de Resources
+
+* Decorador `@mcp.resource()` en Python
+* Devolución de contenido: texto y binario
+* Listado de recursos disponibles
+* Metadatos y descripciones
+
+=== 2.3. Recursos con plantillas
+
+* URI Templates (RFC 6570)
+* Parámetros dinámicos en recursos
+* Ejemplo: acceso a base de datos por ID
+* Validación de parámetros
+
+=== 2.4. Recursos del sistema de archivos
+
+* Acceso a archivos locales
+* Lectura de directorios
+* Filtros y permisos
+* Seguridad: sandboxing y roots
+
+=== 2.5. Casos prácticos
+
+* Servidor de documentación local
+* Acceso a archivos de configuración
+* Recursos desde base de datos SQLite
+* Recursos desde APIs externas
+
+== MÓDULO 3: HERRAMIENTAS EN MCP (5 horas)
+
+=== 3.1. Definición de Tools
+
+* ¿Qué es una Tool en MCP?
+* Diferencia entre Tool y Resource
+* Esquema JSON Schema para parámetros
+* Anotaciones de herramientas
+
+=== 3.2. Implementación de Tools
+
+* Decorador `@mcp.tool()` en Python
+* Definición de esquemas de entrada
+* Validación automática de parámetros
+* Devolución de resultados: texto, imágenes, recursos
+
+=== 3.3. Herramientas con efectos secundarios
+
+* Herramientas de escritura
+* Modificación del sistema de archivos
+* Ejecución de comandos
+* Transacciones y rollback
+
+=== 3.4. Herramientas asíncronas
+
+* Operaciones de larga duración
+* Progress reporting
+* Cancelación de operaciones
+* Timeouts y manejo de errores
+
+=== 3.5. Casos prácticos
+
+* Herramienta de búsqueda web
+* Herramienta de ejecución de código
+* Herramienta de acceso a base de datos
+* Herramienta de gestión de archivos
+
+== MÓDULO 4: PROMPTS Y SAMPLING (4 horas)
+
+=== 4.1. Definición de Prompts
+
+* ¿Qué es un Prompt en MCP?
+* Diferencia con prompts estáticos
+* Argumentos y plantillas
+* Prompts dinámicos
+
+=== 4.2. Implementación de Prompts
+
+* Decorador `@mcp.prompt()` en Python
+* Argumentos con valores por defecto
+* Construcción dinámica de mensajes
+* Inclusión de recursos en prompts
+
+=== 4.3. Sampling: el modelo genera
+
+* ¿Qué es Sampling en MCP?
+* Flujo de sampling: servidor solicita generación
+* Configuración: modelo, temperatura, max_tokens
+* Casos de uso: resumen, análisis, transformación
+
+=== 4.4. Implementación de Sampling
+
+* Decorador `@mcp.sample()` en Python
+* Manejo de respuestas del modelo
+* Sampling multimodal: texto e imágenes
+* Restricciones de seguridad
+
+=== 4.5. Casos prácticos
+
+* Prompt de análisis de código
+* Prompt de generación de documentación
+* Sampling para clasificación automática
+* Pipeline de procesamiento de documentos
+
+== MÓDULO 5: INTEGRACIÓN Y CLIENTES (5 horas)
+
+=== 5.1. Claude Desktop como cliente
+
+* Configuración de servidores MCP
+* Archivo `claude_desktop_config.json`
+* Conexión a servidores locales
+* Conexión a servidores remotos
+
+=== 5.2. Claude Code como cliente
+
+* Integración con Claude Code CLI
+* Configuración de servidores
+* Flujo de desarrollo con MCP
+* Debugging con Inspector
+
+=== 5.3. Desarrollo de clientes MCP
+
+* SDK de cliente en Python
+* SDK de cliente en TypeScript
+* Conexión por stdio
+* Conexión por HTTP/SSE
+
+=== 5.4. Integración con frameworks
+
+* LangChain y MCP
+* LlamaIndex y MCP
+* OpenAI Function Calling vs MCP
+* Agentes personalizados con MCP
+
+=== 5.5. Casos prácticos
+
+* Cliente CLI personalizado
+* Bot de Telegram con MCP
+* API REST que expone herramientas MCP
+* Dashboard de administración
+
+== MÓDULO 6: SEGURIDAD Y TEMAS AVANZADOS (4 horas)
+
+=== 6.1. Seguridad en MCP
+
+* Permisos y consentimiento del usuario
+* Validación de entradas
+* Sanitización de salidas
+* Rate limiting y cuotas
+* Auditoría y logging
+
+=== 6.2. Autenticación
+
+* OAuth 2.0 con MCP
+* API Keys y tokens
+* Autenticación por servidor
+* Delegación de permisos
+
+=== 6.3. Despliegue de servidores MCP
+
+* Servidores MCP en contenedores Docker
+* Despliegue en cloud (AWS, GCP, Azure)
+* Variables de entorno y secretos
+* Monitoring y health checks
+
+=== 6.4. Patrones avanzados
+
+* Composición de servidores MCP
+* Chaining de herramientas
+* Stateful servers vs stateless
+* Caching de recursos
+
+=== 6.5. Ecosistema y futuro
+
+* MCP Registry: descubrimiento de servidores
+* Servidores MCP populares: filesystem, github, postgres
+* Contribución a la especificación
+* Roadmap y evolución del protocolo
+
+== METODOLOGÍA
+
+=== Enfoque práctico
+
+* 60% tiempo en ejercicios prácticos
+* 30% tiempo en explicación teórica
+* 10% tiempo en debate y resolución de dudas
+
+=== Recursos necesarios
+
+* Ordenador con Python 3.10+ o Node.js 18+
+* Claude Desktop o Claude Code (acceso a API)
+* Editor de código (VS Code recomendado)
+* Conexión a internet
+
+== DISTRIBUCIÓN HORARIA
+
+[cols="3,2,2"]
+|===
+| Módulo | Horas | Porcentaje
+
+| M1. Introducción y Conceptos
+| 3h
+| 12%
+
+| M2. Recursos en MCP
+| 4h
+| 16%
+
+| M3. Herramientas en MCP
+| 5h
+| 20%
+
+| M4. Prompts y Sampling
+| 4h
+| 16%
+
+| M5. Integración y Clientes
+| 5h
+| 20%
+
+| M6. Seguridad y Temas Avanzados
+| 4h
+| 16%
+
+| **TOTAL**
+| **25h**
+| **100%**
+|===
+
+== RECURSOS ADICIONALES
+
+=== Documentación oficial
+
+* https://modelcontextprotocol.io[Documentación de MCP]
+* https://github.com/modelcontextprotocol[Repositorio oficial en GitHub]
+* https://github.com/modelcontextprotocol/servers[Servidores MCP de ejemplo]
+
+=== Herramientas
+
+* `mcp` CLI: desarrollo y depuración
+* `mcp-inspector`: inspector visual
+* SDK Python: `pip install mcp`
+* SDK TypeScript: `npm install @modelcontextprotocol/sdk`

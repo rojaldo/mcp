@@ -1,0 +1,3978 @@
+= FastMCP: Guía Completa de Documentación
+:author: Bot-Bunnny
+:version: 2.3.0
+:toc: left
+:toclevels: 4
+:source-highlighter: highlightjs
+:highlight-languages: python
+
+== Introducción a FastMCP
+
+=== ¿Qué es FastMCP?
+
+FastMCP es un framework de Python que simplifica drásticamente la creación de servidores MCP (Model Context Protocol). Diseñado por el equipo de Prefect, proporciona una interfaz declarativa y "Pythonica" para exponer herramientas, recursos y prompts a clientes MCP como Claude Desktop, VS Code con Copilot, y otros asistentes de IA.
+
+[IMPORTANT]
+====
+FastMCP no es un servidor MCP más — es la forma más elegante y productiva de crear servidores MCP en Python. Su filosofía es similar a la de FastAPI: código limpio, tipado fuerte, y documentación automática.
+====
+
+=== ¿Por qué FastMCP?
+
+==== Sin FastMCP: El SDK oficial de Python
+
+Con el SDK oficial de MCP, crear un servidor simple requiere mucho código repetitivo:
+
+[source,python]
+----
+# Sin FastMCP - SDK oficial de MCP
+from mcp.server import Server
+from mcp.server.stdio import stdio_server
+from mcp.types import Tool, TextContent
+import mcp.types as types
+import json
+
+# Crear servidor manualmente
+server = Server("example-server")
+
+# Definir lista de herramientas
+@server.list_tools()
+async def list_tools():
+    return [
+        Tool(
+            name="greet",
+            description="Greet a user by name",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string", "description": "The name to greet"}
+                },
+                "required": ["name"]
+            }
+        )
+    ]
+
+# Implementar la herramienta
+@server.call_tool()
+async def call_tool(name: str, arguments: dict):
+    if name == "greet":
+        user_name = arguments.get("name", "World")
+        return [TextContent(type="text", text=f"Hello, {user_name}!")]
+    raise ValueError(f"Unknown tool: {name}")
+
+# Ejecutar servidor
+async def main():
+    async with stdio_server() as (read_stream, write_stream):
+        await server.run(
+            read_stream,
+            write_stream,
+            server.create_initialization_options()
+        )
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())
+----
+
+==== Con FastMCP: Elegancia y Simplicidad
+
+Con FastMCP, el mismo servidor es dramáticamente más simple:
+
+[source,python]
+----
+# Con FastMCP - Limpio y declarativo
+from fastmcp import FastMCP
+
+mcp = FastMCP("MyServer")
+
+@mcp.tool
+def greet(name: str) -> str:
+    """Greet a user by name."""
+    return f"Hello, {name}!"
+
+if __name__ == "__main__":
+    mcp.run()
+----
+
+[NOTE]
+====
+FastMCP automáticamente:
+
+* Genera el JSON Schema desde las firmas de función
+* Maneja la serialización de tipos de retorno
+* Infiere tipos de parámetros desde anotaciones
+* Proporciona validación automática de entrada
+* Gestiona el protocolo MCP completo
+====
+
+=== Características Principales
+
+[cols="1,3"]
+|===
+| Característica | Descripción
+
+| **Decoradores intuitivos**
+| `@mcp.tool`, `@mcp.resource`, `@mcp.prompt` para registrar componentes
+
+| **Tipado automático**
+| JSON Schema generado desde anotaciones de tipo Python
+
+| **Múltiples transportes**
+| STDIO (por defecto), HTTP Streamable, SSE (legacy)
+
+| **Cliente integrado**
+| Cliente programático para testing y desarrollo
+
+| **Inyección de dependencias**
+| Acceso a Context, HTTP requests, tokens personalizados
+
+| **Middlewares**
+| Interceptación de mensajes para logging, rate limiting, etc.
+
+| **Autenticación**
+| OAuth 2.0 y Bearer Token support para HTTP
+
+| **Lifetime hooks**
+| Setup y teardown cuando el servidor inicia/termina
+|===
+
+=== Comparación: FastMCP vs SDK Oficial
+
+[cols="2,2,2"]
+|===
+| Aspecto | SDK Oficial | FastMCP
+
+| Líneas de código
+| ~50+ | ~10
+
+| Generación de Schema
+| Manual | Automática
+
+| Validación de entrada
+| Manual | Automática (Pydantic)
+
+| Documentación
+| Mínima | Integrada (docstrings)
+
+| Testing
+| Complejo | Cliente integrado
+
+| Middlewares
+| No | Sí
+
+| HTTP Support
+| Manual | Integrado
+|===
+
+== Instalación y Configuración
+
+=== Requisitos
+
+* Python 3.10 o superior
+* pip o uv (gestor de paquetes moderno)
+
+=== Instalación con pip
+
+[source,bash]
+----
+pip install fastmcp
+----
+
+=== Instalación con uv (Recomendado)
+
+uv es un gestor de paquetes moderno y extremadamente rápido:
+
+[source,bash]
+----
+# Instalar uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Crear proyecto
+uv init my-mcp-server
+cd my-mcp-server
+
+# Añadir FastMCP
+uv add fastmcp
+----
+
+=== Verificar Instalación
+
+[source,bash]
+----
+# Verificar versión
+uv run python -c "import fastmcp; print(fastmcp.__version__)"
+
+# O con el CLI de FastMCP
+fastmcp version
+----
+
+=== Estructura de Proyecto Recomendada
+
+[source,bash]
+----
+my-mcp-server/
+├── src/
+│   └── my_server/
+│       ├── __init__.py
+│       ├── server.py          # Servidor principal
+│       ├── tools/
+│       │   ├── __init__.py
+│       │   └── data_tools.py  # Tools relacionados con datos
+│       ├── resources/
+│       │   ├── __init__.py
+│       │   └── config.py      # Resources de configuración
+│       └── prompts/
+│           ├── __init__.py
+│           └── analysis.py    # Prompts de análisis
+├── tests/
+│   └── test_server.py
+├── pyproject.toml
+└── README.md
+----
+
+=== Configuración con pyproject.toml
+
+[source,toml]
+----
+[project]
+name = "my-mcp-server"
+version = "0.1.0"
+description = "My FastMCP Server"
+requires-python = ">=3.10"
+dependencies = [
+    "fastmcp>=2.0.0",
+]
+
+[project.scripts]
+my-server = "my_server.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+----
+
+== El Servidor FastMCP
+
+=== Crear un Servidor Básico
+
+El componente central de cualquier aplicación FastMCP es la clase `FastMCP`. Un servidor mínimo solo necesita un nombre:
+
+[source,python]
+----
+from fastmcp import FastMCP
+
+# Crear servidor con nombre
+mcp = FastMCP("MyServer")
+
+# Ejecutar servidor
+if __name__ == "__main__":
+    mcp.run()
+----
+
+[NOTE]
+====
+El nombre del servidor es importante: aparece en los clientes MCP y ayuda a los usuarios a identificar qué servidor están usando.
+====
+
+=== Instrucciones del Servidor
+
+Las instrucciones ayudan a los clientes (y los LLMs detrás de ellos) a entender qué hace tu servidor y cómo usarlo efectivamente:
+
+[source,python]
+----
+from fastmcp import FastMCP
+
+mcp = FastMCP(
+    "DataAnalysis",
+    instructions="""
+    Provides tools for analyzing numerical datasets.
+    
+    Start with get_summary() for an overview of your data.
+    Use analyze_trends() to identify patterns.
+    Use export_results() to save your analysis.
+    
+    Supported formats: CSV, JSON, Excel.
+    """,
+)
+----
+
+[TIP]
+====
+Las instrucciones se muestran a los usuarios en clientes como Claude Desktop. Incluye:
+
+* Qué hace el servidor
+* Qué herramientas empezar
+* Ejemplos de uso
+* Limitaciones conocidas
+====
+
+=== Parámetros de Configuración del Servidor
+
+La clase `FastMCP` acepta numerosos parámetros para personalizar el comportamiento:
+
+[source,python]
+----
+from fastmcp import FastMCP
+
+mcp = FastMCP(
+    # === Identidad ===
+    name="MyServer",                          # Nombre del servidor
+    instructions="Use this server to...",      # Instrucciones para clientes
+    version="1.0.0",                           # Versión del servidor
+    website_url="https://example.com/server",  # URL con más información
+    
+    # === Comportamiento ===
+    on_duplicate="warn",           # "warn", "error", "replace", "ignore"
+    strict_input_validation=False, # Validación estricta de inputs
+    mask_error_details=False,      # Ocultar detalles de errores internos
+    
+    # === Autenticación ===
+    auth=my_auth_provider,         # Proveedor OAuth o TokenVerifier
+    
+    # === Middlewares ===
+    middleware=[logging_middleware], # Lista de middlewares
+    
+    # === Providers ===
+    providers=[database_provider],   # Proveedores dinámicos
+    
+    # === Lifecycle ===
+    lifespan=my_lifespan,           # Setup/teardown del servidor
+)
+----
+
+=== Los Tres Componentes MCP
+
+FastMCP expone tres tipos de componentes a los clientes:
+
+==== Tools (Herramientas)
+
+Funciones que los clientes pueden invocar para realizar acciones:
+
+[source,python]
+----
+@mcp.tool
+def multiply(a: float, b: float) -> float:
+    """Multiplies two numbers together."""
+    return a * b
+----
+
+==== Resources (Recursos)
+
+Fuentes de datos que los clientes pueden leer:
+
+[source,python]
+----
+@mcp.resource("data://config")
+def get_config() -> dict:
+    """Server configuration."""
+    return {"theme": "dark", "version": "1.0"}
+----
+
+==== Prompts (Plantillas)
+
+Plantillas de mensajes reutilizables para interacciones con LLMs:
+
+[source,python]
+----
+@mcp.prompt
+def analyze_data(data_points: list[float]) -> str:
+    """Analyze numerical data."""
+    formatted = ", ".join(str(p) for p in data_points)
+    return f"Please analyze these data points: {formatted}"
+----
+
+=== Ejecutar el Servidor
+
+FastMCP soporta varios transportes:
+
+==== STDIO (Por Defecto)
+
+Ideal para integraciones locales y CLI tools:
+
+[source,python]
+----
+if __name__ == "__main__":
+    mcp.run()  # Usa STDIO por defecto
+----
+
+==== HTTP Streamable
+
+Para servicios web y APIs:
+
+[source,python]
+----
+if __name__ == "__main__":
+    mcp.run(transport="http", host="127.0.0.1", port=8000)
+----
+
+==== SSE (Legacy)
+
+Transporte legacy para compatibilidad:
+
+[source,python]
+----
+if __name__ == "__main__":
+    mcp.run(transport="sse", host="127.0.0.1", port=8000)
+----
+
+[WARNING]
+====
+SSE está deprecado en favor de Streamable HTTP. Úsalo solo para compatibilidad con clientes legacy.
+====
+
+=== Usando el CLI de FastMCP
+
+FastMCP incluye un CLI para ejecutar servidores sin modificar código:
+
+[source,bash]
+----
+# Ejecutar servidor con STDIO
+fastmcp run my_server.py
+
+# Ejecutar con HTTP
+fastmcp run my_server.py --transport http --port 8000
+
+# Ejecutar función específica
+fastmcp run my_module:create_server --transport http
+
+# Desarrollo con recarga automática
+fastmcp dev my_server.py
+----
+
+== Tools (Herramientas)
+
+=== Concepto de Tools
+
+Los Tools son funciones que los clientes MCP pueden invocar. Son el componente más utilizado en MCP y permiten que los asistentes de IA realicen acciones: consultar APIs, manipular archivos, hacer cálculos, etc.
+
+[IMPORTANT]
+====
+Los Tools son **funciones invocables** — el cliente puede ejecutarlas con argumentos y recibir resultados estructurados. A diferencia de los Resources (que son datos pasivos), los Tools realizan trabajo activo.
+====
+
+=== Crear un Tool Básico
+
+La forma más simple de crear un Tool es con el decorador `@mcp.tool`:
+
+[source,python]
+----
+from fastmcp import FastMCP
+
+mcp = FastMCP("MathServer")
+
+@mcp.tool
+def add(a: int, b: int) -> int:
+    """Add two numbers together.
+    
+    Args:
+        a: First number to add
+        b: Second number to add
+    
+    Returns:
+        The sum of a and b
+    """
+    return a + b
+----
+
+[TIP]
+====
+El docstring es importante: FastMCP lo usa para generar la descripción del Tool. Los clientes muestran esta descripción a los usuarios.
+====
+
+=== Inferencia de Tipos Automática
+
+FastMCP genera automáticamente el JSON Schema desde las anotaciones de tipo:
+
+[source,python]
+----
+from fastmcp import FastMCP
+from typing import Literal
+from pydantic import BaseModel, Field
+
+mcp = FastMCP("AdvancedTools")
+
+# Tipos básicos
+@mcp.tool
+def process_text(
+    text: str,                    # Tipo string
+    count: int,                   # Tipo entero
+    ratio: float,                 # Tipo flotante
+    enabled: bool,                # Tipo booleano
+    items: list[str],             # Lista de strings
+    mapping: dict[str, int],      # Diccionario string -> int
+) -> str:
+    """Process text with various parameters."""
+    return f"Processed: {text}"
+
+# Enums y Literales
+@mcp.tool
+def sort_data(
+    data: list[int],
+    order: Literal["asc", "desc"] = "asc",  # Enum limitado
+) -> list[int]:
+    """Sort a list of integers."""
+    return sorted(data, reverse=(order == "desc"))
+
+# Pydantic Models
+class UserFilter(BaseModel):
+    """Filter criteria for user search."""
+    name: str = Field(description="User name to search")
+    age_min: int | None = Field(default=None, description="Minimum age")
+    age_max: int | None = Field(default=None, description="Maximum age")
+    active: bool = Field(default=True, description="Only active users")
+
+@mcp.tool
+def search_users(filter: UserFilter) -> list[dict]:
+    """Search users with advanced filtering."""
+    # Filter es automáticamente validado por Pydantic
+    return [{"name": filter.name, "active": filter.active}]
+----
+
+=== Parámetros de Tool
+
+El decorador `@mcp.tool` acepta parámetros para personalizar el comportamiento:
+
+[source,python]
+----
+from fastmcp import FastMCP
+
+mcp = FastMCP("ToolsServer")
+
+@mcp.tool(
+    name="calculate_sum",           # Nombre personalizado
+    description="Calculate sum",    # Descripción personalizada
+    tags={"math", "utility"},        # Tags para filtrado
+    enabled=True,                   # Habilitar/deshabilitar
+)
+def add_numbers(a: int, b: int) -> int:
+    """Add two numbers."""
+    return a + b
+
+# Tool deshabilitado
+@mcp.tool(enabled=False)
+def internal_tool() -> str:
+    """Internal tool, not exposed."""
+    return "Not accessible"
+----
+
+=== Tools Asíncronos
+
+Para operaciones de I/O (consultas a BD, llamadas HTTP), usa funciones async:
+
+[source,python]
+----
+import aiohttp
+from fastmcp import FastMCP
+
+mcp = FastMCP("AsyncTools")
+
+@mcp.tool
+async def fetch_url(url: str) -> str:
+    """Fetch content from a URL.
+    
+    Args:
+        url: The URL to fetch
+    
+    Returns:
+        The response text
+    """
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            return await response.text()
+
+@mcp.tool
+async def query_database(query: str) -> list[dict]:
+    """Query the database."""
+    # Simulación de consulta async
+    await asyncio.sleep(0.1)
+    return [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]
+----
+
+=== Validación de Entrada
+
+FastMCP valida automáticamente los inputs usando Pydantic. Hay dos modos:
+
+==== Modo Flexible (Por Defecto)
+
+[source,python]
+----
+from fastmcp import FastMCP
+
+mcp = FastMCP("Server", strict_input_validation=False)  # Default
+
+@mcp.tool
+def greet(name: str, count: int) -> str:
+    return f"Hello {name}, count: {count}"
+
+# El cliente envía strings (común en JSON):
+# {"name": "Alice", "count": "10"}
+# FastMCP convierte automáticamente: "10" -> 10
+# Resultado: "Hello Alice, count: 10"
+----
+
+==== Modo Estricto
+
+[source,python]
+----
+from fastmcp import FastMCP
+
+mcp = FastMCP("Server", strict_input_validation=True)
+
+@mcp.tool
+def greet(name: str, count: int) -> str:
+    return f"Hello {name}, count: {count}"
+
+# El cliente envía:
+# {"name": "Alice", "count": "10"}
+# Error! "10" no es int, el schema requiere int exacto
+# El cliente recibe: "Invalid params: count must be integer"
+----
+
+=== Retorno de Tool
+
+Los Tools pueden retornar diferentes tipos:
+
+[source,python]
+----
+from fastmcp import FastMCP
+from fastmcp.utilities.types import Image
+from mcp.types import EmbeddedResource
+import json
+
+mcp = FastMCP("ReturnTypes")
+
+# Retorno simple (string)
+@mcp.tool
+def get_text() -> str:
+    """Return simple text."""
+    return "Hello, world!"
+
+# Retorno de diccionario (JSON automático)
+@mcp.tool
+def get_data() -> dict:
+    """Return structured data."""
+    return {"status": "ok", "count": 42}
+
+# Retorno de lista
+@mcp.tool
+def get_items() -> list[str]:
+    """Return list of items."""
+    return ["item1", "item2", "item3"]
+
+# Retorno de imagen
+@mcp.tool
+def get_image() -> Image:
+    """Return an image."""
+    # Crear imagen desde bytes
+    image_bytes = b"..."  # PNG o JPEG bytes
+    return Image(data=image_bytes, format="png")
+
+# Retorno de contenido embebido
+@mcp.tool
+def get_resource() -> EmbeddedResource:
+    """Return embedded resource."""
+    return EmbeddedResource(
+        type="resource",
+        resource={
+            "uri": "file:///data.json",
+            "mimeType": "application/json",
+            "text": json.dumps({"key": "value"})
+        }
+    )
+----
+
+=== Ejemplo Completo: Servidor de Tools
+
+[source,python]
+----
+from fastmcp import FastMCP
+from pydantic import BaseModel, Field
+from typing import Literal
+import asyncio
+import json
+
+mcp = FastMCP(
+    "ToolServer",
+    instructions="""
+    A collection of useful tools for data processing.
+    
+    Available tools:
+    - format_json: Format JSON strings
+    - validate_email: Validate email addresses
+    - generate_password: Generate secure passwords
+    - calculate_hash: Calculate file hashes
+    """,
+)
+
+# === Modelos Pydantic ===
+
+class EmailValidation(BaseModel):
+    """Email validation result."""
+    email: str
+    is_valid: bool
+    domain: str | None
+    suggestions: list[str] = []
+
+class PasswordOptions(BaseModel):
+    """Password generation options."""
+    length: int = Field(default=16, ge=8, le=64, description="Password length")
+    include_uppercase: bool = Field(default=True, description="Include A-Z")
+    include_lowercase: bool = Field(default=True, description="Include a-z")
+    include_numbers: bool = Field(default=True, description="Include 0-9")
+    include_symbols: bool = Field(default=False, description="Include !@#$%")
+
+# === Tools ===
+
+@mcp.tool
+def format_json(json_string: str, indent: int = 2) -> str:
+    """Format a JSON string with proper indentation.
+    
+    Args:
+        json_string: The JSON string to format
+        indent: Number of spaces for indentation (default: 2)
+    
+    Returns:
+        Formatted JSON string
+    
+    Raises:
+        ValueError: If input is not valid JSON
+    """
+    try:
+        data = json.loads(json_string)
+        return json.dumps(data, indent=indent, ensure_ascii=False)
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid JSON: {e}")
+
+@mcp.tool
+def validate_email(email: str) -> EmailValidation:
+    """Validate an email address.
+    
+    Args:
+        email: The email address to validate
+    
+    Returns:
+        Validation result with suggestions if invalid
+    """
+    import re
+    
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    is_valid = bool(re.match(pattern, email))
+    
+    result = EmailValidation(
+        email=email,
+        is_valid=is_valid,
+        domain=email.split('@')[1] if '@' in email else None
+    )
+    
+    if not is_valid and '@' in email:
+        # Sugerir dominios comunes
+        common_domains = ['gmail.com', 'outlook.com', 'yahoo.com']
+        local_part = email.split('@')[0]
+        result.suggestions = [f"{local_part}@{d}" for d in common_domains]
+    
+    return result
+
+@mcp.tool
+def generate_password(options: PasswordOptions) -> str:
+    """Generate a secure random password.
+    
+    Args:
+        options: Password generation options
+    
+    Returns:
+        Generated password
+    """
+    import secrets
+    import string
+    
+    chars = ""
+    if options.include_uppercase:
+        chars += string.ascii_uppercase
+    if options.include_lowercase:
+        chars += string.ascii_lowercase
+    if options.include_numbers:
+        chars += string.digits
+    if options.include_symbols:
+        chars += "!@#$%^&*()_+-=[]{}|;:,.<>?"
+    
+    if not chars:
+        chars = string.ascii_letters + string.digits
+    
+    return ''.join(secrets.choice(chars) for _ in range(options.length))
+
+@mcp.tool(tags={"utility", "hash"})
+def calculate_hash(text: str, algorithm: Literal["md5", "sha1", "sha256"] = "sha256") -> str:
+    """Calculate hash of text.
+    
+    Args:
+        text: Text to hash
+        algorithm: Hash algorithm (md5, sha1, sha256)
+    
+    Returns:
+        Hexadecimal hash string
+    """
+    import hashlib
+    
+    hash_func = getattr(hashlib, algorithm)
+    return hash_func(text.encode()).hexdigest()
+
+@mcp.tool
+async def fetch_json(url: str, timeout: float = 10.0) -> dict:
+    """Fetch JSON data from a URL.
+    
+    Args:
+        url: The URL to fetch
+        timeout: Request timeout in seconds
+    
+    Returns:
+        Parsed JSON data
+    """
+    import aiohttp
+    
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, timeout=aiohttp.ClientTimeout(total=timeout)) as response:
+            response.raise_for_status()
+            return await response.json()
+
+# === Ejecutar ===
+
+if __name__ == "__main__":
+    mcp.run()
+----
+
+=== Testing de Tools
+
+FastMCP incluye un cliente para testing:
+
+[source,python]
+----
+import asyncio
+from fastmcp import FastMCP, Client
+
+# Crear servidor
+mcp = FastMCP("TestServer")
+
+@mcp.tool
+def add(a: int, b: int) -> int:
+    """Add two numbers."""
+    return a + b
+
+# Test con cliente
+async def test_tool():
+    client = Client(mcp)
+    
+    async with client:
+        # Listar tools
+        tools = await client.list_tools()
+        print(f"Available tools: {[t.name for t in tools]}")
+        
+        # Llamar tool
+        result = await client.call_tool("add", {"a": 5, "b": 3})
+        print(f"Result: {result.data}")  # 8
+
+asyncio.run(test_tool())
+----
+
+== Resources (Recursos)
+
+=== Concepto de Resources
+
+Los Resources son fuentes de datos pasivas que los clientes pueden leer. A diferencia de los Tools (que realizan acciones), los Resources simplemente exponen información: archivos, configuraciones, datos de bases de datos, etc.
+
+[IMPORTANT]
+====
+Los Resources son **datos de solo lectura** — el cliente los consulta pero no los modifica. Para operaciones de escritura, usa Tools.
+====
+
+=== Crear Resources Estáticos
+
+La forma más simple es exponer datos constantes:
+
+[source,python]
+----
+from fastmcp import FastMCP
+
+mcp = FastMCP("ResourceServer")
+
+# Resource estático con URI fija
+@mcp.resource("config://app")
+def get_app_config() -> dict:
+    """Application configuration."""
+    return {
+        "version": "1.0.0",
+        "debug": False,
+        "max_connections": 100
+    }
+
+# Resource con tipo string
+@mcp.resource("data://readme")
+def get_readme() -> str:
+    """Server README."""
+    return """
+    # My MCP Server
+    
+    This server provides tools for data processing.
+    """
+----
+
+=== URI de Resources
+
+Cada Resource tiene una URI única que lo identifica:
+
+[source,python]
+----
+# URIs válidas para Resources
+@mcp.resource("file:///path/to/data.json")     # Archivo local
+@mcp.resource("config://app")                  # URI scheme personalizado
+@mcp.resource("data://users/active")           # Datos con namespace
+@mcp.resource("memory://cache")                # Recurso en memoria
+----
+
+[TIP]
+====
+Usa URIs descriptivas que indiquen el tipo de datos. Los prefijos comunes son:
+
+* `file://` - Archivos del sistema
+* `config://` - Configuraciones
+* `data://` - Datos de la aplicación
+* `memory://` - Datos en memoria
+====
+
+=== Resource Templates
+
+Los Templates permiten crear Resources dinámicos con parámetros en la URI:
+
+[source,python]
+----
+from fastmcp import FastMCP
+
+mcp = FastMCP("UserServer")
+
+# Template con parámetro
+@mcp.resource("users://{user_id}/profile")
+def get_user_profile(user_id: str) -> dict:
+    """Get user profile by ID.
+    
+    Args:
+        user_id: The unique user identifier
+    """
+    # Simulación de búsqueda en base de datos
+    users = {
+        "1": {"id": "1", "name": "Alice", "email": "alice@example.com"},
+        "2": {"id": "2", "name": "Bob", "email": "bob@example.com"},
+    }
+    return users.get(user_id, {"error": "User not found"})
+
+# Template con múltiples parámetros
+@mcp.resource("files://{project}/{filename}")
+def get_project_file(project: str, filename: str) -> str:
+    """Get file content from a project."""
+    import os
+    path = os.path.join("projects", project, filename)
+    with open(path, "r") as f:
+        return f.read()
+----
+
+[NOTE]
+====
+Los clientes usan los Templates para descubrir qué URIs están disponibles. Cuando un cliente llama a `users://123/profile`, FastMCP extrae el `user_id` y llama a la función con ese valor.
+====
+
+=== Resources con Tipos Complejos
+
+[source,python]
+----
+from fastmcp import FastMCP
+from pydantic import BaseModel
+from typing import Optional
+
+mcp = FastMCP("ComplexResources")
+
+class User(BaseModel):
+    """User model."""
+    id: str
+    name: str
+    email: str
+    active: bool = True
+
+class ServerStatus(BaseModel):
+    """Server status model."""
+    status: str
+    uptime_seconds: int
+    active_connections: int
+    memory_usage_mb: float
+
+# Resource que retorna un modelo Pydantic
+@mcp.resource("server://status")
+def get_server_status() -> ServerStatus:
+    """Get current server status."""
+    return ServerStatus(
+        status="running",
+        uptime_seconds=3600,
+        active_connections=42,
+        memory_usage_mb=128.5
+    )
+
+# Resource que retorna lista
+@mcp.resource("users://active")
+def get_active_users() -> list[User]:
+    """Get all active users."""
+    return [
+        User(id="1", name="Alice", email="alice@example.com"),
+        User(id="2", name="Bob", email="bob@example.com"),
+    ]
+----
+
+=== Resources Binarios
+
+Para datos binarios (imágenes, PDFs, etc.), retorna bytes:
+
+[source,python]
+----
+from fastmcp import FastMCP
+from fastmcp.utilities.types import Image
+
+mcp = FastMCP("BinaryResources")
+
+@mcp.resource("image://logo")
+def get_logo() -> Image:
+    """Get server logo image."""
+    with open("logo.png", "rb") as f:
+        image_bytes = f.read()
+    
+    return Image(data=image_bytes, format="png")
+
+@mcp.resource("file://{filename}")
+def get_binary_file(filename: str) -> bytes:
+    """Get binary file content."""
+    with open(filename, "rb") as f:
+        return f.read()
+----
+
+=== Acceso a Resources desde el Cliente
+
+[source,python]
+----
+import asyncio
+from fastmcp import FastMCP, Client
+
+mcp = FastMCP("ResourceDemo")
+
+@mcp.resource("data://config")
+def get_config() -> dict:
+    return {"version": "1.0", "debug": False}
+
+@mcp.resource("users://{id}/profile")
+def get_user(user_id: str) -> dict:
+    return {"id": user_id, "name": "Alice"}
+
+async def main():
+    client = Client(mcp)
+    
+    async with client:
+        # Listar todos los resources
+        resources = await client.list_resources()
+        for resource in resources:
+            print(f"Resource: {resource.uri}")
+        
+        # Leer un resource estático
+        config = await client.read_resource("data://config")
+        print(f"Config: {config[0].text}")
+        
+        # Leer un resource con template
+        user = await client.read_resource("users://123/profile")
+        print(f"User: {user[0].text}")
+
+asyncio.run(main())
+----
+
+=== Resources Dinámicos con Providers
+
+Para resources que cambian dinámicamente (BD, APIs externas), usa Providers:
+
+[source,python]
+----
+from fastmcp import FastMCP
+from fastmcp.server.providers import ResourceProvider
+
+class DatabaseResourceProvider(ResourceProvider):
+    """Provider que expone tablas de BD como resources."""
+    
+    def __init__(self, db_connection):
+        self.db = db_connection
+    
+    async def list_resources(self):
+        """Listar todas las tablas como resources."""
+        tables = await self.db.fetch_all("SHOW TABLES")
+        return [
+            {"uri": f"db://{table}", "name": table}
+            for table in tables
+        ]
+    
+    async def read_resource(self, uri: str):
+        """Leer contenido de una tabla."""
+        table_name = uri.replace("db://", "")
+        data = await self.db.fetch_all(f"SELECT * FROM {table_name}")
+        return data
+
+# Usar el provider
+mcp = FastMCP("DatabaseServer")
+mcp.add_provider(DatabaseResourceProvider(my_db_connection))
+----
+
+=== Ejemplo Completo: Servidor de Resources
+
+[source,python]
+----
+from fastmcp import FastMCP
+from pydantic import BaseModel
+from typing import Optional
+import json
+import os
+
+mcp = FastMCP(
+    "ResourceServer",
+    instructions="""
+    A server exposing various resources.
+    
+    Static resources:
+    - config://app: Application configuration
+    - config://version: Version information
+    
+    Dynamic resources:
+    - users://{user_id}: User profile by ID
+    - files://{project}/{filename}: Project file content
+    """,
+)
+
+# === Modelos ===
+
+class AppConfig(BaseModel):
+    """Application configuration."""
+    version: str
+    debug: bool
+    database_url: str
+    max_connections: int
+
+class User(BaseModel):
+    """User model."""
+    id: str
+    name: str
+    email: str
+    role: str
+    active: bool
+
+# === Datos simulados ===
+
+USERS_DB = {
+    "1": User(id="1", name="Alice", email="alice@example.com", role="admin", active=True),
+    "2": User(id="2", name="Bob", email="bob@example.com", role="user", active=True),
+    "3": User(id="3", name="Charlie", email="charlie@example.com", role="user", active=False),
+}
+
+PROJECTS_DIR = "projects"
+
+# === Resources estáticos ===
+
+@mcp.resource("config://app")
+def get_app_config() -> AppConfig:
+    """Get application configuration."""
+    return AppConfig(
+        version="1.0.0",
+        debug=False,
+        database_url="postgresql://localhost/mydb",
+        max_connections=100
+    )
+
+@mcp.resource("config://version")
+def get_version() -> dict:
+    """Get version information."""
+    return {
+        "version": "1.0.0",
+        "build": "2024-01-15",
+        "python_version": "3.11"
+    }
+
+@mcp.resource("info://server")
+def get_server_info() -> dict:
+    """Get server information."""
+    return {
+        "name": "ResourceServer",
+        "resources_count": 10,
+        "tools_count": 0,
+        "prompts_count": 0
+    }
+
+# === Resources con templates ===
+
+@mcp.resource("users://{user_id}")
+def get_user_by_id(user_id: str) -> Optional[User]:
+    """Get user by ID.
+    
+    Args:
+        user_id: The unique user identifier
+    """
+    return USERS_DB.get(user_id)
+
+@mcp.resource("users://{user_id}/settings")
+def get_user_settings(user_id: str) -> dict:
+    """Get user settings.
+    
+    Args:
+        user_id: The unique user identifier
+    """
+    user = USERS_DB.get(user_id)
+    if not user:
+        return {"error": "User not found"}
+    
+    return {
+        "theme": "dark",
+        "language": "en",
+        "notifications": True
+    }
+
+@mcp.resource("files://{project}/{filename}")
+def get_project_file(project: str, filename: str) -> str:
+    """Get file content from a project.
+    
+    Args:
+        project: Project name
+        filename: File name within project
+    """
+    file_path = os.path.join(PROJECTS_DIR, project, filename)
+    
+    if not os.path.exists(file_path):
+        return f"File not found: {project}/{filename}"
+    
+    with open(file_path, "r") as f:
+        return f.read()
+
+# === Resources con listas ===
+
+@mcp.resource("users://active")
+def get_active_users() -> list[User]:
+    """Get all active users."""
+    return [u for u in USERS_DB.values() if u.active]
+
+@mcp.resource("users://all")
+def get_all_users() -> list[dict]:
+    """Get all users (as dictionaries)."""
+    return [u.model_dump() for u in USERS_DB.values()]
+
+# === Ejecutar ===
+
+if __name__ == "__main__":
+    mcp.run()
+----
+
+== Prompts
+
+=== Concepto de Prompts
+
+Los Prompts son plantillas de mensajes reutilizables que guían las interacciones con LLMs. Permiten encapsular patrones de conversación y hacerlos disponibles para los clientes.
+
+[IMPORTANT]
+====
+Los Prompts son **plantillas de mensajes** — se renderizan con argumentos y producen mensajes estructurados que el LLM puede usar como contexto o instrucciones.
+====
+
+=== Crear Prompts Básicos
+
+[source,python]
+----
+from fastmcp import FastMCP
+
+mcp = FastMCP("PromptServer")
+
+# Prompt simple que retorna string
+@mcp.prompt
+def analyze_data(data: str) -> str:
+    """Analyze provided data.
+    
+    Args:
+        data: The data to analyze
+    """
+    return f"Please analyze the following data:\n\n{data}"
+
+# Prompt con múltiples argumentos
+@mcp.prompt
+def code_review(code: str, language: str = "python") -> str:
+    """Review code for improvements.
+    
+    Args:
+        code: The code to review
+        language: Programming language (default: python)
+    """
+    return f"""Please review this {language} code and suggest improvements:
+
+```{language}
+{code}
+```
+
+Focus on:
+1. Code quality
+2. Performance
+3. Security
+4. Best practices
+"""
+----
+
+=== Prompts Estructurados
+
+Para prompts más complejos, retorna una lista de mensajes:
+
+[source,python]
+----
+from fastmcp import FastMCP
+from fastmcp.server.prompts import UserMessage, AssistantMessage, SystemMessage
+
+mcp = FastMCP("StructuredPrompts")
+
+@mcp.prompt
+def data_analysis_session(dataset_name: str) -> list:
+    """Start a data analysis session.
+    
+    Args:
+        dataset_name: Name of the dataset to analyze
+    """
+    return [
+        SystemMessage("You are a data analyst assistant."),
+        UserMessage(f"I want to analyze the dataset: {dataset_name}"),
+        AssistantMessage("I'll help you analyze that dataset. What specific aspects would you like to explore?"),
+    ]
+----
+
+=== Prompts con Argumentos Opcionales
+
+[source,python]
+----
+from fastmcp import FastMCP
+
+mcp = FastMCP("PromptDemo")
+
+@mcp.prompt
+def generate_documentation(
+    code: str,
+    style: str = "google",  # google, numpy, sphinx
+    include_examples: bool = True,
+    language: str = "python"
+) -> str:
+    """Generate documentation for code.
+    
+    Args:
+        code: The code to document
+        style: Documentation style (google, numpy, sphinx)
+        include_examples: Whether to include usage examples
+        language: Programming language
+    """
+    prompt = f"""Generate {style}-style documentation for this {language} code:
+
+```
+{code}
+```
+
+Requirements:
+- Use {style} docstring format
+- Document all parameters
+- Document return values
+- Include type information"""
+
+    if include_examples:
+        prompt += "\n- Include usage examples"
+    
+    return prompt
+
+@mcp.prompt
+def explain_error(
+    error_message: str,
+    code_context: str | None = None,
+    language: str = "python"
+) -> str:
+    """Explain an error message.
+    
+    Args:
+        error_message: The error message to explain
+        code_context: Surrounding code (optional)
+        language: Programming language
+    """
+    prompt = f"""Explain this {language} error message:
+
+{error_message}
+"""
+    
+    if code_context:
+        prompt += f"""
+
+Code context:
+```
+{code_context}
+```
+"""
+    
+    prompt += """
+
+Provide:
+1. What caused the error
+2. How to fix it
+3. Best practices to avoid it
+"""
+    
+    return prompt
+----
+
+=== Prompts Dinámicos
+
+Los prompts pueden generar contenido dinámicamente:
+
+[source,python]
+----
+from fastmcp import FastMCP
+from datetime import datetime
+import json
+
+mcp = FastMCP("DynamicPrompts")
+
+@mcp.prompt
+def analyze_with_context(data: str, analysis_type: str = "general") -> str:
+    """Analyze data with current context.
+    
+    Args:
+        data: Data to analyze
+        analysis_type: Type of analysis (general, statistical, security)
+    """
+    context = {
+        "timestamp": datetime.now().isoformat(),
+        "analysis_type": analysis_type,
+        "data_length": len(data)
+    }
+    
+    return f"""Analyze the following data (type: {analysis_type}):
+
+{data}
+
+Context:
+{json.dumps(context, indent=2)}
+
+Provide a detailed analysis focusing on {analysis_type} aspects.
+"""
+
+@mcp.prompt
+def generate_tests(
+    code: str,
+    framework: str = "pytest",
+    coverage_level: str = "high"
+) -> str:
+    """Generate tests for code.
+    
+    Args:
+        code: Code to test
+        framework: Testing framework
+        coverage_level: Coverage target (low, medium, high)
+    """
+    coverage_map = {
+        "low": "50%",
+        "medium": "80%",
+        "high": "95%"
+    }
+    
+    return f"""Generate {framework} tests for this code:
+
+```
+{code}
+```
+
+Requirements:
+- Use {framework} framework
+- Target {coverage_map[coverage_level]} coverage
+- Include edge cases
+- Test both success and failure paths
+"""
+----
+
+=== Acceso a Prompts desde el Cliente
+
+[source,python]
+----
+import asyncio
+from fastmcp import FastMCP, Client
+
+mcp = FastMCP("PromptClientDemo")
+
+@mcp.prompt
+def analyze_data(data: str) -> str:
+    return f"Analyze: {data}"
+
+async def main():
+    client = Client(mcp)
+    
+    async with client:
+        # Listar prompts disponibles
+        prompts = await client.list_prompts()
+        print(f"Available prompts: {[p.name for p in prompts]}")
+        
+        # Obtener un prompt con argumentos
+        result = await client.get_prompt(
+            "analyze_data",
+            {"data": "sales figures for Q1"}
+        )
+        
+        # Los mensajes están en result.messages
+        for message in result.messages:
+            print(f"Role: {message.role}")
+            print(f"Content: {message.content}")
+
+asyncio.run(main())
+----
+
+=== Ejemplo Completo: Servidor de Prompts
+
+[source,python]
+----
+from fastmcp import FastMCP
+from fastmcp.server.prompts import UserMessage, AssistantMessage, SystemMessage
+
+mcp = FastMCP(
+    "PromptServer",
+    instructions="""
+    A collection of useful prompts for LLM interactions.
+    
+    Available prompts:
+    - code_review: Review code for improvements
+    - generate_docs: Generate documentation
+    - explain_error: Explain error messages
+    - analyze_data: Analyze datasets
+    - create_test: Generate tests
+    """,
+)
+
+# === Prompts de código ===
+
+@mcp.prompt
+def code_review(
+    code: str,
+    language: str = "python",
+    focus_areas: list[str] | None = None
+) -> str:
+    """Review code and suggest improvements.
+    
+    Args:
+        code: The code to review
+        language: Programming language
+        focus_areas: Areas to focus on (optional)
+    """
+    areas = focus_areas or ["quality", "performance", "security", "best_practices"]
+    
+    return f"""Review this {language} code:
+
+```{language}
+{code}
+```
+
+Focus areas: {', '.join(areas)}
+
+For each focus area, provide:
+1. Current state analysis
+2. Specific recommendations
+3. Code examples if applicable
+
+Format your response as:
+## {Area Name}
+### Current State
+### Recommendations
+### Example Code
+"""
+
+@mcp.prompt
+def generate_docs(
+    code: str,
+    doc_style: str = "google",
+    include_type_hints: bool = True,
+    include_examples: bool = True
+) -> str:
+    """Generate documentation for code.
+    
+    Args:
+        code: Code to document
+        doc_style: Documentation style (google, numpy, sphinx)
+        include_type_hints: Include type annotations
+        include_examples: Include usage examples
+    """
+    return f"""Generate {doc_style}-style documentation for:
+
+```
+{code}
+```
+
+Requirements:
+- Use {doc_style} docstring format
+- Document all parameters and return values
+{"- Include type hints in docstrings" if include_type_hints else ""}
+{"- Include usage examples" if include_examples else ""}
+
+Output only the documented code.
+"""
+
+# === Prompts de análisis ===
+
+@mcp.prompt
+def analyze_data(
+    data: str,
+    analysis_type: str = "general",
+    output_format: str = "markdown"
+) -> str:
+    """Analyze data and provide insights.
+    
+    Args:
+        data: Data to analyze (CSV, JSON, or text)
+        analysis_type: Type of analysis (general, statistical, trend)
+        output_format: Output format (markdown, json, text)
+    """
+    return f"""Perform a {analysis_type} analysis on:
+
+{data}
+
+Provide:
+1. Summary statistics (if applicable)
+2. Key patterns or trends
+3. Anomalies or outliers
+4. Recommendations
+
+Output format: {output_format}
+"""
+
+# === Prompts de debugging ===
+
+@mcp.prompt
+def debug_session(
+    error_message: str,
+    code: str | None = None,
+    steps_already_tried: list[str] | None = None
+) -> list:
+    """Start a debugging session.
+    
+    Args:
+        error_message: The error message encountered
+        code: Relevant code (optional)
+        steps_already_tried: Debugging steps already attempted
+    """
+    messages = [
+        SystemMessage("You are an expert debugging assistant. Help the user diagnose and fix their issue."),
+        UserMessage(f"I encountered this error:\n\n{error_message}")
+    ]
+    
+    if code:
+        messages.append(UserMessage(f"Here's the relevant code:\n\n```\n{code}\n```"))
+    
+    if steps_already_tried:
+        steps = "\n".join(f"- {s}" for s in steps_already_tried)
+        messages.append(UserMessage(f"I've already tried:\n{steps}"))
+    
+    messages.append(AssistantMessage("I'll help you debug this. Let me analyze the error and suggest solutions."))
+    
+    return messages
+
+# === Prompts de testing ===
+
+@mcp.prompt
+def create_test_plan(
+    feature_description: str,
+    test_types: list[str] | None = None,
+    priority: str = "medium"
+) -> str:
+    """Create a test plan for a feature.
+    
+    Args:
+        feature_description: Description of the feature
+        test_types: Types of tests (unit, integration, e2e)
+        priority: Priority level (low, medium, high)
+    """
+    types = test_types or ["unit", "integration"]
+    
+    return f"""Create a {priority} priority test plan for:
+
+{feature_description}
+
+Test types to include: {', '.join(types)}
+
+For each test type, specify:
+1. Test cases
+2. Expected inputs and outputs
+3. Edge cases
+4. Error scenarios
+"""
+----
+
+== Context
+
+=== ¿Qué es el Context?
+
+El objeto `Context` proporciona acceso a las capacidades de MCP desde dentro de tus funciones. Permite:
+
+* **Logging**: Enviar mensajes de debug, info, warning, error al cliente
+* **Progress Reporting**: Reportar progreso de operaciones largas
+* **Resource Access**: Acceder a resources registrados en el servidor
+* **LLM Sampling**: Solicitar al LLM del cliente que genere texto
+* **User Elicitation**: Pedir input al usuario durante la ejecución
+* **Session State**: Guardar datos entre requests
+
+=== Acceder al Context
+
+==== Método Recomendado (Dependency Injection)
+
+[source,python]
+----
+from fastmcp import FastMCP
+from fastmcp.dependencies import CurrentContext
+from fastmcp.server.context import Context
+
+mcp = FastMCP("ContextDemo")
+
+@mcp.tool
+async def process_file(file_uri: str, ctx: Context = CurrentContext()) -> str:
+    """Process a file using context for logging."""
+    await ctx.info(f"Processing {file_uri}")
+    return "File processed"
+----
+
+[NOTE]
+====
+El parámetro `ctx` se inyecta automáticamente y no aparece en el schema del tool. Los clientes nunca lo ven.
+====
+
+==== Método Legacy (Type Hint)
+
+[source,python]
+----
+from fastmcp import FastMCP, Context
+
+mcp = FastMCP("ContextDemo")
+
+@mcp.tool
+async def process_file(file_uri: str, ctx: Context) -> str:
+    """Process a file using context for logging."""
+    # Context se inyecta automáticamente por el type hint
+    await ctx.info(f"Processing {file_uri}")
+    return "File processed"
+----
+
+=== Logging
+
+Envía mensajes de log al cliente MCP:
+
+[source,python]
+----
+from fastmcp import FastMCP, Context
+from fastmcp.dependencies import CurrentContext
+
+mcp = FastMCP("LoggingDemo")
+
+@mcp.tool
+async def analyze_data(data: list[int], ctx: Context = CurrentContext()) -> dict:
+    """Analyze data with logging."""
+    
+    await ctx.debug("Starting analysis")  # Solo visible si el cliente lo permite
+    await ctx.info(f"Analyzing {len(data)} data points")
+    
+    if len(data) > 10000:
+        await ctx.warning("Large dataset, processing may take time")
+    
+    try:
+        result = {
+            "count": len(data),
+            "sum": sum(data),
+            "mean": sum(data) / len(data) if data else 0
+        }
+        await ctx.info("Analysis complete")
+        return result
+    except Exception as e:
+        await ctx.error(f"Analysis failed: {e}")
+        raise
+----
+
+=== Progress Reporting
+
+Reporta progreso para operaciones largas:
+
+[source,python]
+----
+from fastmcp import FastMCP, Context
+from fastmcp.dependencies import CurrentContext
+import asyncio
+
+mcp = FastMCP("ProgressDemo")
+
+@mcp.tool
+async def process_large_file(
+    file_path: str,
+    ctx: Context = CurrentContext()
+) -> str:
+    """Process a large file with progress updates."""
+    
+    total_lines = 1000  # Ejemplo
+    
+    for i in range(total_lines):
+        # Procesar línea
+        await asyncio.sleep(0.01)  # Simular trabajo
+        
+        # Reportar progreso cada 100 líneas
+        if i % 100 == 0:
+            await ctx.report_progress(
+                progress=i,
+                total=total_lines,
+                message=f"Processing line {i}/{total_lines}"
+            )
+    
+    await ctx.report_progress(progress=total_lines, total=total_lines)
+    return f"Processed {total_lines} lines"
+----
+
+=== Resource Access desde Tools
+
+Accede a resources registrados en el servidor:
+
+[source,python]
+----
+from fastmcp import FastMCP, Context
+from fastmcp.dependencies import CurrentContext
+
+mcp = FastMCP("ResourceAccessDemo")
+
+@mcp.resource("data://config")
+def get_config() -> dict:
+    return {"api_key": "secret", "endpoint": "https://api.example.com"}
+
+@mcp.tool
+async def use_config(ctx: Context = CurrentContext()) -> str:
+    """Use config resource in a tool."""
+    
+    # Listar resources disponibles
+    resources = await ctx.list_resources()
+    print(f"Available: {[r.uri for r in resources]}")
+    
+    # Leer un resource
+    config_content = await ctx.read_resource("data://config")
+    config = config_content[0].content  # Obtener contenido
+    
+    # Usar el config
+    return f"Using endpoint: {config['endpoint']}"
+----
+
+=== Session State
+
+Guarda datos que persisten entre requests en la misma sesión:
+
+[source,python]
+----
+from fastmcp import FastMCP, Context
+from fastmcp.dependencies import CurrentContext
+
+mcp = FastMCP("StatefulDemo")
+
+@mcp.tool
+async def set_preference(
+    key: str,
+    value: str,
+    ctx: Context = CurrentContext()
+) -> str:
+    """Set a user preference for this session."""
+    await ctx.set_state(f"pref_{key}", value)
+    return f"Preference {key} set to {value}"
+
+@mcp.tool
+async def get_preference(
+    key: str,
+    ctx: Context = CurrentContext()
+) -> str | None:
+    """Get a user preference from this session."""
+    value = await ctx.get_state(f"pref_{key}")
+    return value
+
+@mcp.tool
+async def increment_counter(ctx: Context = CurrentContext()) -> int:
+    """Increment a counter that persists across tool calls."""
+    count = await ctx.get_state("counter") or 0
+    count += 1
+    await ctx.set_state("counter", count)
+    return count
+----
+
+[NOTE]
+====
+El session state es aislado por cliente — cada cliente tiene su propio state. Los valores expiran después de 1 día por defecto.
+====
+
+=== LLM Sampling
+
+Solicita al LLM del cliente que genere texto:
+
+[source,python]
+----
+from fastmcp import FastMCP, Context
+from fastmcp.dependencies import CurrentContext
+
+mcp = FastMCP("SamplingDemo")
+
+@mcp.tool
+async def summarize_with_ai(
+    text: str,
+    ctx: Context = CurrentContext()
+) -> str:
+    """Summarize text using the client's LLM."""
+    
+    # Solicitar al LLM del cliente
+    response = await ctx.sample(
+        f"Summarize this text in 3 sentences:\n\n{text}",
+        temperature=0.7,
+        max_tokens=200
+    )
+    
+    return response.text
+----
+
+=== User Elicitation
+
+Pide input al usuario durante la ejecución:
+
+[source,python]
+----
+from fastmcp import FastMCP, Context
+from fastmcp.dependencies import CurrentContext
+from pydantic import BaseModel
+
+mcp = FastMCP("ElicitationDemo")
+
+class UserInfo(BaseModel):
+    name: str
+    email: str
+    age: int
+
+@mcp.tool
+async def collect_user_info(ctx: Context = CurrentContext()) -> dict:
+    """Collect user information interactively."""
+    
+    # Pedir input estructurado
+    result = await ctx.elicit(
+        "Please provide your information:",
+        response_type=UserInfo
+    )
+    
+    if result.action == "accept":
+        user = result.data
+        return {
+            "status": "collected",
+            "name": user.name,
+            "email": user.email,
+            "age": user.age
+        }
+    else:
+        return {"status": "cancelled"}
+----
+
+=== Ejemplo Completo: Uso de Context
+
+[source,python]
+----
+from fastmcp import FastMCP, Context
+from fastmcp.dependencies import CurrentContext
+from pydantic import BaseModel
+import asyncio
+
+mcp = FastMCP(
+    "ContextServer",
+    instructions="A server demonstrating all context capabilities.",
+)
+
+# === Modelos ===
+
+class AnalysisResult(BaseModel):
+    """Result of data analysis."""
+    count: int
+    sum: float
+    mean: float
+    min: float
+    max: float
+
+# === Resources ===
+
+@mcp.resource("config://limits")
+def get_limits() -> dict:
+    """Configuration limits."""
+    return {"max_items": 10000, "timeout_seconds": 30}
+
+# === Tools con Context ===
+
+@mcp.tool
+async def analyze_with_logging(
+    data: list[float],
+    ctx: Context = CurrentContext()
+) -> AnalysisResult:
+    """Analyze numerical data with detailed logging.
+    
+    Args:
+        data: List of numbers to analyze
+    
+    Returns:
+        Analysis results including count, sum, mean, min, max
+    """
+    await ctx.debug(f"Starting analysis of {len(data)} items")
+    await ctx.info("Validating data...")
+    
+    if not data:
+        await ctx.warning("Empty data list provided")
+        return AnalysisResult(count=0, sum=0, mean=0, min=0, max=0)
+    
+    # Validación
+    limits_content = await ctx.read_resource("config://limits")
+    limits = limits_content[0].content
+    
+    if len(data) > limits["max_items"]:
+        await ctx.warning(f"Data exceeds limit of {limits['max_items']}")
+        data = data[:limits["max_items"]]
+    
+    await ctx.info("Calculating statistics...")
+    
+    result = AnalysisResult(
+        count=len(data),
+        sum=sum(data),
+        mean=sum(data) / len(data),
+        min=min(data),
+        max=max(data)
+    )
+    
+    await ctx.info(f"Analysis complete: mean={result.mean:.2f}")
+    return result
+
+@mcp.tool
+async def process_with_progress(
+    items: list[str],
+    ctx: Context = CurrentContext()
+) -> dict:
+    """Process items with progress reporting.
+    
+    Args:
+        items: List of items to process
+    
+    Returns:
+        Processing summary
+    """
+    total = len(items)
+    processed = 0
+    errors = 0
+    
+    await ctx.info(f"Starting to process {total} items")
+    
+    for i, item in enumerate(items):
+        try:
+            # Simular procesamiento
+            await asyncio.sleep(0.05)
+            processed += 1
+            
+            # Reportar progreso
+            await ctx.report_progress(
+                progress=i + 1,
+                total=total,
+                message=f"Processed: {item[:30]}..."
+            )
+        except Exception as e:
+            await ctx.error(f"Error processing {item}: {e}")
+            errors += 1
+    
+    await ctx.info(f"Completed: {processed} processed, {errors} errors")
+    
+    return {
+        "total": total,
+        "processed": processed,
+        "errors": errors
+    }
+
+@mcp.tool
+async def session_workflow(ctx: Context = CurrentContext()) -> dict:
+    """Demonstrate session state.
+    
+    Returns:
+        Session state information
+    """
+    # Obtener contador actual
+    count = await ctx.get_state("workflow_count") or 0
+    count += 1
+    await ctx.set_state("workflow_count", count)
+    
+    # Guardar último acceso
+    from datetime import datetime
+    await ctx.set_state("last_access", datetime.now().isoformat())
+    
+    return {
+        "workflow_count": count,
+        "session_id": ctx.session_id,
+        "request_id": ctx.request_id
+    }
+
+@mcp.tool
+async def ask_user_for_input(
+    prompt: str,
+    ctx: Context = CurrentContext()
+) -> dict:
+    """Ask user for input during execution.
+    
+    Args:
+        prompt: Question to ask the user
+    
+    Returns:
+        User's response
+    """
+    result = await ctx.elicit(prompt, response_type=str)
+    
+    if result.action == "accept":
+        return {
+            "status": "accepted",
+            "response": result.data
+        }
+    elif result.action == "cancel":
+        return {
+            "status": "cancelled",
+            "response": None
+        }
+    else:
+        return {
+            "status": "rejected",
+            "response": None
+        }
+
+# === Ejecutar ===
+
+if __name__ == "__main__":
+    mcp.run()
+----
+
+== Cliente FastMCP
+
+=== Concepto de Cliente
+
+El cliente FastMCP (`fastmcp.Client`) proporciona una interfaz programática para interactuar con servidores MCP. Es ideal para:
+
+* **Testing**: Probar servidores durante desarrollo
+* **Integración**: Conectar múltiples servidores
+* **Automatización**: Scripts que usan tools MCP
+
+=== Crear un Cliente
+
+[source,python]
+----
+import asyncio
+from fastmcp import Client, FastMCP
+
+# === Servidor de ejemplo ===
+server = FastMCP("TestServer")
+
+@server.tool
+def greet(name: str) -> str:
+    """Greet a user."""
+    return f"Hello, {name}!"
+
+# === Cliente ===
+async def main():
+    # Cliente con servidor en memoria
+    client = Client(server)
+    
+    async with client:
+        # Ping para verificar conexión
+        await client.ping()
+        
+        # Listar componentes
+        tools = await client.list_tools()
+        print(f"Tools: {[t.name for t in tools]}")
+        
+        # Llamar tool
+        result = await client.call_tool("greet", {"name": "World"})
+        print(f"Result: {result.data}")  # "Hello, World!"
+
+asyncio.run(main())
+----
+
+=== Tipos de Transporte
+
+El cliente soporta múltiples transportes:
+
+==== In-Memory (Testing)
+
+[source,python]
+----
+from fastmcp import Client, FastMCP
+
+server = FastMCP("TestServer")
+client = Client(server)  # Conecta directamente en memoria
+----
+
+[NOTE]
+====
+Ideal para tests unitarios. No hay subprocess ni network overhead.
+====
+
+==== STDIO (Subprocess)
+
+[source,python]
+----
+from fastmcp import Client
+
+# Conectar a un servidor Python
+client = Client("my_server.py")
+
+# Con variables de entorno
+client = Client("my_server.py", env={"API_KEY": "secret"})
+
+# Con un comando específico
+client = Client(
+    command="python",
+    args=["my_server.py", "--debug"],
+    env={"DEBUG": "1"}
+)
+----
+
+==== HTTP (Web Service)
+
+[source,python]
+----
+from fastmcp import Client
+
+# HTTP Streamable (recomendado)
+client = Client("https://api.example.com/mcp")
+
+# Con headers de autenticación
+client = Client(
+    "https://api.example.com/mcp",
+    headers={"Authorization": "Bearer token123"}
+)
+----
+
+=== Ciclo de Vida de Conexión
+
+El cliente usa context managers para gestionar conexiones:
+
+[source,python]
+----
+from fastmcp import Client, FastMCP
+
+mcp = FastMCP("MyServer")
+
+@mcp.tool
+def greet(name: str) -> str:
+    return f"Hello, {name}!"
+
+async def main():
+    client = Client(mcp)
+    
+    # Opción 1: Context manager automático
+    async with client:
+        # Conexión establecida automáticamente
+        # Handshake MCP completado
+        result = await client.call_tool("greet", {"name": "Alice"})
+    
+    # Opción 2: Inicialización manual
+    client = Client(mcp, auto_initialize=False)
+    async with client:
+        # Conexión establecida, pero no inicializada
+        result = await client.initialize()  # Inicializar manualmente
+        tools = await client.list_tools()
+----
+
+=== Operaciones del Cliente
+
+==== Tools
+
+[source,python]
+----
+async with client:
+    # Listar tools
+    tools = await client.list_tools()
+    for tool in tools:
+        print(f"{tool.name}: {tool.description}")
+    
+    # Llamar tool
+    result = await client.call_tool("add", {"a": 5, "b": 3})
+    print(f"Result: {result.data}")
+    
+    # Manejar errores
+    try:
+        result = await client.call_tool("divide", {"a": 10, "b": 0})
+    except Exception as e:
+        print(f"Error: {e}")
+----
+
+==== Resources
+
+[source,python]
+----
+async with client:
+    # Listar resources
+    resources = await client.list_resources()
+    for resource in resources:
+        print(f"{resource.uri}: {resource.name}")
+    
+    # Leer resource
+    content = await client.read_resource("config://app")
+    print(f"Content: {content[0].text}")
+    
+    # Leer resource con template
+    user = await client.read_resource("users://123/profile")
+    print(f"User: {user[0].text}")
+----
+
+==== Prompts
+
+[source,python]
+----
+async with client:
+    # Listar prompts
+    prompts = await client.list_prompts()
+    for prompt in prompts:
+        print(f"{prompt.name}: {prompt.description}")
+    
+    # Obtener prompt con argumentos
+    result = await client.get_prompt(
+        "analyze_data",
+        {"data": "1, 2, 3, 4, 5"}
+    )
+    
+    for message in result.messages:
+        print(f"{message.role}: {message.content}")
+----
+
+=== Callback Handlers
+
+El cliente puede manejar callbacks del servidor:
+
+[source,python]
+----
+from fastmcp import Client
+from fastmcp.client.logging import LogMessage
+
+async def log_handler(message: LogMessage):
+    print(f"[{message.level}] {message.data}")
+
+async def progress_handler(progress: float, total: float | None, message: str | None):
+    print(f"Progress: {progress}/{total} - {message}")
+
+async def sampling_handler(messages, params, context):
+    # Integrar con tu LLM
+    return "Generated response"
+
+client = Client(
+    "my_server.py",
+    log_handler=log_handler,
+    progress_handler=progress_handler,
+    sampling_handler=sampling_handler
+)
+----
+
+=== Testing con Cliente
+
+[source,python]
+----
+import pytest
+from fastmcp import Client, FastMCP
+
+# Servidor bajo test
+mcp = FastMCP("TestServer")
+
+@mcp.tool
+def add(a: int, b: int) -> int:
+    """Add two numbers."""
+    return a + b
+
+@mcp.tool
+def divide(a: float, b: float) -> float:
+    """Divide two numbers."""
+    if b == 0:
+        raise ValueError("Cannot divide by zero")
+    return a / b
+
+# Tests
+@pytest.mark.asyncio
+async def test_add():
+    client = Client(mcp)
+    async with client:
+        result = await client.call_tool("add", {"a": 5, "b": 3})
+        assert result.data == 8
+
+@pytest.mark.asyncio
+async def test_divide():
+    client = Client(mcp)
+    async with client:
+        result = await client.call_tool("divide", {"a": 10, "b": 2})
+        assert result.data == 5.0
+
+@pytest.mark.asyncio
+async def test_divide_by_zero():
+    client = Client(mcp)
+    async with client:
+        with pytest.raises(Exception):
+            await client.call_tool("divide", {"a": 10, "b": 0})
+----
+
+=== Ejemplo Completo: Cliente Avanzado
+
+[source,python]
+----
+import asyncio
+from fastmcp import Client, FastMCP
+from fastmcp.client.logging import LogMessage
+
+# === Servidor de ejemplo ===
+mcp = FastMCP("AdvancedServer")
+
+@mcp.tool
+async def long_operation(duration: int) -> str:
+    """Long operation with progress."""
+    import asyncio
+    for i in range(10):
+        await asyncio.sleep(duration / 10)
+    return "Done"
+
+@mcp.resource("data://config")
+def get_config() -> dict:
+    return {"version": "1.0"}
+
+@mcp.prompt
+def analyze(data: str) -> str:
+    return f"Analyze: {data}"
+
+# === Handlers ===
+
+async def log_handler(message: LogMessage):
+    print(f"[LOG {message.level}] {message.data}")
+
+async def progress_handler(progress: float, total: float | None, message: str | None):
+    percent = (progress / total * 100) if total else progress
+    print(f"[PROGRESS] {percent:.1f}% - {message}")
+
+async def sampling_handler(messages, params, context):
+    # Simular respuesta de LLM
+    return "This is a simulated LLM response"
+
+# === Cliente ===
+
+async def main():
+    client = Client(
+        mcp,
+        log_handler=log_handler,
+        progress_handler=progress_handler,
+        sampling_handler=sampling_handler,
+        timeout=30.0
+    )
+    
+    async with client:
+        # Información del servidor
+        print(f"Server: {client.initialize_result.serverInfo.name}")
+        print(f"Instructions: {client.initialize_result.instructions}")
+        
+        # Listar componentes
+        tools = await client.list_tools()
+        resources = await client.list_resources()
+        prompts = await client.list_prompts()
+        
+        print(f"\nTools: {[t.name for t in tools]}")
+        print(f"Resources: {[r.uri for r in resources]}")
+        print(f"Prompts: {[p.name for p in prompts]}")
+        
+        # Usar tool
+        result = await client.call_tool("long_operation", {"duration": 2})
+        print(f"\nResult: {result.data}")
+        
+        # Leer resource
+        config = await client.read_resource("data://config")
+        print(f"Config: {config[0].text}")
+        
+        # Obtener prompt
+        prompt_result = await client.get_prompt("analyze", {"data": "test"})
+        print(f"Prompt: {prompt_result.messages[0].content}")
+
+asyncio.run(main())
+----
+
+== Middlewares
+
+=== Concepto de Middleware
+
+Los middlewares interceptan cada mensaje MCP que fluye por el servidor — requests, responses, y notifications en ambas direcciones. Son perfectos para:
+
+* **Logging**: Registrar todas las operaciones
+* **Rate Limiting**: Limitar frecuencia de requests
+* **Authentication**: Verificar permisos
+* **Metrics**: Recolectar estadísticas
+* **Error Handling**: Manejar errores globalmente
+
+=== Middleware Básico
+
+[source,python]
+----
+from fastmcp import FastMCP
+from fastmcp.server.middleware import Middleware
+
+class LoggingMiddleware(Middleware):
+    """Middleware que registra todas las operaciones."""
+    
+    async def on_request(self, request, context):
+        """Se ejecuta antes de procesar cada request."""
+        print(f"[REQUEST] {request.method} - {request.params}")
+        return request  # Retornar el request para continuar
+    
+    async def on_response(self, response, context):
+        """Se ejecuta después de procesar cada request."""
+        print(f"[RESPONSE] {response}")
+        return response  # Retornar la respuesta
+
+mcp = FastMCP("MyServer", middleware=[LoggingMiddleware()])
+----
+
+=== Middleware de Logging Completo
+
+[source,python]
+----
+import time
+import json
+from fastmcp import FastMCP
+from fastmcp.server.middleware import Middleware
+
+class RequestLoggingMiddleware(Middleware):
+    """Registra requests y responses con timing."""
+    
+    async def on_request(self, request, context):
+        # Guardar timestamp
+        context.start_time = time.time()
+        
+        # Log del request
+        print(f">>> {request.method}")
+        if request.params:
+            # Ocultar datos sensibles
+            safe_params = self._sanitize_params(request.params)
+            print(f"    Params: {json.dumps(safe_params)}")
+        
+        return request
+    
+    async def on_response(self, response, context):
+        # Calcular duración
+        duration = time.time() - context.start_time
+        print(f"<<< Response in {duration:.3f}s")
+        
+        return response
+    
+    def _sanitize_params(self, params):
+        """Ocultar parámetros sensibles."""
+        sensitive = {"password", "token", "secret", "api_key"}
+        result = {}
+        for key, value in params.items():
+            if key.lower() in sensitive:
+                result[key] = "***REDACTED***"
+            else:
+                result[key] = value
+        return result
+
+# Usar el middleware
+mcp = FastMCP("LoggedServer", middleware=[RequestLoggingMiddleware()])
+
+@mcp.tool
+def login(username: str, password: str) -> str:
+    """Login with credentials."""
+    return f"Logged in as {username}"
+
+if __name__ == "__main__":
+    mcp.run()
+----
+
+=== Middleware de Rate Limiting
+
+[source,python]
+----
+import time
+from collections import defaultdict
+from fastmcp import FastMCP
+from fastmcp.server.middleware import Middleware
+from fastmcp.exceptions import ToolError
+
+class RateLimitMiddleware(Middleware):
+    """Limita la frecuencia de requests por cliente."""
+    
+    def __init__(self, max_requests: int = 100, window_seconds: int = 60):
+        self.max_requests = max_requests
+        self.window_seconds = window_seconds
+        self.requests = defaultdict(list)
+    
+    async def on_request(self, request, context):
+        # Obtener identificador del cliente
+        client_id = context.client_id or "anonymous"
+        
+        # Limpiar requests antiguos
+        now = time.time()
+        self.requests[client_id] = [
+            t for t in self.requests[client_id]
+            if t > now - self.window_seconds
+        ]
+        
+        # Verificar límite
+        if len(self.requests[client_id]) >= self.max_requests:
+            raise ToolError(f"Rate limit exceeded: {self.max_requests} requests per {self.window_seconds}s")
+        
+        # Registrar request
+        self.requests[client_id].append(now)
+        
+        return request
+
+mcp = FastMCP(
+    "RateLimitedServer",
+    middleware=[RateLimitMiddleware(max_requests=10, window_seconds=60)]
+)
+
+@mcp.tool
+def process_data(data: str) -> str:
+    """Process data."""
+    return f"Processed: {data}"
+----
+
+=== Middleware de Autenticación
+
+[source,python]
+----
+from fastmcp import FastMCP
+from fastmcp.server.middleware import Middleware
+from fastmcp.exceptions import ToolError
+
+class AuthMiddleware(Middleware):
+    """Verifica autenticación para tools protegidos."""
+    
+    def __init__(self, protected_tools: set[str] | None = None):
+        self.protected_tools = protected_tools or set()
+    
+    async def on_request(self, request, context):
+        # Solo verificar tools
+        if request.method == "tools/call":
+            tool_name = request.params.get("name")
+            
+            if tool_name in self.protected_tools:
+                # Verificar token desde HTTP headers
+                token = context.get_http_headers().get("Authorization")
+                
+                if not token or not self._validate_token(token):
+                    raise ToolError("Unauthorized: valid token required")
+        
+        return request
+    
+    def _validate_token(self, token: str) -> bool:
+        """Validar token (ejemplo simplificado)."""
+        # En producción, validar contra BD o servicio de auth
+        return token.startswith("Bearer valid-token")
+
+mcp = FastMCP(
+    "AuthServer",
+    middleware=[AuthMiddleware(protected_tools={"admin_tool", "delete_user"})]
+)
+
+@mcp.tool
+def public_tool() -> str:
+    """Public tool - no auth required."""
+    return "Public result"
+
+@mcp.tool
+def admin_tool() -> str:
+    """Admin tool - requires authentication."""
+    return "Admin result"
+----
+
+=== Middleware de Métricas
+
+[source,python]
+----
+import time
+from collections import defaultdict
+from fastmcp import FastMCP
+from fastmcp.server.middleware import Middleware
+
+class MetricsMiddleware(Middleware):
+    """Recolecta métricas de uso."""
+    
+    def __init__(self):
+        self.metrics = defaultdict(lambda: {
+            "count": 0,
+            "total_time": 0,
+            "errors": 0,
+            "min_time": float("inf"),
+            "max_time": 0
+        })
+    
+    async def on_request(self, request, context):
+        context.start_time = time.time()
+        return request
+    
+    async def on_response(self, response, context):
+        # Calcular duración
+        duration = time.time() - context.start_time
+        
+        # Obtener nombre del tool
+        if hasattr(context, "tool_name"):
+            tool_name = context.tool_name
+        else:
+            tool_name = "unknown"
+        
+        # Actualizar métricas
+        metric = self.metrics[tool_name]
+        metric["count"] += 1
+        metric["total_time"] += duration
+        metric["min_time"] = min(metric["min_time"], duration)
+        metric["max_time"] = max(metric["max_time"], duration)
+        
+        return response
+    
+    def get_metrics(self) -> dict:
+        """Obtener métricas agregadas."""
+        return {
+            name: {
+                "count": data["count"],
+                "avg_time": data["total_time"] / data["count"] if data["count"] else 0,
+                "min_time": data["min_time"] if data["min_time"] != float("inf") else 0,
+                "max_time": data["max_time"],
+                "errors": data["errors"]
+            }
+            for name, data in self.metrics.items()
+        }
+
+# Usar el middleware
+metrics = MetricsMiddleware()
+mcp = FastMCP("MetricsServer", middleware=[metrics])
+
+@mcp.tool
+def slow_operation() -> str:
+    import time
+    time.sleep(1)
+    return "Done"
+
+@mcp.tool
+def fast_operation() -> str:
+    return "Done"
+----
+
+=== Múltiples Middlewares
+
+[source,python]
+----
+from fastmcp import FastMCP
+
+mcp = FastMCP(
+    "MultiMiddlewareServer",
+    middleware=[
+        LoggingMiddleware(),
+        RateLimitMiddleware(max_requests=100),
+        AuthMiddleware(protected_tools={"admin"}),
+        MetricsMiddleware(),
+    ]
+)
+----
+
+[NOTE]
+====
+Los middlewares se ejecutan en orden: request fluye del primero al último, response fluye del último al primero.
+====
+
+== Autenticación y Seguridad
+
+=== Autenticación HTTP
+
+Para servidores HTTP, FastMCP soporta autenticación OAuth 2.0 y Bearer Token:
+
+==== Bearer Token
+
+[source,python]
+----
+from fastmcp import FastMCP
+from fastmcp.server.auth import BearerAuthProvider
+
+# Provider simple con tokens hardcodeados
+auth = BearerAuthProvider(
+    tokens=["secret-token-1", "secret-token-2"]
+)
+
+mcp = FastMCP(
+    "SecureServer",
+    auth=auth
+)
+
+@mcp.tool
+def protected_data() -> str:
+    """Returns protected data."""
+    return "Secret information"
+
+if __name__ == "__main__":
+    mcp.run(transport="http")
+----
+
+==== OAuth 2.0
+
+[source,python]
+----
+from fastmcp import FastMCP
+from fastmcp.server.auth import OAuthProvider
+
+# Configurar OAuth
+auth = OAuthProvider(
+    issuer="https://auth.example.com",
+    client_id="my-mcp-server",
+    client_secret="client-secret",
+    authorization_endpoint="https://auth.example.com/authorize",
+    token_endpoint="https://auth.example.com/token",
+    jwks_uri="https://auth.example.com/.well-known/jwks.json"
+)
+
+mcp = FastMCP("OAuthServer", auth=auth)
+
+if __name__ == "__main__":
+    mcp.run(transport="http")
+----
+
+=== Acceder a Información de Autenticación
+
+[source,python]
+----
+from fastmcp import FastMCP, Context
+from fastmcp.dependencies import CurrentContext
+
+mcp = FastMCP("AuthInfoServer")
+
+@mcp.tool
+async def who_am_i(ctx: Context = CurrentContext()) -> dict:
+    """Get information about the authenticated user."""
+    
+    # Obtener HTTP request
+    from fastmcp.server.dependencies import get_http_request
+    request = get_http_request()
+    
+    # Obtener headers
+    headers = request.headers
+    auth_header = headers.get("Authorization", "Not provided")
+    
+    return {
+        "client_id": ctx.client_id,
+        "request_id": ctx.request_id,
+        "has_auth": "Authorization" in headers
+    }
+----
+
+=== Ocultar Detalles de Error
+
+Para producción, oculta detalles de errores internos:
+
+[source,python]
+----
+from fastmcp import FastMCP
+
+mcp = FastMCP(
+    "ProductionServer",
+    mask_error_details=True  # Reemplaza detalles con mensaje genérico
+)
+
+@mcp.tool
+def might_fail(data: str) -> str:
+    """Tool que puede fallar."""
+    # Si ocurre un error, el cliente ve:
+    # "Internal server error" en lugar de
+    # "KeyError: 'missing_key' at line 42 in ..."
+    ...
+----
+
+== Lifetime Hooks
+
+=== Concepto de Lifespan
+
+Los lifetime hooks permiten ejecutar código cuando el servidor inicia o termina. Son útiles para:
+
+* Inicializar conexiones a bases de datos
+* Cargar configuraciones
+* Establecer pools de conexiones
+* Limpiar recursos al terminar
+
+=== Lifespan Básico
+
+[source,python]
+----
+from contextlib import asynccontextmanager
+from fastmcp import FastMCP
+
+@asynccontextmanager
+async def app_lifespan(app):
+    # Setup: Se ejecuta al iniciar el servidor
+    print("Server starting...")
+    
+    # Inicializar recursos
+    app.db_connection = await connect_to_database()
+    app.cache = await create_cache()
+    
+    # Guardar en el state del servidor
+    yield {
+        "db": app.db_connection,
+        "cache": app.cache
+    }
+    
+    # Teardown: Se ejecuta al terminar el servidor
+    print("Server shutting down...")
+    await app.db_connection.close()
+    await app.cache.clear()
+
+mcp = FastMCP("LifespanServer", lifespan=app_lifespan)
+----
+
+=== Acceder a Recursos del Lifespan
+
+[source,python]
+----
+from contextlib import asynccontextmanager
+from fastmcp import FastMCP, Context
+from fastmcp.dependencies import CurrentContext
+
+# Simular conexión a BD
+class Database:
+    async def query(self, sql: str):
+        return [{"id": 1, "name": "Alice"}]
+
+db = None
+
+@asynccontextmanager
+async def app_lifespan(app):
+    global db
+    print("Connecting to database...")
+    db = Database()
+    yield {"db": db}
+    print("Closing database connection...")
+
+mcp = FastMCP("DatabaseServer", lifespan=app_lifespan)
+
+@mcp.tool
+async def get_users(ctx: Context = CurrentContext()) -> list:
+    """Get all users from database."""
+    # Acceder a la BD global
+    return await db.query("SELECT * FROM users")
+----
+
+=== Lifespan con Context State
+
+[source,python]
+----
+from contextlib import asynccontextmanager
+from fastmcp import FastMCP, Context
+from fastmcp.dependencies import CurrentContext
+
+class AppState:
+    """Estado compartido del servidor."""
+    def __init__(self):
+        self.db = None
+        self.cache = None
+
+state = AppState()
+
+@asynccontextmanager
+async def app_lifespan(app):
+    # Setup
+    from my_database import Database
+    from my_cache import Cache
+    
+    state.db = await Database.connect("postgresql://localhost/mydb")
+    state.cache = Cache(max_size=1000)
+    
+    # Poblar cache inicial
+    await state.cache.set("initialized_at", "2024-01-01")
+    
+    yield {"db": state.db, "cache": state.cache}
+    
+    # Teardown
+    await state.db.disconnect()
+    await state.cache.clear()
+
+mcp = FastMCP("StatefulServer", lifespan=app_lifespan)
+
+@mcp.tool
+async def query_db(sql: str, ctx: Context = CurrentContext()) -> list:
+    """Query the database."""
+    return await state.db.query(sql)
+
+@mcp.tool
+async def get_cache(key: str, ctx: Context = CurrentContext()) -> str | None:
+    """Get value from cache."""
+    return await state.cache.get(key)
+
+@mcp.tool
+async def set_cache(key: str, value: str, ctx: Context = CurrentContext()) -> None:
+    """Set value in cache."""
+    await state.cache.set(key, value)
+----
+
+== Despliegue y Transportes
+
+=== Transportes Disponibles
+
+FastMCP soporta tres transportes principales:
+
+[cols="1,2,2"]
+|===
+| Transporte | Descripción | Uso
+
+| **STDIO**
+| Comunicación via stdin/stdout
+| CLI tools, Claude Desktop, desarrollo local
+
+| **HTTP**
+| Streamable HTTP (recomendado)
+| Servicios web, APIs, producción
+
+| **SSE**
+| Server-Sent Events (legacy)
+| Compatibilidad con clientes antiguos
+|===
+
+=== STDIO (Por Defecto)
+
+El transporte STDIO es el más simple y el predeterminado:
+
+[source,python]
+----
+from fastmcp import FastMCP
+
+mcp = FastMCP("StdioServer")
+
+@mcp.tool
+def greet(name: str) -> str:
+    return f"Hello, {name}!"
+
+if __name__ == "__main__":
+    mcp.run()  # STDIO por defecto
+----
+
+Configuración en Claude Desktop:
+
+[source,json]
+----
+{
+  "mcpServers": {
+    "my-server": {
+      "command": "python",
+      "args": ["/path/to/my_server.py"]
+    }
+  }
+}
+----
+
+=== HTTP Streamable
+
+Para servicios web:
+
+[source,python]
+----
+from fastmcp import FastMCP
+
+mcp = FastMCP("HttpServer")
+
+@mcp.tool
+def greet(name: str) -> str:
+    return f"Hello, {name}!"
+
+if __name__ == "__main__":
+    mcp.run(
+        transport="http",
+        host="127.0.0.1",
+        port=8000
+    )
+----
+
+Con autenticación:
+
+[source,python]
+----
+from fastmcp import FastMCP
+from fastmcp.server.auth import BearerAuthProvider
+
+auth = BearerAuthProvider(tokens=["my-secret-token"])
+
+mcp = FastMCP(
+    "SecureHttpServer",
+    auth=auth
+)
+
+if __name__ == "__main__":
+    mcp.run(
+        transport="http",
+        host="0.0.0.0",
+        port=8000
+    )
+----
+
+=== Rutas Personalizadas (HTTP)
+
+Añade endpoints HTTP personalizados:
+
+[source,python]
+----
+from fastmcp import FastMCP
+from starlette.requests import Request
+from starlette.responses import JSONResponse, PlainTextResponse
+
+mcp = FastMCP("CustomRoutesServer")
+
+@mcp.tool
+def greet(name: str) -> str:
+    return f"Hello, {name}!"
+
+# Health check endpoint
+@mcp.custom_route("/health", methods=["GET"])
+async def health_check(request: Request) -> PlainTextResponse:
+    return PlainTextResponse("OK")
+
+# Status endpoint
+@mcp.custom_route("/status", methods=["GET"])
+async def status(request: Request) -> JSONResponse:
+    return JSONResponse({
+        "status": "running",
+        "tools_count": len(mcp._tools),
+        "resources_count": len(mcp._resources)
+    })
+
+# Webhook endpoint
+@mcp.custom_route("/webhook", methods=["POST"])
+async def handle_webhook(request: Request) -> JSONResponse:
+    data = await request.json()
+    # Procesar webhook
+    return JSONResponse({"received": True})
+
+if __name__ == "__main__":
+    mcp.run(transport="http", port=8000)
+----
+
+=== Integración con FastAPI
+
+Monta FastMCP en una aplicación FastAPI existente:
+
+[source,python]
+----
+from fastapi import FastAPI
+from fastmcp import FastMCP
+
+# Aplicación FastAPI existente
+app = FastAPI()
+
+@app.get("/")
+async def root():
+    return {"message": "Main API"}
+
+# Servidor MCP
+mcp = FastMCP("McpServer")
+
+@mcp.tool
+def greet(name: str) -> str:
+    return f"Hello, {name}!"
+
+# Montar MCP en /mcp
+from fastmcp.server.http import start_streamable_http
+
+@app.on_event("startup")
+async def startup():
+    # El MCP se monta como sub-aplicación
+    mcp_app = mcp.get_http_app()
+    app.mount("/mcp", mcp_app)
+
+# O alternativamente, ejecutar directamente
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+----
+
+=== Docker
+
+[source,dockerfile]
+----
+# Dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Instalar dependencias
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar código
+COPY . .
+
+# Ejecutar servidor
+CMD ["python", "server.py"]
+----
+
+[source,bash]
+----
+# Construir imagen
+docker build -t my-mcp-server .
+
+# Ejecutar contenedor
+docker run -p 8000:8000 my-mcp-server
+
+# O con STDIO
+docker run -i my-mcp-server
+----
+
+=== CLI de FastMCP
+
+El CLI permite ejecutar servidores sin modificar código:
+
+[source,bash]
+----
+# Ejecutar servidor STDIO
+fastmcp run my_server.py
+
+# Ejecutar con HTTP
+fastmcp run my_server.py --transport http --port 8000
+
+# Ejecutar con SSE
+fastmcp run my_server.py --transport sse --port 8000
+
+# Desarrollo con recarga automática
+fastmcp dev my_server.py
+
+# Ejecutar función específica
+fastmcp run my_module:create_server
+
+# Mostrar información del servidor
+fastmcp inspect my_server.py
+----
+
+== Ejemplo Completo: Servidor de Producción
+
+El siguiente ejemplo integra todos los conceptos en un servidor de producción completo:
+
+[source,python]
+----
+"""
+Complete FastMCP Server Example
+A production-ready server demonstrating all features.
+"""
+import asyncio
+import json
+import time
+from contextlib import asynccontextmanager
+from datetime import datetime
+from typing import Literal
+
+from fastmcp import FastMCP, Context
+from fastmcp.dependencies import CurrentContext
+from fastmcp.server.middleware import Middleware
+from fastmcp.server.auth import BearerAuthProvider
+from pydantic import BaseModel, Field
+
+# === Modelos ===
+
+class User(BaseModel):
+    """User model."""
+    id: str
+    name: str
+    email: str
+    role: Literal["admin", "user"] = "user"
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+class AnalysisResult(BaseModel):
+    """Analysis result model."""
+    count: int
+    sum: float
+    mean: float
+    min: float
+    max: float
+
+class ErrorResponse(BaseModel):
+    """Error response model."""
+    error: str
+    code: str
+    details: dict | None = None
+
+# === Estado Global ===
+
+class AppState:
+    """Application state."""
+    def __init__(self):
+        self.users: dict[str, User] = {}
+        self.cache: dict[str, str] = {}
+        self.request_count: int = 0
+
+state = AppState()
+
+# === Lifespan ===
+
+@asynccontextmanager
+async def app_lifespan(app):
+    """Setup and teardown for the server."""
+    print("🚀 Server starting...")
+    
+    # Inicializar datos
+    state.users["1"] = User(
+        id="1",
+        name="Alice",
+        email="alice@example.com",
+        role="admin"
+    )
+    state.users["2"] = User(
+        id="2",
+        name="Bob",
+        email="bob@example.com",
+        role="user"
+    )
+    
+    print(f"✅ Initialized with {len(state.users)} users")
+    
+    yield {"state": state}
+    
+    print("🛑 Server shutting down...")
+    state.users.clear()
+    state.cache.clear()
+    print("✅ Cleanup complete")
+
+# === Middlewares ===
+
+class LoggingMiddleware(Middleware):
+    """Log all requests and responses."""
+    
+    async def on_request(self, request, context):
+        context.start_time = time.time()
+        print(f"📥 [{datetime.now().isoformat()}] {request.method}")
+        return request
+    
+    async def on_response(self, response, context):
+        duration = time.time() - context.start_time
+        print(f"📤 [{datetime.now().isoformat()}] Response ({duration:.3f}s)")
+        return response
+
+class MetricsMiddleware(Middleware):
+    """Collect usage metrics."""
+    
+    async def on_response(self, response, context):
+        state.request_count += 1
+        return response
+
+# === Autenticación ===
+
+auth = BearerAuthProvider(
+    tokens=["admin-token-123", "user-token-456"]
+)
+
+# === Servidor ===
+
+mcp = FastMCP(
+    "ProductionServer",
+    instructions="""
+    A production-ready MCP server.
+    
+    Features:
+    - User management (CRUD)
+    - Data analysis
+    - Caching
+    - Session state
+    
+    Authentication required for some operations.
+    """,
+    version="1.0.0",
+    auth=auth,
+    middleware=[LoggingMiddleware(), MetricsMiddleware()],
+    lifespan=app_lifespan,
+    mask_error_details=True,
+)
+
+# === Resources ===
+
+@mcp.resource("server://info")
+def get_server_info() -> dict:
+    """Get server information."""
+    return {
+        "name": "ProductionServer",
+        "version": "1.0.0",
+        "users_count": len(state.users),
+        "request_count": state.request_count
+    }
+
+@mcp.resource("users://{user_id}")
+def get_user_by_id(user_id: str) -> User | None:
+    """Get user by ID."""
+    return state.users.get(user_id)
+
+@mcp.resource("users://all")
+def get_all_users() -> list[dict]:
+    """Get all users."""
+    return [u.model_dump() for u in state.users.values()]
+
+# === Tools ===
+
+# --- User Management ---
+
+@mcp.tool(tags={"users", "read"})
+async def list_users(ctx: Context = CurrentContext()) -> list[dict]:
+    """List all users.
+    
+    Returns:
+        List of all users
+    """
+    await ctx.info(f"Listing {len(state.users)} users")
+    return [u.model_dump() for u in state.users.values()]
+
+@mcp.tool(tags={"users", "read"})
+async def get_user(user_id: str, ctx: Context = CurrentContext()) -> dict:
+    """Get a user by ID.
+    
+    Args:
+        user_id: The unique user identifier
+    
+    Returns:
+        User data or error
+    """
+    user = state.users.get(user_id)
+    if not user:
+        await ctx.warning(f"User not found: {user_id}")
+        return {"error": "User not found", "code": "NOT_FOUND"}
+    
+    await ctx.debug(f"Retrieved user: {user.name}")
+    return user.model_dump()
+
+@mcp.tool(tags={"users", "write"})
+async def create_user(
+    name: str,
+    email: str,
+    role: Literal["admin", "user"] = "user",
+    ctx: Context = CurrentContext()
+) -> dict:
+    """Create a new user.
+    
+    Args:
+        name: User's name
+        email: User's email
+        role: User's role (admin or user)
+    
+    Returns:
+        Created user
+    """
+    user_id = str(len(state.users) + 1)
+    user = User(id=user_id, name=name, email=email, role=role)
+    state.users[user_id] = user
+    
+    await ctx.info(f"Created user: {user.name} (ID: {user_id})")
+    return user.model_dump()
+
+@mcp.tool(tags={"users", "write"})
+async def delete_user(user_id: str, ctx: Context = CurrentContext()) -> dict:
+    """Delete a user.
+    
+    Args:
+        user_id: The unique user identifier
+    
+    Returns:
+        Deletion result
+    """
+    if user_id not in state.users:
+        await ctx.warning(f"Attempted to delete non-existent user: {user_id}")
+        return {"error": "User not found", "code": "NOT_FOUND"}
+    
+    user = state.users.pop(user_id)
+    await ctx.info(f"Deleted user: {user.name}")
+    return {"success": True, "deleted_user": user.model_dump()}
+
+# --- Data Analysis ---
+
+@mcp.tool(tags={"analysis"})
+async def analyze_data(
+    data: list[float],
+    ctx: Context = CurrentContext()
+) -> AnalysisResult:
+    """Analyze numerical data.
+    
+    Args:
+        data: List of numbers to analyze
+    
+    Returns:
+        Analysis results
+    """
+    await ctx.info(f"Analyzing {len(data)} data points")
+    
+    if not data:
+        await ctx.warning("Empty data list")
+        return AnalysisResult(count=0, sum=0, mean=0, min=0, max=0)
+    
+    # Report progress
+    await ctx.report_progress(progress=0, total=len(data), message="Starting analysis")
+    
+    result = AnalysisResult(
+        count=len(data),
+        sum=sum(data),
+        mean=sum(data) / len(data),
+        min=min(data),
+        max=max(data)
+    )
+    
+    await ctx.report_progress(progress=len(data), total=len(data), message="Analysis complete")
+    await ctx.info(f"Analysis result: mean={result.mean:.2f}")
+    
+    return result
+
+@mcp.tool(tags={"analysis"})
+async def process_with_progress(
+    items: list[str],
+    ctx: Context = CurrentContext()
+) -> dict:
+    """Process items with progress reporting.
+    
+    Args:
+        items: List of items to process
+    
+    Returns:
+        Processing summary
+    """
+    total = len(items)
+    await ctx.info(f"Processing {total} items")
+    
+    processed = 0
+    for i, item in enumerate(items):
+        # Simular procesamiento
+        await asyncio.sleep(0.1)
+        processed += 1
+        
+        # Reportar progreso cada 10%
+        if i % max(1, total // 10) == 0:
+            await ctx.report_progress(
+                progress=i + 1,
+                total=total,
+                message=f"Processing item {i + 1}/{total}"
+            )
+    
+    await ctx.info(f"Completed processing {processed} items")
+    return {"processed": processed, "total": total}
+
+# --- Caching ---
+
+@mcp.tool(tags={"cache"})
+async def cache_get(key: str, ctx: Context = CurrentContext()) -> dict:
+    """Get value from cache.
+    
+    Args:
+        key: Cache key
+    
+    Returns:
+        Cached value or None
+    """
+    value = state.cache.get(key)
+    await ctx.debug(f"Cache get: {key} = {value}")
+    return {"key": key, "value": value, "found": key in state.cache}
+
+@mcp.tool(tags={"cache"})
+async def cache_set(key: str, value: str, ctx: Context = CurrentContext()) -> dict:
+    """Set value in cache.
+    
+    Args:
+        key: Cache key
+        value: Value to cache
+    
+    Returns:
+        Operation result
+    """
+    state.cache[key] = value
+    await ctx.debug(f"Cache set: {key} = {value}")
+    return {"success": True, "key": key}
+
+# --- Session State ---
+
+@mcp.tool(tags={"session"})
+async def set_session_value(
+    key: str,
+    value: str,
+    ctx: Context = CurrentContext()
+) -> dict:
+    """Set a value in session state.
+    
+    Args:
+        key: State key
+        value: State value
+    
+    Returns:
+        Operation result
+    """
+    await ctx.set_state(key, value)
+    await ctx.info(f"Session state set: {key}")
+    return {"success": True, "key": key}
+
+@mcp.tool(tags={"session"})
+async def get_session_value(key: str, ctx: Context = CurrentContext()) -> dict:
+    """Get a value from session state.
+    
+    Args:
+        key: State key
+    
+    Returns:
+        Stored value or None
+    """
+    value = await ctx.get_state(key)
+    return {"key": key, "value": value}
+
+# === Prompts ===
+
+@mcp.prompt
+def analyze_user_data(user_id: str) -> str:
+    """Generate a prompt for analyzing user data.
+    
+    Args:
+        user_id: User ID to analyze
+    """
+    return f"""Analyze the data for user {user_id}.
+
+Focus on:
+1. User activity patterns
+2. Engagement metrics
+3. Potential improvements
+
+Provide actionable insights.
+"""
+
+@mcp.prompt
+def generate_report(data_type: str = "users") -> str:
+    """Generate a report prompt.
+    
+    Args:
+        data_type: Type of data to report on
+    """
+    return f"""Generate a comprehensive report on {data_type}.
+
+Include:
+1. Executive summary
+2. Key metrics
+3. Trends and patterns
+4. Recommendations
+
+Format the report in markdown.
+"""
+
+# === HTTP Routes ===
+
+@mcp.custom_route("/health", methods=["GET"])
+async def health_check(request):
+    """Health check endpoint."""
+    from starlette.responses import JSONResponse
+    return JSONResponse({
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
+        "users_count": len(state.users),
+        "request_count": state.request_count
+    })
+
+# === Main ===
+
+if __name__ == "__main__":
+    import sys
+    
+    # Parse arguments
+    transport = "stdio"
+    port = 8000
+    
+    if "--http" in sys.argv:
+        transport = "http"
+    if "--port" in sys.argv:
+        idx = sys.argv.index("--port")
+        port = int(sys.argv[idx + 1])
+    
+    print(f"Starting server with transport: {transport}")
+    
+    if transport == "http":
+        mcp.run(transport="http", host="0.0.0.0", port=port)
+    else:
+        mcp.run()
+----
+
+== Mejores Prácticas
+
+=== Organización del Código
+
+Estructura tu proyecto para escalabilidad:
+
+[source,bash]
+----
+src/my_server/
+├── __init__.py
+├── server.py          # Servidor principal
+├── tools/
+│   ├── __init__.py
+│   ├── users.py       # Tools de usuarios
+│   └── data.py        # Tools de datos
+├── resources/
+│   ├── __init__.py
+│   └── config.py      # Resources de configuración
+├── prompts/
+│   ├── __init__.py
+│   └── analysis.py   # Prompts de análisis
+└── middleware/
+    ├── __init__.py
+    └── logging.py     # Middleware de logging
+----
+
+=== Tips y Consejos
+
+==== Usa Type Hints Siempre
+
+[source,python]
+----
+# ✅ Correcto
+@mcp.tool
+def process_data(
+    items: list[dict[str, int]],
+    threshold: float = 0.5,
+    mode: Literal["fast", "thorough"] = "fast"
+) -> dict[str, float]:
+    """Process data with clear types."""
+    ...
+
+# ❌ Incorrecto
+@mcp.tool
+def process_data(items, threshold=0.5, mode="fast"):
+    """Process data."""
+    ...
+----
+
+==== Documenta con Docstrings
+
+[source,python]
+----
+# ✅ Correcto
+@mcp.tool
+def analyze_dataset(
+    data: list[float],
+    outlier_method: Literal["iqr", "zscore"] = "iqr",
+    threshold: float = 1.5
+) -> AnalysisResult:
+    """Analyze a numerical dataset.
+    
+    Performs statistical analysis including outlier detection.
+    
+    Args:
+        data: List of numerical values to analyze
+        outlier_method: Method for outlier detection
+            - iqr: Interquartile range method
+            - zscore: Z-score based method
+        threshold: Threshold for outlier detection
+            - For IQR: multiplier (default 1.5)
+            - For Z-score: standard deviations (default 1.5)
+    
+    Returns:
+        AnalysisResult with statistics and detected outliers
+    
+    Raises:
+        ValueError: If data is empty or threshold is invalid
+    
+    Example:
+        >>> result = analyze_dataset([1, 2, 3, 100], threshold=1.5)
+        >>> result.outliers
+        [100]
+    """
+    ...
+----
+
+==== Maneja Errores Apropiadamente
+
+[source,python]
+----
+from fastmcp.exceptions import ToolError
+
+@mcp.tool
+def divide(a: float, b: float) -> float:
+    """Divide two numbers."""
+    if b == 0:
+        raise ToolError(
+            "Division by zero is not allowed",
+            error_code="DIVISION_BY_ZERO"
+        )
+    return a / b
+----
+
+==== Usa Context para Logging
+
+[source,python]
+----
+from fastmcp import Context
+from fastmcp.dependencies import CurrentContext
+
+@mcp.tool
+async def long_operation(ctx: Context = CurrentContext()) -> str:
+    """Perform a long operation."""
+    await ctx.info("Starting operation")
+    
+    # Procesar...
+    
+    await ctx.debug("Processing step 1")
+    
+    if warning_condition:
+        await ctx.warning("Potential issue detected")
+    
+    await ctx.info("Operation complete")
+    return "Done"
+----
+
+==== Testing Adecuado
+
+[source,python]
+----
+import pytest
+from fastmcp import Client, FastMCP
+
+# Servidor bajo test
+mcp = FastMCP("TestServer")
+
+@mcp.tool
+def add(a: int, b: int) -> int:
+    """Add two numbers."""
+    return a + b
+
+# Fixtures
+@pytest.fixture
+def client():
+    return Client(mcp)
+
+# Tests
+@pytest.mark.asyncio
+async def test_add(client):
+    async with client:
+        result = await client.call_tool("add", {"a": 2, "b": 3})
+        assert result.data == 5
+
+@pytest.mark.asyncio
+async def test_add_negative(client):
+    async with client:
+        result = await client.call_tool("add", {"a": -1, "b": 1})
+        assert result.data == 0
+----
+
+== Referencia Rápida
+
+=== Decoradores
+
+[cols="1,3"]
+|===
+| Decorador | Descripción
+
+| `@mcp.tool`
+| Registrar un tool
+
+| `@mcp.resource("uri")`
+| Registrar un resource con URI
+
+| `@mcp.prompt`
+| Registrar un prompt
+
+| `@mcp.custom_route("/path", methods=["GET"])`
+| Añadir ruta HTTP personalizada
+|===
+
+=== Context Methods
+
+[cols="1,3"]
+|===
+| Método | Descripción
+
+| `await ctx.debug(msg)`
+| Log debug message
+
+| `await ctx.info(msg)`
+| Log info message
+
+| `await ctx.warning(msg)`
+| Log warning message
+
+| `await ctx.error(msg)`
+| Log error message
+
+| `await ctx.report_progress(progress, total, message)`
+| Reportar progreso
+
+| `await ctx.list_resources()`
+| Listar resources
+
+| `await ctx.read_resource(uri)`
+| Leer resource
+
+| `await ctx.list_prompts()`
+| Listar prompts
+
+| `await ctx.get_prompt(name, args)`
+| Obtener prompt
+
+| `await ctx.sample(prompt, **kwargs)`
+| Solicitar sampling al LLM
+
+| `await ctx.elicit(prompt, response_type)`
+| Pedir input al usuario
+
+| `await ctx.set_state(key, value)`
+| Guardar en session state
+
+| `await ctx.get_state(key)`
+| Leer de session state
+|===
+
+=== Cliente Methods
+
+[cols="1,3"]
+|===
+| Método | Descripción
+
+| `await client.ping()`
+| Verificar conexión
+
+| `await client.list_tools()`
+| Listar tools
+
+| `await client.call_tool(name, args)`
+| Llamar tool
+
+| `await client.list_resources()`
+| Listar resources
+
+| `await client.read_resource(uri)`
+| Leer resource
+
+| `await client.list_prompts()`
+| Listar prompts
+
+| `await client.get_prompt(name, args)`
+| Obtener prompt
+|===
+
+=== Ejecutar Servidor
+
+[cols="1,3"]
+|===
+| Comando | Descripción
+
+| `mcp.run()`
+| Ejecutar con STDIO
+
+| `mcp.run(transport="http")`
+| Ejecutar con HTTP
+
+| `mcp.run(transport="sse")`
+| Ejecutar con SSE
+
+| `fastmcp run server.py`
+| Ejecutar con CLI
+
+| `fastmcp dev server.py`
+| Desarrollo con reload
+|===
+
+== Conclusión
+
+FastMCP simplifica drásticamente la creación de servidores MCP. Con decoradores intuitivos, tipado automático, y un cliente integrado para testing, puedes pasar menos tiempo en boilerplate y más tiempo en funcionalidad.
+
+=== Próximos Pasos
+
+1. **Practica**: Crea un servidor simple con 2-3 tools
+2. **Testing**: Usa el cliente integrado para probar
+3. **Despliega**: Configura Claude Desktop o usa HTTP
+4. **Itera**: Añade resources, prompts, y middlewares
+5. **Producción**: Añade autenticación y logging
+
+=== Recursos
+
+* Documentación oficial: https://gofastmcp.com
+* Repositorio GitHub: https://github.com/PrefectHQ/fastmcp
+* Ejemplos: https://github.com/PrefectHQ/fastmcp/tree/main/examples
+* MCP Spec: https://modelcontextprotocol.io
+
+¡Feliz coding! 🚀

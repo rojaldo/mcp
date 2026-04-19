@@ -1,0 +1,5840 @@
+== CURSO DE MODEL CONTEXT PROTOCOL (MCP)
+:author: Formación Continua
+:duration: 25 horas lectivas
+:nivel: Intermedio
+:language: es
+:toc: left
+:toclevels: 3
+:sectnums:
+:sectnumlevels: 3
+:source-highlighter: highlightjs
+:highlightjs-theme: atom-one-light
+
+== INTRODUCCIÓN AL CURSO
+Este curso está diseñado para proporcionar una comprensión profunda del **Model Context Protocol (MCP)**, un protocolo abierto que estandariza cómo los modelos de lenguaje interactúan con herramientas y fuentes de datos externas.
+
+A lo largo de 25 horas, aprenderás desde los conceptos fundamentales hasta implementaciones avanzadas, pasando por la creación de servidores MCP, la integración con clientes como Claude Desktop y Claude Code, y las mejores prácticas de seguridad.
+
+== ¿A quién va dirigido?
+
+Este curso está orientado a:
+
+* **Desarrolladores backend** que quieran exponer sus APIs a modelos de lenguaje
+* **Ingenieros de IA** que integren LLMs en aplicaciones productivas
+* **Arquitectos de software** que diseñen sistemas de agentes inteligentes
+* **Cualquier persona** con conocimientos de programación (Python o JavaScript) que quiera entender cómo conectar LLMs con datos y herramientas externas
+
+== Prerrequisitos
+* Conocimientos sólidos de **Python** o **JavaScript/TypeScript**
+* Familiaridad con **APIs REST** y conceptos de cliente-servidor
+* Conceptos básicos de **modelos de lenguaje** (qué son, cómo funcionan)
+* Conocimientos de **JSON** y **JSON Schema**
+* Nociones básicas de **línea de comandos** (terminal)
+
+== ¿Qué es MCP y por qué importa?
+
+El ecosistema de inteligencia artificial ha crecido exponencialmente en los últimos años, pero una de las áreas más problemáticas ha sido la **integración de LLMs con sistemas externos**. Cada proveedor ha desarrollado su propia solución:
+
+* **OpenAI** introdujo "Function Calling" con esquemas JSON específicos
+* **Anthropic** creó "Tool Use" con un formato propio
+* **Google** implementó "Function Declarations"
+* **Otros proveedores** ofrecen "Plugins", "Extensions" o "Integrations"
+
+Esta fragmentación crea un problema fundamental: **si quieres que tu herramienta funcione con múltiples LLMs, tienes que implementarla varias veces**, una para cada proveedor.
+
+El **Model Context Protocol (MCP)** surge como solución a este problema. Es un **protocolo abierto y estandarizado** que permite:
+
+1. **Escribir una vez, usar en todas partes**: Un servidor MCP funciona con cualquier cliente compatible
+2. **Descubrimiento automático**: El cliente descubre las capacidades del servidor
+3. **Tipado fuerte**: JSON Schema para validar entradas y salidas
+4. **Extensibilidad**: Puedes crear tus propios tipos de capacidades
+
+== INFORMACIÓN GENERAL
+[cols="2,5"]
+|===
+| Modalidad | Online
+| Nivel | Intermedio
+| Requisitos | Conocimientos de programación (Python o JavaScript), APIs REST y conceptos básicos de LLMs
+| Herramientas | Python 3.10+, Node.js 18+, Claude Desktop o Claude Code
+| Duración | 25 horas lectivas
+|===
+
+== MÓDULO 1: INTRODUCCIÓN Y CONCEPTOS FUNDAMENTALES
+[NOTE]
+.Duración
+== 3 horas== ====1.1. ¿Qué es MCP?
+== El problema de la fragmentación
+Antes de MCP, cada proveedor de LLM tenía su propia forma de conectar modelos con herramientas externas. Esto creaba varios problemas:
+
+**Problema 1: Multiplicación del trabajo**
+
+Imagina que eres un desarrollador y quieres que tu aplicación de gestión de tareas se pueda conectar a un LLM para que los usuarios puedan interactuar en lenguaje natural. Con la situación actual:
+
+* Para OpenAI, tendrías que implementar "Function Calling"
+* Para Anthropic, "Tool Use"
+* Para Google, "Function Declarations"
+* Para otros, quizás tengas que crear plugins específicos
+
+Cada implementación tiene sus propias convenciones, esquemas y formatos. Si quieres mantener compatibilidad con todos, el trabajo se multiplica.
+
+**Problema 2: Inconsistencias**
+
+Los diferentes sistemas tienen capacidades diferentes:
+
+* Algunos permiten adjuntar archivos, otros no
+* Algunos tienen "resources" (datos pasivos), otros solo "tools" (acciones)
+* La gestión de contexto varía entre sistemas
+* Los formatos de respuesta no son interoperables
+
+**Problema 3: Lock-in del proveedor**
+
+Una vez que inviertes en implementar las integraciones de un proveedor específico, migrar a otro es costoso. Esto crea dependencia y limita la flexibilidad.
+
+== La solución: MCP
+El **Model Context Protocol (MCP)** es un **protocolo abierto** desarrollado por **Anthropic** y liberado como estándar abierto. Su objetivo es proporcionar una **capa de abstracción** entre los LLMs y las herramientas/recursos externos.
+
+[source,text]
+┌─────────────────────────────────────────────────────────────────┐
+│                        CAPA MCP                                  │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
+│  │  Resources  │  │   Tools     │  │  Prompts    │              │
+│  │  (datos)    │  │  (acciones) │  │ (plantillas)│              │
+│  └─────────────┘  └─────────────┘  └─────────────┘              │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+         ┌────────────────────┼────────────────────┐
+         │                    │                    │
+         ▼                    ▼                    ▼
+┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
+│ Claude Desktop  │  │   Claude Code   │  │   Tu Cliente   │
+│   (Cliente)     │  │   (Cliente)     │  │   (Cliente)     │
+└─────────────────┘  └─────────────────┘  └─────────────────┘
+
+El protocolo define tres tipos principales de capacidades:
+
+1. **Resources**: Datos pasivos que el LLM puede leer (archivos, registros de base de datos, respuestas de API)
+2. **Tools**: Funciones que el LLM puede ejecutar (crear archivo, enviar email, ejecutar código)
+3. **Prompts**: Plantillas predefinidas para interacciones comunes (analizar código, generar documentación)
+
+Y una capacidad adicional llamada **Sampling** que permite al servidor solicitar generación de contenido al LLM.
+
+== Ventajas de MCP
+**1. Estandarización**
+
+MCP define un formato único para describir capacidades, argumentos y respuestas. Esto significa:
+
+* Un servidor MCP funciona con cualquier cliente compatible
+* Los clientes pueden descubrir automáticamente qué ofrece cada servidor
+* Los esquemas son validables (JSON Schema)
+
+**2. Descubrimiento automático**
+
+Cuando un cliente se conecta a un servidor MCP, puede preguntar:
+
+* ¿Qué recursos tienes disponibles?
+* ¿Qué herramientas puedo usar?
+* ¿Qué prompts ofreces?
+
+El servidor responde con metadatos descriptivos, incluyendo:
+
+* Nombres y descripciones
+* Esquemas de parámetros
+* Ejemplos de uso
+
+**3. Tipado fuerte con JSON Schema**
+
+Cada herramienta define su esquema de entrada usando JSON Schema:
+
+[source,json]
+----
+{
+  "name": "buscar_web",
+  "description": "Busca en la web y devuelve resultados",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "query": {
+        "type": "string",
+        "description": "Término de búsqueda"
+      },
+      "num_results": {
+        "type": "integer",
+        "description": "Número de resultados",
+        "default": 5,
+        "minimum": 1,
+        "maximum": 20
+      }
+    },
+    "required": ["query"]
+  }
+}
+----
+
+Esto permite:
+
+* Validación automática de parámetros
+* Generación de UI para configurar herramientas
+* Documentación automática
+
+**4. Extensibilidad**
+
+El protocolo está diseñado para ser extendido:
+
+* Puedes crear nuevos tipos de esquemas de URI
+* Puedes añadir metadatos personalizados
+* Puedes definir nuevas capacidades
+
+== Comparación con alternativas
+[cols="1,1,1,1,1"]
+|===
+| Característica | MCP | OpenAI Function Calling | Anthropic Tool Use | Plugins
+
+| Estandarizado
+| ✓ Protocolo abierto
+| ✗ Propietario
+| ✗ Propietario
+| ✗ Propietario
+
+| Multi-proveedor
+| ✓ Cualquier LLM
+| ✗ Solo OpenAI
+| ✗ Solo Anthropic
+| ✗ Solo ChatGPT
+
+| Resources
+| ✓ First-class citizen
+| ✗ No existe
+| ✗ No existe
+| ✗ Limitado
+
+| Prompts
+| ✓ Plantillas dinámicas
+| ✗ No existe
+| ✗ No existe
+| ✗ No existe
+
+| Sampling
+| ✓ Servidor solicita generación
+| ✗ No existe
+| ✗ No existe
+| ✗ No existe
+
+| JSON-RPC
+| ✓ Estándar JSON-RPC 2.0
+| ✗ Formato propio
+| ✗ Formato propio
+| ✗ Formato propio
+
+| Descubrimiento
+| ✓ Automático
+| △ Manual
+| △ Manual
+| △ Manual
+|===
+
+== Historia y evolución
+* **Noviembre 2024**: Anthropic anuncia MCP como protocolo abierto
+* **Diciembre 2024**: Primera versión del SDK (Python y TypeScript)
+* **Enero 2025**: Integración con Claude Desktop y Claude Code
+* **Febrero 2025**: MCP Registry para descubrimiento de servidores
+* **Futuro**: Más proveedores adoptando el estándar
+
+== 1.2. Arquitectura del protocolo
+== Modelo cliente-servidor
+MCP sigue un modelo **cliente-servidor** clásico, pero con características únicas:
+
+**Cliente (MCP Client)**
+
+El cliente es la aplicación que consume el LLM. Ejemplos:
+
+* Claude Desktop (aplicación de escritorio)
+* Claude Code (CLI)
+* Tu propia aplicación (usando el SDK)
+
+Responsabilidades del cliente:
+
+* Iniciar la conexión con el servidor
+* Gestionar el ciclo de vida de la sesión
+* Descubrir las capacidades del servidor
+* Llamar a herramientas y leer recursos
+* Manejar la autenticación (si es necesaria)
+* Mostrar permisos al usuario
+
+**Servidor (MCP Server)**
+
+El servidor es el proceso que expone capacidades. Puede ser:
+
+* Un proceso local (ejecutado por el cliente via stdio)
+* Un servidor remoto (accesible via HTTP/SSE)
+* Un servicio en la nube
+
+Responsabilidades del servidor:
+
+* Registrar capacidades (resources, tools, prompts)
+* Manejar solicitudes del cliente
+* Validar parámetros de entrada
+* Ejecutar la lógica de negocio
+* Devolver respuestas formateadas
+
+[source,text]
+┌─────────────────────────────────────────────────────────────────┐
+│                        Arquitectura MCP                          │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│   ┌─────────────┐         JSON-RPC 2.0        ┌─────────────┐   │
+│   │   Cliente   │ ◄──────────────────────────► │   Servidor  │   │
+│   │   (MCP)     │                             │   (MCP)     │   │
+│   └─────────────┘                             └─────────────┘   │
+│         │                                           │          │
+│         │                                           │          │
+│         ▼                                           ▼          │
+│   ┌─────────────┐                             ┌─────────────┐   │
+│   │ Claude/LLM  │                             │  Resources  │   │
+│   │   Engine    │                             │  Tools      │   │
+│   │             │                             │  Prompts    │   │
+│   └─────────────┘                             └─────────────┘   │
+│                                                      │          │
+│                                                      ▼          │
+│                                               ┌─────────────┐   │
+│                                               │   Backend   │   │
+│                                               │ - Archivos  │   │
+│                                               │ - DBs       │   │
+│                                               │ - APIs      │   │
+│                                               └─────────────┘   │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+
+== Transportes disponibles
+MCP soporta tres tipos de transporte:
+
+**1. stdio (Standard Input/Output)**
+
+Este es el transporte más común y simple. El cliente ejecuta el servidor como un subprocess y se comunica a través de stdin/stdout.
+
+Ventajas:
+
+* Simple de configurar
+* No requiere puertos de red
+* Seguro: el servidor solo se ejecuta cuando el cliente lo necesita
+* Ideal para herramientas locales
+
+Desventajas:
+
+* Solo funciona en la misma máquina
+* Requiere que el servidor sea un ejecutable
+* Menos eficiente para muchas conexiones
+
+Ejemplo de configuración:
+
+[source,json]
+----
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "python",
+      "args": ["-m", "mcp_server_filesystem", "/home/user/documents"]
+    }
+  }
+}
+----
+
+**2. HTTP/SSE (Server-Sent Events)**
+
+El servidor escucha en un puerto HTTP y el cliente se conecta via HTTP con SSE para recibir mensajes.
+
+Ventajas:
+
+* Permite servidores remotos
+* Múltiples clientes pueden conectarse
+* Integración con APIs existentes
+* Soporta autenticación HTTP
+
+Desventajas:
+
+* Requiere configuración de red
+* Más complejo de configurar
+* Potenciales problemas de firewall
+
+Ejemplo de configuración:
+
+[source,json]
+----
+{
+  "mcpServers": {
+    "remote-server": {
+      "url": "https://api.ejemplo.com/mcp",
+      "headers": {
+        "Authorization": "Bearer tu-token"
+      }
+    }
+  }
+}
+----
+
+**3. WebSocket**
+
+Conexión bidireccional persistente usando el protocolo WebSocket.
+
+Ventajas:
+
+* Comunicación bidireccional en tiempo real
+* Menor latencia que HTTP/SSE
+* Ideal para aplicaciones interactivas
+
+Desventajas:
+
+* Más complejo de implementar
+* Requiere soporte WebSocket
+* Menos compatible con proxies corporativos
+
+Ejemplo de configuración:
+
+[source,json]
+----
+{
+  "mcpServers": {
+    "websocket-server": {
+      "url": "wss://api.ejemplo.com/mcp/ws"
+    }
+  }
+}
+----
+
+== Protocolo JSON-RPC 2.0
+MCP usa **JSON-RPC 2.0** como base para la comunicación. Este es un protocolo ligero de llamada a procedimientos remotos que usa JSON como formato de datos.
+
+**Estructura de los mensajes**
+
+Todos los mensajes JSON-RPC 2.0 tienen esta estructura base:
+
+[source,json]
+----
+{
+  "jsonrpc": "2.0",
+  ...
+}
+----
+
+Hay tres tipos de mensajes:
+
+**1. Request (Solicitud)**
+
+Una solicitud que espera respuesta:
+
+[source,json]
+----
+{
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "buscar_web",
+    "arguments": {
+      "query": "MCP protocol",
+      "num_results": 5
+    }
+  },
+  "id": 1
+}
+----
+
+El campo `id` identifica la solicitud y permite correlacionarla con la respuesta.
+
+**2. Response (Respuesta)**
+
+La respuesta a una solicitud:
+
+Respuesta exitosa:
+
+[source,json]
+----
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Resultados de búsqueda..."
+      }
+    ]
+  },
+  "id": 1
+}
+----
+
+Respuesta con error:
+
+[source,json]
+----
+{
+  "jsonrpc": "2.0",
+  "error": {
+    "code": -32602,
+    "message": "Invalid params",
+    "data": {
+      "param": "query",
+      "reason": "Missing required parameter"
+    }
+  },
+  "id": 1
+}
+----
+
+**3. Notification (Notificación)**
+
+Mensaje unidireccional que no espera respuesta:
+
+[source,json]
+----
+{
+  "jsonrpc": "2.0",
+  "method": "notifications/tools/list_changed"
+}
+----
+
+Las notificaciones se usan para eventos como:
+
+* Cambios en la lista de herramientas
+* Cambios en la lista de recursos
+* Progreso de operaciones largas
+
+**Códigos de error estándar**
+
+JSON-RPC 2.0 define códigos de error estándar:
+
+|===
+| Código | Nombre | Descripción
+
+| -32700
+| Parse error
+| Error parseando el JSON
+
+| -32600
+| Invalid Request
+| La solicitud no es válida
+
+| -32601
+| Method not found
+| El método no existe
+
+| -32602
+| Invalid params
+| Parámetros inválidos
+
+| -32603
+| Internal error
+| Error interno del servidor
+|===
+
+== Ciclo de vida de una conexión
+La conexión MCP sigue un ciclo de vida bien definido:
+
+**Fase 1: Inicialización**
+
+[source,text]
+Cliente                                    Servidor
+   │                                          │
+   │ ─────── initialize ────────────────────► │
+   │                                          │
+   │ ◄────── initialize/response ─────────── │
+   │                                          │
+   │ ─────── initialized ────────────────────► │
+   │                                          │
+
+El cliente envía `initialize` con sus capacidades:
+
+[source,json]
+----
+{
+  "jsonrpc": "2.0",
+  "method": "initialize",
+  "params": {
+    "protocolVersion": "2024-11-05",
+    "capabilities": {
+      "tools": {},
+      "resources": {},
+      "prompts": {},
+      "sampling": {}
+    },
+    "clientInfo": {
+      "name": "mi-cliente",
+      "version": "1.0.0"
+    }
+  },
+  "id": 1
+}
+----
+
+El servidor responde con sus propias capacidades:
+
+[source,json]
+----
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "protocolVersion": "2024-11-05",
+    "capabilities": {
+      "tools": { "listChanged": true },
+      "resources": { "subscribe": true },
+      "prompts": {},
+      "sampling": {}
+    },
+    "serverInfo": {
+      "name": "mi-servidor",
+      "version": "1.0.0"
+    }
+  },
+  "id": 1
+}
+----
+
+Luego el cliente envía `initialized` como notificación:
+
+[source,json]
+----
+{
+  "jsonrpc": "2.0",
+  "method": "notifications/initialized"
+}
+----
+
+**Fase 2: Operación**
+
+Durante la fase de operación, el cliente y servidor intercambian solicitudes y notificaciones:
+
+[source,text]
+Cliente                                    Servidor
+   │                                          │
+   │ ─────── tools/list ────────────────────► │
+   │ ◄────── tools/list/response ──────────── │
+   │                                          │
+   │ ─────── tools/call ────────────────────► │
+   │ ◄────── tools/call/response ──────────── │
+   │                                          │
+   │ ─────── resources/list ────────────────► │
+   │ ◄────── resources/list/response ──────── │
+   │                                          │
+   │ ◄── notifications/resources/list_changed │
+   │                                          │
+
+**Fase 3: Terminación**
+
+Para cerrar la conexión de forma ordenada:
+
+[source,json]
+----
+// Cliente solicita cierre
+{
+  "jsonrpc": "2.0",
+  "method": "shutdown",
+  "id": 999
+}
+
+// Servidor confirma
+{
+  "jsonrpc": "2.0",
+  "result": {},
+  "id": 999
+}
+
+// Cliente notifica salida
+{
+  "jsonrpc": "2.0",
+  "method": "exit"
+}
+----
+
+== 1.3. Conceptos fundamentales
+MCP define cinco conceptos fundamentales que forman el núcleo del protocolo:
+
+== Resources (Recursos)
+Los **Resources** son datos que el servidor expone al cliente. Piensa en ellos como "archivos" o "documentos" que el LLM puede leer para obtener contexto.
+
+**Características principales:**
+
+* Son **pasivos**: el cliente lee datos, no ejecuta acciones
+* Se identifican por **URIs** (Uniform Resource Identifiers)
+* Tienen un **tipo MIME** que describe el formato del contenido
+* Pueden ser **estáticos** (contenido fijo) o **dinámicos** (generados al momento)
+
+**Analogía:**
+
+Si piensas en un sistema de archivos:
+
+* Un archivo `/home/user/documento.txt` es un recurso
+* Su URI sería `file:///home/user/documento.txt`
+* Su tipo MIME sería `text/plain`
+
+**Ejemplo de recurso estático:**
+
+[source,python]
+----
+@app.resource("config://app")
+async def get_config() -> Resource:
+    """Configuración estática de la aplicación."""
+    return Resource(
+        uri="config://app",
+        name="Configuración de la App",
+        mimeType="application/json",
+        text=json.dumps({
+            "version": "1.0.0",
+            "environment": "production",
+            "debug": False
+        })
+    )
+----
+
+**Ejemplo de recurso dinámico:**
+
+[source,python]
+----
+from datetime import datetime
+
+@app.resource("time://now")
+async def get_current_time() -> Resource:
+    """Hora actual - generado dinámicamente."""
+    return Resource(
+        uri="time://now",
+        name="Hora Actual",
+        mimeType="text/plain",
+        text=datetime.now().isoformat()
+    )
+----
+
+**URI Templates:**
+
+Los recursos pueden usar plantillas de URI para aceptar parámetros:
+
+[source,python]
+----
+@app.resource_template("users://{user_id}")
+async def get_user(user_id: str) -> Resource:
+    """Obtiene información de un usuario por ID."""
+    user = await db.get_user(user_id)
+    return Resource(
+        uri=f"users://{user_id}",
+        name=f"Usuario {user_id}",
+        mimeType="application/json",
+        text=json.dumps(user)
+    )
+----
+
+En este caso, el cliente puede solicitar:
+* `users://123` - Información del usuario 123
+* `users://456` - Información del usuario 456
+
+== Tools (Herramientas)
+Las **Tools** son funciones que el LLM puede invocar para realizar acciones. A diferencia de los recursos, las herramientas pueden tener **efectos secundarios**.
+
+**Características principales:**
+
+* Son **activas**: ejecutan código y realizan acciones
+* Tienen **parámetros** definidos con JSON Schema
+* Pueden **modificar estado** (crear archivos, enviar emails, etc.)
+* Devuelven **contenido** (texto, imágenes, recursos)
+
+**Analogía:**
+
+Si los recursos son como "leer un archivo", las herramientas son como "ejecutar un comando".
+
+**Ejemplo de herramienta simple:**
+
+[source,python]
+----
+@app.tool(
+    name="saludar",
+    description="Saluda al usuario por su nombre"
+)
+async def saludar(nombre: str) -> list[TextContent]:
+    """Herramienta que genera un saludo."""
+    return [TextContent(
+        type="text",
+        text=f"¡Hola, {nombre}! Bienvenido al servidor MCP."
+    )]
+----
+
+**Ejemplo de herramienta con múltiples parámetros:**
+
+[source,python]
+----
+@app.tool(
+    name="buscar_web",
+    description="Busca en la web y devuelve resultados"
+)
+async def buscar_web(
+    query: str,
+    num_results: int = 5,
+    idioma: str = "es"
+) -> list[TextContent]:
+    """
+    Busca en la web.
+    
+    Args:
+        query: Término de búsqueda
+        num_results: Número de resultados (1-20)
+        idioma: Código de idioma (es, en, fr, de)
+    """
+    # Validar parámetros
+    if num_results < 1 or num_results > 20:
+        raise ValueError("num_results debe estar entre 1 y 20")
+    
+    # Realizar búsqueda
+    resultados = await buscar_en_web(query, num_results, idioma)
+    
+    # Formatear resultados
+    output = [f"🔍 Resultados para '{query}':\n"]
+    for i, r in enumerate(resultados, 1):
+        output.append(f"{i}. {r['titulo']}")
+        output.append(f"   {r['url']}")
+        output.append(f"   {r['descripcion'][:100]}...")
+    
+    return [TextContent(type="text", text="\n".join(output))]
+----
+
+**Esquema JSON generado automáticamente:**
+
+[source,json]
+----
+{
+  "name": "buscar_web",
+  "description": "Busca en la web y devuelve resultados",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "query": {
+        "type": "string",
+        "description": "Término de búsqueda"
+      },
+      "num_results": {
+        "type": "integer",
+        "description": "Número de resultados (1-20)",
+        "default": 5,
+        "minimum": 1,
+        "maximum": 20
+      },
+      "idioma": {
+        "type": "string",
+        "description": "Código de idioma (es, en, fr, de)",
+        "default": "es",
+        "enum": ["es", "en", "fr", "de"]
+      }
+    },
+    "required": ["query"]
+  }
+}
+----
+
+== Prompts (Plantillas)
+Los **Prompts** son plantillas predefinidas que el cliente puede usar para iniciar conversaciones con contexto específico.
+
+**Características principales:**
+
+* Son **plantillas**: definen la estructura del mensaje
+* Pueden tener **argumentos**: valores que el usuario proporciona
+* Pueden **incluir recursos**: archivos incrustados en el prompt
+* Estandarizan **interacciones comunes**
+
+**Analogía:**
+
+Los prompts son como "formularios" que el usuario rellena. En lugar de escribir el mismo mensaje cada vez, usa una plantilla predefinida.
+
+**Ejemplo de prompt simple:**
+
+[source,python]
+----
+@app.prompt(
+    name="analizar_codigo",
+    description="Analiza código fuente y sugiere mejoras"
+)
+async def analizar_codigo(
+    archivo: str,
+    nivel_detalle: str = "completo"
+) -> list[PromptMessage]:
+    """
+    Prompt para análisis de código.
+    
+    Args:
+        archivo: Ruta del archivo a analizar
+        nivel_detalle: Nivel de detalle (basico, medio, completo)
+    """
+    # Leer archivo
+    from pathlib import Path
+    path = Path(archivo)
+    codigo = path.read_text()
+    
+    # Construir prompt
+    instrucciones = {
+        "basico": "Identifica errores obvios y problemas de estilo.",
+        "medio": "Analiza calidad del código, patrones usados y posibles mejoras.",
+        "completo": "Realiza un análisis completo: calidad, seguridad, rendimiento, y proporciona código refactorizado."
+    }
+    
+    return [
+        PromptMessage(
+            role="user",
+            content=TextContent(
+                type="text",
+                text=f"""Analiza el siguiente código:
+
+{instrucciones.get(nivel_detalle, instrucciones['completo'])}
+
+Archivo: {archivo}
+"""
+            )
+        ),
+        PromptMessage(
+            role="user",
+            content=EmbeddedResource(
+                type="resource",
+                resource=TextResourceContents(
+                    uri=f"file://{archivo}",
+                    mimeType="text/plain",
+                    text=codigo
+                )
+            )
+        )
+    ]
+----
+
+**Uso desde el cliente:**
+
+El cliente puede invocar el prompt con argumentos:
+
+[source,python]
+----
+# Obtener el prompt
+messages = await client.get_prompt(
+    "analizar_codigo",
+    {"archivo": "/home/user/main.py", "nivel_detalle": "completo"}
+)
+
+# messages contiene la conversación lista para enviar al LLM
+----
+
+== Sampling
+El **Sampling** permite que el servidor solicite al LLM que genere contenido. Es una **inversión del control**: normalmente el cliente envía solicitudes al servidor, pero con sampling el servidor solicita algo al cliente.
+
+**Características principales:**
+
+* **Inversión de control**: el servidor solicita al LLM
+* Útil para **análisis, clasificación, transformación** de datos
+* El cliente puede **rechazar** la solicitud
+* Permite **operaciones multimodales** (texto e imágenes)
+
+**Casos de uso:**
+
+1. **Análisis de datos**: El servidor tiene datos y necesita que el LLM los analice
+2. **Clasificación**: El servidor tiene texto y necesita clasificarlo
+3. **Transformación**: El servidor tiene contenido y necesita reformatearlo
+4. **Resumen**: El servidor tiene documento largo y necesita resumirlo
+
+**Ejemplo de sampling:**
+
+[source,python]
+----
+@app.tool(
+    name="clasificar_texto",
+    description="Clasifica un texto usando el LLM"
+)
+async def clasificar_texto(
+    texto: str,
+    categorias: list[str]
+) -> list[TextContent]:
+    """Clasifica texto en una de las categorías dadas."""
+    
+    # Construir prompt para el LLM
+    prompt = f"""Clasifica el siguiente texto en EXACTAMENTE una de estas categorías:
+
+Categorías: {', '.join(categorias)}
+
+Texto: {texto}
+
+Responde SOLO con el nombre de la categoría, sin explicaciones adicionales."""
+    
+    # Solicitar sampling al cliente
+    response = await app.request_sampling(
+        messages=[
+            {"role": "user", "content": [{"type": "text", "text": prompt}]}
+        ],
+        max_tokens=50,
+        temperature=0.1  # Baja temperatura para respuestas más precisas
+    )
+    
+    # El cliente puede rechazar, manejar el error
+    categoria = response.content.text.strip()
+    
+    # Validar que la categoría es válida
+    if categoria.lower() not in [c.lower() for c in categorias]:
+        return [TextContent(
+            type="text",
+            text=f"Error: Categoría inválida '{categoria}'. "
+                 f"Categorías válidas: {', '.join(categorias)}"
+        )]
+    
+    return [TextContent(type="text", text=f"Categoría: {categoria}")]
+----
+
+**Flujo de sampling:**
+
+[source,text]
+Servidor                          Cliente                          LLM
+   │                                │                                │
+   │ ◄──── Solicitud de tool ─────── │                                │
+   │                                │                                │
+   │ ───── request_sampling ───────► │                                │
+   │                                │                                │
+   │                                │ ───── Mensaje al LLM ─────────► │
+   │                                │                                │
+   │                                │ ◄──── Respuesta del LLM ─────── │
+   │                                │                                │
+   │ ◄──── Sampling response ────── │                                │
+   │                                │                                │
+   │ ───── Tool response ──────────► │                                │
+   │                                │                                │
+
+== Roots (Raíces)
+Los **Roots** definen qué directorios puede acceder el servidor. Es un mecanismo de **seguridad** que limita el acceso al sistema de archivos.
+
+**Características principales:**
+
+* Definidos por el **cliente**
+* Limitan el acceso del servidor
+* Usados para **sandboxing**
+* Especialmente importantes con servidores de sistema de archivos
+
+**Configuración en el cliente:**
+
+[source,json]
+----
+{
+  "roots": [
+    {
+      "uri": "file:///home/user/projects",
+      "name": "Proyectos"
+    },
+    {
+      "uri": "file:///home/user/documents",
+      "name": "Documentos"
+    }
+  ]
+}
+----
+
+**Uso en el servidor:**
+
+[source,python]
+----
+from pathlib import Path
+
+def validar_path(path: str, roots: list[Path]) -> Path:
+    """Valida que un path esté dentro de los roots permitidos."""
+    full_path = Path(path).resolve()
+    
+    for root in roots:
+        try:
+            full_path.relative_to(root.resolve())
+            return full_path  # Está dentro de un root permitido
+        except ValueError:
+            continue
+    
+    raise ValueError(f"Acceso denegado: {path} está fuera de los roots permitidos")
+
+@app.resource_template("file://{path}")
+async def read_file(path: str) -> Resource:
+    """Lee un archivo del sistema de archivos."""
+    # Obtener roots del contexto
+    roots = app.get_roots()  # Proporcionados por el cliente
+    
+    # Validar path
+    safe_path = validar_path(path, roots)
+    
+    # Leer archivo
+    return Resource(
+        uri=f"file://{path}",
+        mimeType="text/plain",
+        text=safe_path.read_text()
+    )
+----
+
+== 1.4. Instalación y configuración
+== SDK Python
+El SDK oficial de Python para MCP se instala fácilmente:
+
+[source,bash]
+----
+# Con pip
+pip install mcp
+
+# Con uv (recomendado para desarrollo)
+uv pip install mcp
+
+# Con poetry
+poetry add mcp
+----
+
+**Estructura recomendada de proyecto:**
+
+[source,text]
+mi_servidor_mcp/
+├── pyproject.toml
+├── README.md
+├── src/
+│   └── mi_servidor/
+│       ├── __init__.py
+│       ├── server.py
+│       ├── tools/
+│       │   ├── __init__.py
+│       │   ├── web_search.py
+│       │   └── file_ops.py
+│       └── resources/
+│           ├── __init__.py
+│           └── config.py
+└── tests/
+    └── test_server.py
+----
+
+**pyproject.toml mínimo:**
+
+[source,toml]
+----
+[project]
+name = "mi-servidor-mcp"
+version = "0.1.0"
+description = "Mi primer servidor MCP"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=0.1.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+mi-servidor = "mi_servidor.server:main"
+----
+
+== SDK TypeScript
+El SDK oficial de TypeScript:
+
+[source,bash]
+----
+# Con npm
+npm install @modelcontextprotocol/sdk
+
+# Con pnpm
+pnpm add @modelcontextprotocol/sdk
+
+# Con yarn
+yarn add @modelcontextprotocol/sdk
+----
+
+**Estructura recomendada:**
+
+[source,text]
+mi-servidor-mcp/
+├── package.json
+├── tsconfig.json
+├── README.md
+├── src/
+│   ├── index.ts
+│   ├── server.ts
+│   ├── tools/
+│   │   ├── index.ts
+│   │   └── web-search.ts
+│   └── resources/
+│       └── config.ts
+└── dist/
+----
+
+**package.json mínimo:**
+
+[source,json]
+----
+{
+  "name": "mi-servidor-mcp",
+  "version": "0.1.0",
+  "description": "Mi primer servidor MCP",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "mi-servidor": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
+----
+
+== Tu primer servidor MCP (Python)
+[source,python]
+----
+# server.py - Servidor MCP básico
+
+from mcp.server import Server
+from mcp.server.stdio import stdio_server
+from mcp.types import Tool, TextContent
+import asyncio
+
+# Crear el servidor
+app = Server("mi-primer-servidor")
+
+# ===== TOOLS =====
+
+@app.list_tools()
+async def list_tools() -> list[Tool]:
+    """Lista las herramientas disponibles."""
+    return [
+        Tool(
+            name="saludar",
+            description="Saluda al usuario por su nombre",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "nombre": {
+                        "type": "string",
+                        "description": "Nombre del usuario"
+                    }
+                },
+                "required": ["nombre"]
+            }
+        ),
+        Tool(
+            name="sumar",
+            description="Suma dos números",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "a": {
+                        "type": "number",
+                        "description": "Primer número"
+                    },
+                    "b": {
+                        "type": "number",
+                        "description": "Segundo número"
+                    }
+                },
+                "required": ["a", "b"]
+            }
+        )
+    ]
+
+@app.call_tool()
+async def call_tool(name: str, arguments: dict) -> list[TextContent]:
+    """Ejecuta una herramienta."""
+    
+    if name == "saludar":
+        nombre = arguments.get("nombre", "Usuario")
+        return [TextContent(
+            type="text",
+            text=f"¡Hola, {nombre}! Bienvenido a mi servidor MCP."
+        )]
+    
+    elif name == "sumar":
+        a = arguments.get("a", 0)
+        b = arguments.get("b", 0)
+        resultado = a + b
+        return [TextContent(
+            type="text",
+            text=f"La suma de {a} + {b} = {resultado}"
+        )]
+    
+    else:
+        raise ValueError(f"Herramienta desconocida: {name}")
+
+# ===== MAIN =====
+
+async def main():
+    """Ejecuta el servidor."""
+    async with stdio_server() as (read_stream, write_stream):
+        await app.run(
+            read_stream,
+            write_stream,
+            app.create_initialization_options()
+        )
+
+if __name__ == "__main__":
+    asyncio.run(main())
+----
+
+**Ejecutar el servidor:**
+
+[source,bash]
+----
+# Directamente
+python server.py
+
+# Como módulo
+python -m mi_servidor.server
+
+# Con configuración en Claude Desktop
+# Añadir a claude_desktop_config.json:
+# {
+#   "mcpServers": {
+#     "mi-servidor": {
+#       "command": "python",
+#       "args": ["server.py"]
+#     }
+#   }
+# }
+----
+
+== Tu primer servidor MCP (TypeScript)
+[source,typescript]
+----
+// server.ts - Servidor MCP básico
+
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import {
+  ListToolsRequestSchema,
+  CallToolRequestSchema,
+  Tool,
+} from "@modelcontextprotocol/sdk/types.js";
+
+// Crear el servidor
+const server = new Server(
+  { name: "mi-primer-servidor", version: "0.1.0" },
+  { capabilities: { tools: {} } }
+);
+
+// Definir herramientas
+const TOOLS: Tool[] = [
+  {
+    name: "saludar",
+    description: "Saluda al usuario por su nombre",
+    inputSchema: {
+      type: "object",
+      properties: {
+        nombre: {
+          type: "string",
+          description: "Nombre del usuario",
+        },
+      },
+      required: ["nombre"],
+    },
+  },
+  {
+    name: "sumar",
+    description: "Suma dos números",
+    inputSchema: {
+      type: "object",
+      properties: {
+        a: { type: "number", description: "Primer número" },
+        b: { type: "number", description: "Segundo número" },
+      },
+      required: ["a", "b"],
+    },
+  },
+];
+
+// Manejar listado de herramientas
+server.setRequestHandler(ListToolsRequestSchema, async () => {
+  return { tools: TOOLS };
+});
+
+// Manejar llamada a herramientas
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  const { name, arguments: args } = request.params;
+
+  if (name === "saludar") {
+    const nombre = args?.nombre as string || "Usuario";
+    return {
+      content: [
+        {
+          type: "text",
+          text: `¡Hola, ${nombre}! Bienvenido a mi servidor MCP.`,
+        },
+      ],
+    };
+  }
+
+  if (name === "sumar") {
+    const a = args?.a as number ?? 0;
+    const b = args?.b as number ?? 0;
+    return {
+      content: [
+        {
+          type: "text",
+          text: `La suma de ${a} + ${b} = ${a + b}`,
+        },
+      ],
+    };
+  }
+
+  throw new Error(`Herramienta desconocida: ${name}`);
+});
+
+// Ejecutar el servidor
+const transport = new StdioServerTransport();
+await server.connect(transport);
+----
+
+**Ejecutar el servidor:**
+
+[source,bash]
+----
+# Compilar
+npm run build
+
+# Ejecutar
+node dist/index.js
+
+# O directamente con ts-node
+npx ts-node src/index.ts
+----
+
+== Configuración en Claude Desktop
+Claude Desktop usa un archivo de configuración JSON para registrar servidores MCP:
+
+**Ubicaciones del archivo:**
+
+* **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+* **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+* **Linux**: `~/.config/Claude/claude_desktop_config.json`
+
+**Estructura del archivo:**
+
+[source,json]
+----
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/documents"],
+      "env": {}
+    },
+    "postgres": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres"],
+      "env": {
+        "DATABASE_URL": "postgresql://user:pass@localhost/mydb"
+      }
+    },
+    "mi-servidor-python": {
+      "command": "python",
+      "args": ["-m", "mi_servidor.server"],
+      "env": {
+        "PYTHONPATH": "/home/user/projects/mi_servidor/src"
+      }
+    },
+    "mi-servidor-node": {
+      "command": "node",
+      "args": ["/home/user/projects/mi_servidor/dist/index.js"],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}
+----
+
+**Variables de entorno:**
+
+Puedes usar variables de entorno del sistema:
+
+[source,json]
+----
+{
+  "mcpServers": {
+    "mi-servidor": {
+      "command": "python",
+      "args": ["-m", "mi_servidor"],
+      "env": {
+        "API_KEY": "${MY_API_KEY}",
+        "DEBUG": "1"
+      }
+    }
+  }
+}
+----
+
+== Inspector MCP
+El **Inspector MCP** es una herramienta visual para depurar servidores MCP:
+
+**Instalación:**
+
+[source,bash]
+----
+# Instalar globalmente
+npm install -g @modelcontextprotocol/inspector
+
+# O usar npx directamente
+npx @modelcontextprotocol/inspector python -m mi_servidor
+----
+
+**Uso:**
+
+[source,bash]
+----
+# Ejecutar inspector con servidor Python
+mcp-inspector python -m mi_servidor.server
+
+# Ejecutar inspector con servidor Node
+mcp-inspector node dist/index.js
+
+# Ejecutar inspector con servidor remoto
+mcp-inspector https://api.ejemplo.com/mcp
+----
+
+**Características del Inspector:**
+
+* Ver lista de herramientas, recursos y prompts
+* Ejecutar herramientas con parámetros interactivos
+* Ver respuestas en tiempo real
+* Depurar errores con logs detallados
+* Probar sampling
+* Ver estadísticas de conexión
+
+**Interfaz:**
+
+El Inspector abre una interfaz web en `http://localhost:5173` con:
+
+* Panel izquierdo: Lista de capacidades
+* Panel central: Área de pruebas
+* Panel derecho: Logs y respuestas
+* Barra superior: Conexión y estado
+
+== MÓDULO 2: RECURSOS EN MCP
+[NOTE]
+.Duración
+== 4 horas== ====2.1. Definición de Resources
+== ¿Qué es un Resource?
+
+Un **Resource** en MCP es una abstracción para representar **datos accesibles** por el cliente. A diferencia de una herramienta (que ejecuta acciones), un recurso es **pasivo**: el cliente lo lee para obtener información.
+
+**Conceptos clave:**
+
+1. **URI**: Cada recurso tiene un identificador único (Uniform Resource Identifier)
+2. **Contenido**: El recurso contiene datos (texto o binario)
+3. **Tipo MIME**: Describe el formato del contenido
+4. **Metadatos**: Nombre, descripción, etc.
+
+**Analogía del mundo real:**
+
+Piensa en los recursos como archivos en una biblioteca:
+
+* La **URI** es como la "ubicación" del archivo en la estantería
+* El **contenido** es el texto dentro del archivo
+* El **tipo MIME** es como la categoría del libro (novela, ensayo, poesía)
+* Los **metadatos** son como la ficha de catálogo
+
+== URIs y esquemas
+Las URIs siguen el estándar RFC 3986 y tienen la forma:
+
+[source,text]
+esquema://autoridad/ruta?consulta#fragmento
+
+**Esquemas comunes en MCP:**
+
+[cols="1,3"]
+|===
+| Esquema | Uso
+
+| `file://`
+| Archivos del sistema de archivos local
+
+| `http://` / `https://`
+| Recursos accesibles via HTTP
+
+| `postgres://`
+| Consultas a base de datos PostgreSQL
+
+| `sqlite://`
+| Consultas a base de datos SQLite
+
+| Custom (ej: `app://`, `config://`)
+| Esquemas personalizados para tu aplicación
+|===
+
+**Ejemplos de URIs:**
+
+[source,text]
+# Archivo local
+file:///home/user/documentos/notas.md
+
+# Recurso HTTP
+https://api.ejemplo.com/datos/usuarios/123
+
+# Base de datos
+postgres://localhost/midb/usuarios/123
+
+# Esquema personalizado
+config://app/settings
+cache://session/current
+logs://app/2024-01-15
+
+== Tipos de contenido MIME
+Cada recurso tiene un **tipo MIME** que describe el formato de su contenido:
+
+**Tipos de texto:**
+
+[cols="1,3"]
+|===
+| MIME | Descripción
+
+| `text/plain`
+| Texto simple sin formato
+
+| `text/markdown`
+| Texto con formato Markdown
+
+| `text/html`
+| Documento HTML
+
+| `text/csv`
+| Datos en formato CSV
+
+| `application/json`
+| Datos estructurados JSON
+
+| `application/xml`
+| Datos estructurados XML
+
+| `application/yaml`
+| Datos estructurados YAML
+|===
+
+**Tipos binarios:**
+
+[cols="1,3"]
+|===
+| MIME | Descripción
+
+| `image/png`
+| Imagen en formato PNG
+
+| `image/jpeg`
+| Imagen en formato JPEG
+
+| `image/gif`
+| Imagen en formato GIF
+
+| `application/pdf`
+| Documento PDF
+
+| `application/zip`
+| Archivo comprimido
+
+| `application/octet-stream`
+| Datos binarios genéricos
+|===
+
+**Detección automática de MIME:**
+
+[source,python]
+----
+import mimetypes
+from pathlib import Path
+
+def detectar_mime(archivo: str) -> str:
+    """Detecta el tipo MIME de un archivo."""
+    mime_type, _ = mimetypes.guess_type(archivo)
+    return mime_type or "application/octet-stream"
+
+# Ejemplos
+detectar_mime("documento.txt")     # text/plain
+detectar_mime("pagina.html")       # text/html
+detectar_mime("datos.json")        # application/json
+detectar_mime("imagen.png")        # image/png
+detectar_mime("archivo.unknown")   # application/octet-stream
+----
+
+== Recursos estáticos vs dinámicos
+**Recursos estáticos:**
+
+El contenido no cambia entre lecturas. Ejemplos:
+
+* Archivos de configuración
+* Documentos almacenados
+* Código fuente
+
+[source,python]
+----
+@app.resource("config://app/settings.json")
+async def get_settings() -> Resource:
+    """Configuración estática de la aplicación."""
+    # El archivo se lee de disco pero no cambia dinámicamente
+    with open("config/settings.json") as f:
+        content = f.read()
+    
+    return Resource(
+        uri="config://app/settings.json",
+        name="Configuración de la Aplicación",
+        description="Ajustes globales de la aplicación",
+        mimeType="application/json",
+        text=content
+    )
+----
+
+**Recursos dinámicos:**
+
+El contenido se genera al momento de la solicitud. Ejemplos:
+
+* Hora actual
+* Estado del sistema
+* Consultas a bases de datos
+* Resultados de APIs
+
+[source,python]
+----
+from datetime import datetime
+import psutil  # Biblioteca para info del sistema
+
+@app.resource("system://status")
+async def get_system_status() -> Resource:
+    """Estado actual del sistema - generado dinámicamente."""
+    status = {
+        "timestamp": datetime.now().isoformat(),
+        "cpu_percent": psutil.cpu_percent(),
+        "memory_percent": psutil.virtual_memory().percent,
+        "disk_percent": psutil.disk_usage('/').percent,
+        "processes": len(psutil.pids())
+    }
+    
+    return Resource(
+        uri="system://status",
+        name="Estado del Sistema",
+        description="Métricas actuales del sistema",
+        mimeType="application/json",
+        text=json.dumps(status, indent=2)
+    )
+
+@app.resource("time://now")
+async def get_current_time() -> Resource:
+    """Hora actual - diferente cada vez que se lee."""
+    return Resource(
+        uri="time://now",
+        name="Hora Actual",
+        description="Hora actual del servidor",
+        mimeType="text/plain",
+        text=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    )
+----
+
+**Diferencias clave:**
+
+[cols="1,1,1"]
+|===
+| Aspecto | Estático | Dinámico
+
+| Contenido
+| Fijo
+| Generado al momento
+
+| Caching
+| Seguro
+| Puede ser problemático
+
+| Rendimiento
+| Predecible
+| Varía
+
+| Ejemplos
+| Archivos, configuración
+| Consultas, estado, tiempo
+|===
+
+== Recursos con suscripción
+Algunos recursos pueden **cambiar** mientras el cliente está conectado. MCP permite al cliente **suscribirse** a cambios:
+
+[source,python]
+----
+from mcp.types import Resource
+
+# Recursos que pueden cambiar
+RECURSOS_SUSCRITOS = {}
+
+@app.resource("logs://app")
+async def get_logs() -> Resource:
+    """Logs de la aplicación - pueden cambiar."""
+    with open("app.log") as f:
+        content = f.read()
+    
+    return Resource(
+        uri="logs://app",
+        name="Logs de la Aplicación",
+        mimeType="text/plain",
+        text=content
+    )
+
+# Notificar cambios
+async def notificar_cambio_log():
+    """Notifica a los clientes que el recurso ha cambiado."""
+    await app.send_notification(
+        method="notifications/resources/updated",
+        params={"uri": "logs://app"}
+    )
+----
+
+== 2.2. Implementación de Resources
+== Listar recursos
+El cliente puede solicitar la lista de recursos disponibles:
+
+[source,python]
+----
+from mcp.types import Resource
+
+@app.list_resources()
+async def list_resources() -> list[Resource]:
+    """Lista todos los recursos disponibles."""
+    return [
+        Resource(
+            uri="config://app",
+            name="Configuración de la App",
+            description="Ajustes globales",
+            mimeType="application/json"
+        ),
+        Resource(
+            uri="config://database",
+            name="Configuración de Base de Datos",
+            description="Parámetros de conexión",
+            mimeType="application/json"
+        ),
+        Resource(
+            uri="logs://app",
+            name="Logs de la Aplicación",
+            description="Últimos logs",
+            mimeType="text/plain"
+        )
+    ]
+----
+
+**Importante:** Solo lista recursos **estáticos** o **descubribles**. Los recursos con plantillas (URI Templates) se listan en `list_resource_templates`.
+
+== Leer un recurso
+El cliente puede leer el contenido de un recurso:
+
+[source,python]
+----
+from mcp.types import Resource, ResourceContents
+
+@app.read_resource()
+async def read_resource(uri: str) -> ResourceContents:
+    """Lee el contenido de un recurso."""
+    
+    if uri == "config://app":
+        with open("config/app.json") as f:
+            content = f.read()
+        return ResourceContents(
+            uri=uri,
+            mimeType="application/json",
+            text=content
+        )
+    
+    elif uri == "config://database":
+        with open("config/database.yaml") as f:
+            content = f.read()
+        return ResourceContents(
+            uri=uri,
+            mimeType="application/yaml",
+            text=content
+        )
+    
+    elif uri == "logs://app":
+        with open("logs/app.log") as f:
+            content = f.read()
+        return ResourceContents(
+            uri=uri,
+            mimeType="text/plain",
+            text=content
+        )
+    
+    else:
+        raise ValueError(f"Recurso no encontrado: {uri}")
+----
+
+== Recursos binarios
+Para recursos que contienen datos binarios (imágenes, PDFs, etc.), usa `blob` en lugar de `text`:
+
+[source,python]
+----
+import base64
+from pathlib import Path
+
+@app.resource("image://logo")
+async def get_logo() -> Resource:
+    """Devuelve una imagen como recurso binario."""
+    image_path = Path("assets/logo.png")
+    image_bytes = image_path.read_bytes()
+    
+    # Codificar en base64
+    image_base64 = base64.b64encode(image_bytes).decode()
+    
+    return Resource(
+        uri="image://logo",
+        name="Logo de la Empresa",
+        mimeType="image/png",
+        blob=image_base64  # Contenido binario
+    )
+
+@app.read_resource()
+async def read_resource(uri: str) -> ResourceContents:
+    if uri.startswith("image://"):
+        image_name = uri[8:]  # Extraer nombre después de "image://"
+        image_path = Path(f"assets/{image_name}.png")
+        
+        if not image_path.exists():
+            raise ValueError(f"Imagen no encontrada: {image_name}")
+        
+        image_bytes = image_path.read_bytes()
+        image_base64 = base64.b64encode(image_bytes).decode()
+        
+        return ResourceContents(
+            uri=uri,
+            mimeType="image/png",
+            blob=image_base64
+        )
+----
+----
+
+== 2.3. Recursos con plantillas (URI Templates)
+== Concepto de URI Templates
+Las **URI Templates** (RFC 6570) permiten definir recursos con **parámetros dinámicos**:
+
+[source,text]
+# Sin parámetros
+users://list
+
+# Con parámetro
+users://{user_id}
+files://{path}
+db://{table}/{id}
+
+**Ventajas:**
+
+* No necesitas listar todos los recursos posibles
+* El cliente puede acceder a recursos dinámicamente
+* Más eficiente para grandes conjuntos de datos
+
+== Implementación de plantillas
+[source,python]
+----
+from mcp.types import ResourceTemplate
+
+# Definir la plantilla
+@app.resource_template("users://{user_id}")
+async def get_user(user_id: str) -> Resource:
+    """Obtiene información de un usuario por ID."""
+    
+    # Buscar usuario en la base de datos
+    user = await db.get_user(user_id)
+    
+    if not user:
+        raise ValueError(f"Usuario no encontrado: {user_id}")
+    
+    return Resource(
+        uri=f"users://{user_id}",
+        name=f"Usuario {user_id}",
+        description=f"Información del usuario {user['name']}",
+        mimeType="application/json",
+        text=json.dumps(user, indent=2)
+    )
+
+# Listar plantillas disponibles
+@app.list_resource_templates()
+async def list_templates() -> list[ResourceTemplate]:
+    """Lista las plantillas de recursos disponibles."""
+    return [
+        ResourceTemplate(
+            uriTemplate="users://{user_id}",
+            name="Usuario por ID",
+            description="Obtiene información de un usuario específico",
+            mimeType="application/json"
+        ),
+        ResourceTemplate(
+            uriTemplate="files://{path}",
+            name="Archivo por ruta",
+            description="Lee un archivo del sistema",
+            mimeType="text/plain"
+        )
+    ]
+----
+
+== Validación de parámetros
+Es crucial validar los parámetros para evitar errores y problemas de seguridad:
+
+[source,python]
+----
+import re
+from pathlib import Path
+
+@app.resource_template("files://{path}")
+async def read_file(path: str) -> Resource:
+    """Lee un archivo del sistema."""
+    
+    # Validar que el path no contiene caracteres peligrosos
+    if ".." in path:
+        raise ValueError("Path no puede contener '..'")
+    
+    if path.startswith("/"):
+        raise ValueError("Path debe ser relativo")
+    
+    # Validar extensiones permitidas
+    ALLOWED_EXTENSIONS = [".txt", ".md", ".json", ".csv", ".yaml"]
+    if not any(path.endswith(ext) for ext in ALLOWED_EXTENSIONS):
+        raise ValueError(f"Extensión no permitida. Permitidas: {', '.join(ALLOWED_EXTENSIONS)}")
+    
+    # Validar que existe
+    full_path = Path("data") / path  # Directorio base
+    if not full_path.exists():
+        raise ValueError(f"Archivo no encontrado: {path}")
+    
+    # Detectar MIME type
+    mime_types = {
+        ".txt": "text/plain",
+        ".md": "text/markdown",
+        ".json": "application/json",
+        ".csv": "text/csv",
+        ".yaml": "application/yaml"
+    }
+    extension = Path(path).suffix
+    mime_type = mime_types.get(extension, "text/plain")
+    
+    return Resource(
+        uri=f"files://{path}",
+        name=f"Archivo: {path}",
+        mimeType=mime_type,
+        text=full_path.read_text()
+    )
+----
+
+== Ejemplo completo: API de usuarios
+[source,python]
+----
+from mcp.server import Server
+from mcp.types import Resource, ResourceTemplate
+import json
+
+app = Server("users-api")
+
+# Base de datos simulada
+USERS_DB = {
+    "1": {"id": "1", "name": "Alice", "email": "alice@example.com", "role": "admin"},
+    "2": {"id": "2", "name": "Bob", "email": "bob@example.com", "role": "user"},
+    "3": {"id": "3", "name": "Charlie", "email": "charlie@example.com", "role": "user"},
+}
+
+# Recursos estáticos
+@app.list_resources()
+async def list_resources() -> list[Resource]:
+    """Lista recursos estáticos."""
+    return [
+        Resource(
+            uri="users://list",
+            name="Lista de Usuarios",
+            description="Lista de todos los IDs de usuarios",
+            mimeType="application/json"
+        ),
+        Resource(
+            uri="users://stats",
+            name="Estadísticas",
+            description="Estadísticas de usuarios",
+            mimeType="application/json"
+        )
+    ]
+
+@app.read_resource()
+async def read_resource(uri: str) -> Resource:
+    """Lee recursos estáticos."""
+    
+    if uri == "users://list":
+        users_list = [{"id": u["id"], "name": u["name"]} for u in USERS_DB.values()]
+        return Resource(
+            uri=uri,
+            mimeType="application/json",
+            text=json.dumps(users_list, indent=2)
+        )
+    
+    elif uri == "users://stats":
+        stats = {
+            "total": len(USERS_DB),
+            "admins": sum(1 for u in USERS_DB.values() if u["role"] == "admin"),
+            "users": sum(1 for u in USERS_DB.values() if u["role"] == "user")
+        }
+        return Resource(
+            uri=uri,
+            mimeType="application/json",
+            text=json.dumps(stats, indent=2)
+        )
+    
+    else:
+        raise ValueError(f"Recurso no encontrado: {uri}")
+
+# Recursos con plantillas
+@app.list_resource_templates()
+async def list_templates() -> list[ResourceTemplate]:
+    """Lista plantillas de recursos."""
+    return [
+        ResourceTemplate(
+            uriTemplate="users://{user_id}",
+            name="Usuario por ID",
+            description="Información detallada de un usuario",
+            mimeType="application/json"
+        ),
+        ResourceTemplate(
+            uriTemplate="users://{user_id}/avatar",
+            name="Avatar de Usuario",
+            description="Avatar del usuario",
+            mimeType="image/png"
+        )
+    ]
+
+@app.resource_template("users://{user_id}")
+async def get_user(user_id: str) -> Resource:
+    """Obtiene un usuario por ID."""
+    
+    if user_id not in USERS_DB:
+        raise ValueError(f"Usuario no encontrado: {user_id}")
+    
+    return Resource(
+        uri=f"users://{user_id}",
+        name=f"Usuario {user_id}",
+        mimeType="application/json",
+        text=json.dumps(USERS_DB[user_id], indent=2)
+    )
+
+@app.resource_template("users://{user_id}/avatar")
+async def get_user_avatar(user_id: str) -> Resource:
+    """Obtiene el avatar de un usuario."""
+    
+    if user_id not in USERS_DB:
+        raise ValueError(f"Usuario no encontrado: {user_id}")
+    
+    # Simular avatar (en producción, leer de archivo o base de datos)
+    import base64
+    
+    # Avatar placeholder
+    avatar_base64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGWMjR9QAAAAABJRU5ErkJggg=="
+    
+    return Resource(
+        uri=f"users://{user_id}/avatar",
+        name=f"Avatar de {USERS_DB[user_id]['name']}",
+        mimeType="image/png",
+        blob=avatar_base64
+    )
+----
+
+== 2.4. Recursos del sistema de archivos
+== Acceso a archivos locales
+Uno de los casos de uso más comunes de MCP es proporcionar acceso al sistema de archivos:
+
+[source,python]
+----
+from pathlib import Path
+from mcp.server import Server
+from mcp.types import Resource, ResourceTemplate
+import mimetypes
+
+app = Server("filesystem-server")
+
+# Directorio base (root)
+BASE_DIR = Path("/home/user/documents")
+
+@app.list_resources()
+async def list_resources() -> list[Resource]:
+    """Lista archivos en el directorio base."""
+    resources = []
+    
+    for file_path in BASE_DIR.rglob("*"):
+        if file_path.is_file():
+            relative_path = file_path.relative_to(BASE_DIR)
+            mime_type, _ = mimetypes.guess_type(str(file_path))
+            
+            resources.append(Resource(
+                uri=f"file://{relative_path}",
+                name=file_path.name,
+                mimeType=mime_type or "application/octet-stream"
+            ))
+    
+    return resources
+
+@app.resource_template("file://{path}")
+async def read_file(path: str) -> Resource:
+    """Lee un archivo del sistema."""
+    
+    # Resolver path completo
+    full_path = BASE_DIR / path
+    
+    # Validar que está dentro del directorio permitido
+    try:
+        full_path.resolve().relative_to(BASE_DIR.resolve())
+    except ValueError:
+        raise ValueError(f"Acceso denegado: {path} está fuera del directorio permitido")
+    
+    # Validar que existe
+    if not full_path.exists():
+        raise ValueError(f"Archivo no encontrado: {path}")
+    
+    # Validar que es un archivo
+    if not full_path.is_file():
+        raise ValueError(f"No es un archivo: {path}")
+    
+    # Detectar MIME type
+    mime_type, _ = mimetypes.guess_type(str(full_path))
+    
+    # Leer contenido
+    if mime_type and mime_type.startswith("image/"):
+        # Archivo binario
+        import base64
+        content = base64.b64encode(full_path.read_bytes()).decode()
+        return Resource(
+            uri=f"file://{path}",
+            name=full_path.name,
+            mimeType=mime_type,
+            blob=content
+        )
+    else:
+        # Archivo de texto
+        return Resource(
+            uri=f"file://{path}",
+            name=full_path.name,
+            mimeType=mime_type or "text/plain",
+            text=full_path.read_text()
+        )
+----
+
+== Seguridad: Roots y sandboxing
+Es fundamental limitar el acceso a archivos sensibles:
+
+[source,python]
+----
+from pathlib import Path
+from typing import List
+
+class SecureFileManager:
+    """Gestor de archivos con seguridad."""
+    
+    def __init__(self, allowed_roots: List[Path]):
+        self.allowed_roots = [r.resolve() for r in allowed_roots]
+    
+    def is_allowed(self, path: Path) -> bool:
+        """Verifica si un path está dentro de los roots permitidos."""
+        resolved = path.resolve()
+        
+        for root in self.allowed_roots:
+            try:
+                resolved.relative_to(root)
+                return True
+            except ValueError:
+                continue
+        
+        return False
+    
+    def resolve(self, path: str) -> Path:
+        """Resuelve un path de forma segura."""
+        # Evitar directory traversal
+        if ".." in path:
+            raise ValueError("Path no puede contener '..'")
+        
+        # Buscar en los roots permitidos
+        for root in self.allowed_roots:
+            full_path = (root / path).resolve()
+            if full_path.exists() and self.is_allowed(full_path):
+                return full_path
+        
+        raise ValueError(f"Archivo no encontrado o acceso denegado: {path}")
+
+# Uso
+manager = SecureFileManager([
+    Path("/home/user/documents"),
+    Path("/home/user/projects")
+])
+
+@app.resource_template("file://{path}")
+async def read_file(path: str) -> Resource:
+    """Lee un archivo de forma segura."""
+    safe_path = manager.resolve(path)
+    
+    # Resto de la implementación...
+----
+
+== 2.5. Casos prácticos
+== Servidor de documentación local
+[source,python]
+----
+from pathlib import Path
+from mcp.server import Server
+from mcp.types import Resource, ResourceTemplate
+import mimetypes
+
+app = Server("docs-server")
+DOCS_DIR = Path("./docs")
+
+@app.list_resources()
+async def list_docs() -> list[Resource]:
+    """Lista todos los archivos de documentación."""
+    resources = []
+    
+    for file_path in DOCS_DIR.rglob("*.md"):
+        relative = file_path.relative_to(DOCS_DIR)
+        resources.append(Resource(
+            uri=f"docs://{relative}",
+            name=file_path.stem.replace("-", " ").title(),
+            description=f"Documentación: {relative}",
+            mimeType="text/markdown"
+        ))
+    
+    # Añadir índice
+    resources.insert(0, Resource(
+        uri="docs://index",
+        name="Índice de Documentación",
+        description="Lista de toda la documentación disponible",
+        mimeType="text/markdown"
+    ))
+    
+    return resources
+
+@app.resource("docs://index")
+async def get_index() -> Resource:
+    """Genera un índice de la documentación."""
+    lines = ["# Índice de Documentación\n"]
+    
+    for file_path in sorted(DOCS_DIR.rglob("*.md")):
+        relative = file_path.relative_to(DOCS_DIR)
+        title = file_path.stem.replace("-", " ").title()
+        lines.append(f"- [{title}](docs://{relative})")
+    
+    return Resource(
+        uri="docs://index",
+        name="Índice",
+        mimeType="text/markdown",
+        text="\n".join(lines)
+    )
+
+@app.resource_template("docs://{path}")
+async def read_doc(path: str) -> Resource:
+    """Lee un archivo de documentación."""
+    full_path = DOCS_DIR / path
+    
+    if not full_path.exists():
+        raise ValueError(f"Documento no encontrado: {path}")
+    
+    return Resource(
+        uri=f"docs://{path}",
+        name=full_path.stem,
+        mimeType="text/markdown",
+        text=full_path.read_text()
+    )
+----
+
+== Acceso a base de datos SQLite
+[source,python]
+----
+import sqlite3
+import json
+from pathlib import Path
+from mcp.types import Resource, ResourceTemplate
+
+app = Server("sqlite-server")
+DB_PATH = Path("./data/app.db")
+
+def get_connection():
+    """Obtiene una conexión a la base de datos."""
+    return sqlite3.connect(DB_PATH)
+
+@app.list_resources()
+async def list_tables() -> list[Resource]:
+    """Lista todas las tablas de la base de datos."""
+    conn = get_connection()
+    cursor = conn.execute(
+        "SELECT name FROM sqlite_master WHERE type='table'"
+    )
+    tables = [row[0] for row in cursor.fetchall()]
+    conn.close()
+    
+    resources = [
+        Resource(
+            uri="db://tables",
+            name="Lista de Tablas",
+            description="Todas las tablas en la base de datos",
+            mimeType="application/json"
+        )
+    ]
+    
+    for table in tables:
+        resources.append(Resource(
+            uri=f"db://{table}",
+            name=f"Tabla: {table}",
+            mimeType="application/json"
+        ))
+    
+    return resources
+
+@app.resource("db://tables")
+async def get_tables() -> Resource:
+    """Obtiene la lista de tablas."""
+    conn = get_connection()
+    cursor = conn.execute(
+        "SELECT name FROM sqlite_master WHERE type='table'"
+    )
+    tables = [row[0] for row in cursor.fetchall()]
+    conn.close()
+    
+    return Resource(
+        uri="db://tables",
+        name="Tablas",
+        mimeType="application/json",
+        text=json.dumps(tables, indent=2)
+    )
+
+@app.resource_template("db://{table}")
+async def get_table_schema(table: str) -> Resource:
+    """Obtiene el esquema de una tabla."""
+    # Validar nombre de tabla
+    if not table.replace("_", "").isalnum():
+        raise ValueError("Nombre de tabla inválido")
+    
+    conn = get_connection()
+    
+    # Obtener columnas
+    cursor = conn.execute(f"PRAGMA table_info({table})")
+    columns = [
+        {
+            "name": row[1],
+            "type": row[2],
+            "notnull": bool(row[3]),
+            "primary": bool(row[5])
+        }
+        for row in cursor.fetchall()
+    ]
+    
+    conn.close()
+    
+    return Resource(
+        uri=f"db://{table}",
+        name=f"Esquema de {table}",
+        mimeType="application/json",
+        text=json.dumps({
+            "table": table,
+            "columns": columns
+        }, indent=2)
+    )
+
+@app.resource_template("db://{table}/{id}")
+async def get_row(table: str, id: str) -> Resource:
+    """Obtiene una fila específica de una tabla."""
+    if not table.replace("_", "").isalnum():
+        raise ValueError("Nombre de tabla inválido")
+    
+    conn = get_connection()
+    
+    # Verificar que la tabla tiene columna 'id'
+    cursor = conn.execute(f"PRAGMA table_info({table})")
+    columns = [row[1] for row in cursor.fetchall()]
+    
+    if "id" not in columns:
+        conn.close()
+        raise ValueError(f"La tabla {table} no tiene columna 'id'")
+    
+    # Obtener la fila
+    cursor = conn.execute(f"SELECT * FROM {table} WHERE id = ?", (id,))
+    row = cursor.fetchone()
+    
+    if not row:
+        conn.close()
+        raise ValueError(f"Registro no encontrado: {table}/{id}")
+    
+    # Convertir a diccionario
+    result = dict(zip(columns, row))
+    conn.close()
+    
+    return Resource(
+        uri=f"db://{table}/{id}",
+        name=f"Registro {id} de {table}",
+        mimeType="application/json",
+        text=json.dumps(result, indent=2)
+    )
+----
+
+== MÓDULO 3: HERRAMIENTAS EN MCP
+[NOTE]
+.Duración
+== 5 horas== ====3.1. Definición de Tools
+== ¿Qué es una Tool?
+
+Una **Tool** (herramienta) en MCP es una función que el modelo de lenguaje puede invocar para realizar acciones. A diferencia de los recursos (que son pasivos), las herramientas pueden:
+
+* **Modificar estado**: Crear archivos, actualizar bases de datos, enviar emails
+* **Ejecutar comandos**: Correr scripts, hacer peticiones HTTP
+* **Realizar cómputos**: Procesar datos, transformar información
+* **Interactuar con sistemas externos**: APIs, servicios web
+
+**Diferencias clave entre Tool y Resource:**
+
+[cols="1,1,1"]
+|===
+| Aspecto | Resource | Tool
+
+| Naturaleza
+| Pasivo (lectura)
+| Activo (ejecución)
+
+| URI
+| Sí (identificador)
+| No (solo nombre)
+
+| Parámetros
+| En la URI (path)
+| JSON Schema explícito
+
+| Efectos secundarios
+| No (idempotente)
+| Sí (puede modificar estado)
+
+| Ejemplo típico
+| Leer un archivo
+| Escribir un archivo
+
+| Análogo REST
+| GET
+| POST/PUT/DELETE
+|===
+
+== Anatomía de una herramienta
+Una herramienta MCP tiene cuatro componentes principales:
+
+**1. Nombre (name)**
+
+Identificador único de la herramienta. Debe ser descriptivo y usar snake_case:
+
+[source,python]
+----
+# ✅ Buen nombre
+name="buscar_web"
+
+# ✅ Buen nombre
+name="crear_usuario"
+
+# ❌ Mal nombre
+name="do_thing"
+
+# ❌ Mal nombre
+name="tool1"
+----
+
+**2. Descripción (description)**
+
+Explica qué hace la herramienta y cuándo usarla. Es crucial porque el LLM usa esta descripción para decidir si invocar la herramienta:
+
+[source,python]
+----
+# ✅ Buena descripción
+description="Busca en la web usando DuckDuckGo y devuelve los resultados más relevantes. Útil cuando necesitas información actualizada de internet."
+
+# ❌ Mala descripción
+description="Busca cosas"
+----
+
+**3. Esquema de entrada (inputSchema)**
+
+Define los parámetros usando JSON Schema:
+
+[source,json]
+----
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "Término de búsqueda"
+    },
+    "num_results": {
+      "type": "integer",
+      "description": "Número de resultados a devolver",
+      "default": 5,
+      "minimum": 1,
+      "maximum": 20
+    },
+    "idioma": {
+      "type": "string",
+      "description": "Código de idioma para la búsqueda",
+      "enum": ["es", "en", "fr", "de"],
+      "default": "es"
+    }
+  },
+  "required": ["query"]
+}
+----
+
+**4. Función manejadora (handler)**
+
+La función que ejecuta la lógica:
+
+[source,python]
+----
+async def handle_search(query: str, num_results: int = 5, idioma: str = "es"):
+    # Implementación
+    results = await search_duckduckgo(query, num_results, idioma)
+    return [TextContent(type="text", text=format_results(results))]
+----
+
+== JSON Schema en profundidad
+JSON Schema es un estándar para describir la estructura de datos JSON. MCP lo usa para definir los parámetros de las herramientas.
+
+**Tipos básicos:**
+
+[source,json]
+----
+// String
+"nombre": {
+  "type": "string",
+  "description": "Nombre del usuario"
+}
+
+// String con patrón
+"email": {
+  "type": "string",
+  "description": "Email del usuario",
+  "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+}
+
+// String con longitud mínima
+"password": {
+  "type": "string",
+  "description": "Contraseña",
+  "minLength": 8
+}
+
+// String con enum
+"rol": {
+  "type": "string",
+  "description": "Rol del usuario",
+  "enum": ["admin", "user", "guest"]
+}
+----
+
+**Tipos numéricos:**
+
+[source,json]
+----
+// Integer
+"edad": {
+  "type": "integer",
+  "description": "Edad en años",
+  "minimum": 0,
+  "maximum": 150
+}
+
+// Number
+"precio": {
+  "type": "number",
+  "description": "Precio en euros",
+  "minimum": 0,
+  "exclusiveMinimum": true
+}
+
+// Number con rango
+"porcentaje": {
+  "type": "number",
+  "description": "Porcentaje de descuento",
+  "minimum": 0,
+  "maximum": 100
+}
+----
+
+**Booleanos:**
+
+[source,json]
+----
+"activo": {
+  "type": "boolean",
+  "description": "Si el usuario está activo",
+  "default": true
+}
+----
+
+**Arrays:**
+
+[source,json]
+----
+"tags": {
+  "type": "array",
+  "description": "Etiquetas del recurso",
+  "items": {
+    "type": "string"
+  },
+  "minItems": 1,
+  "maxItems": 10
+}
+
+"ids": {
+  "type": "array",
+  "description": "Lista de IDs",
+  "items": {
+    "type": "integer"
+  }
+}
+
+// Array de objetos
+"items": {
+  "type": "array",
+  "description": "Items del pedido",
+  "items": {
+    "type": "object",
+    "properties": {
+      "producto_id": {"type": "integer"},
+      "cantidad": {"type": "integer", "minimum": 1}
+    },
+    "required": ["producto_id", "cantidad"]
+  }
+}
+----
+
+**Objetos anidados:**
+
+[source,json]
+----
+"direccion": {
+  "type": "object",
+  "description": "Dirección del usuario",
+  "properties": {
+    "calle": {"type": "string"},
+    "numero": {"type": "integer"},
+    "piso": {"type": "string"},
+    "ciudad": {"type": "string"},
+    "codigo_postal": {
+      "type": "string",
+      "pattern": "^[0-9]{5}$"
+    },
+    "pais": {
+      "type": "string",
+      "enum": ["ES", "PT", "FR", "DE", "IT"]
+    }
+  },
+  "required": ["calle", "numero", "ciudad", "codigo_postal", "pais"]
+}
+----
+
+**Combinación de esquemas:**
+
+[source,json]
+----
+// anyOf - al menos uno de los esquemas
+"valor": {
+  "anyOf": [
+    {"type": "integer"},
+    {"type": "string", "pattern": "^[0-9]+$"}
+  ]
+}
+
+// oneOf - exactamente uno de los esquemas
+"tipo_documento": {
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "tipo": {"const": "dni"},
+        "numero": {"type": "string", "pattern": "^[0-9]{8}[A-Z]$"}
+      }
+    },
+    {
+      "type": "object",
+      "properties": {
+        "tipo": {"const": "nie"},
+        "numero": {"type": "string", "pattern": "^[XYZ][0-9]{7}[A-Z]$"}
+      }
+    }
+  ]
+}
+
+// allOf - todos los esquemas
+"usuario_completo": {
+  "allOf": [
+    {"$ref": "#/definitions/datos_personales"},
+    {"$ref": "#/definitions/datos_contacto"}
+  ]
+}
+----
+
+== 3.2. Implementación de Tools
+== Definición con el SDK Python
+El SDK de Python ofrece dos formas de definir herramientas:
+
+**Método 1: Decorador `@app.tool()`**
+
+[source,python]
+----
+from mcp.server import Server
+from mcp.types import TextContent
+
+app = Server("mi-servidor")
+
+@app.tool(
+    name="calcular_suma",
+    description="Calcula la suma de dos números"
+)
+async def calcular_suma(a: float, b: float) -> list[TextContent]:
+    """
+    Suma dos números y devuelve el resultado.
+    
+    Args:
+        a: Primer número
+        b: Segundo número
+    
+    Returns:
+        Resultado de la suma
+    """
+    resultado = a + b
+    return [TextContent(type="text", text=f"El resultado de {a} + {b} = {resultado}")]
+----
+
+El SDK genera automáticamente el JSON Schema a partir de los parámetros de la función y sus type hints.
+
+**Método 2: Definición explícita**
+
+[source,python]
+----
+from mcp.types import Tool
+
+# Definir herramienta
+MI_HERRAMIENTA = Tool(
+    name="calcular_suma",
+    description="Calcula la suma de dos números",
+    inputSchema={
+        "type": "object",
+        "properties": {
+            "a": {
+                "type": "number",
+                "description": "Primer número"
+            },
+            "b": {
+                "type": "number",
+                "description": "Segundo número"
+            }
+        },
+        "required": ["a", "b"]
+    }
+)
+
+# Listar herramientas
+@app.list_tools()
+async def list_tools() -> list[Tool]:
+    return [MI_HERRAMIENTA]
+
+# Manejar llamadas
+@app.call_tool()
+async def call_tool(name: str, arguments: dict) -> list[TextContent]:
+    if name == "calcular_suma":
+        a = arguments.get("a", 0)
+        b = arguments.get("b", 0)
+        return [TextContent(type="text", text=f"Resultado: {a + b}")]
+    raise ValueError(f"Herramienta desconocida: {name}")
+----
+
+== Validación de parámetros
+El SDK valida automáticamente los parámetros contra el JSON Schema, pero es buena práctica añadir validaciones adicionales:
+
+[source,python]
+----
+from typing import Literal
+from pydantic import BaseModel, Field, validator
+
+# Opción 1: Validación con Pydantic
+class BuscarWebParams(BaseModel):
+    """Parámetros para búsqueda web."""
+    query: str = Field(..., min_length=1, max_length=500)
+    num_results: int = Field(default=5, ge=1, le=20)
+    idioma: Literal["es", "en", "fr", "de"] = "es"
+    
+    @validator('query')
+    def query_not_empty(cls, v):
+        if not v.strip():
+            raise ValueError('La consulta no puede estar vacía')
+        return v.strip()
+
+@app.tool(name="buscar_web", description="Busca en la web")
+async def buscar_web(query: str, num_results: int = 5, idioma: str = "es") -> list[TextContent]:
+    # Validar con Pydantic
+    params = BuscarWebParams(query=query, num_results=num_results, idioma=idioma)
+    
+    # Ahora params está validado
+    resultados = await search(params.query, params.num_results, params.idioma)
+    return [TextContent(type="text", text=format_results(resultados))]
+
+# Opción 2: Validación manual
+@app.tool(name="crear_usuario", description="Crea un nuevo usuario")
+async def crear_usuario(
+    nombre: str,
+    email: str,
+    edad: int,
+    rol: str = "user"
+) -> list[TextContent]:
+    # Validar nombre
+    if not nombre or len(nombre) < 2:
+        return [TextContent(type="text", text="Error: El nombre debe tener al menos 2 caracteres")]
+    
+    # Validar email
+    import re
+    email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if not re.match(email_regex, email):
+        return [TextContent(type="text", text="Error: Email inválido")]
+    
+    # Validar edad
+    if edad < 0 or edad > 150:
+        return [TextContent(type="text", text="Error: La edad debe estar entre 0 y 150")]
+    
+    # Validar rol
+    roles_validos = ["admin", "user", "guest"]
+    if rol not in roles_validos:
+        return [TextContent(type="text", text=f"Error: Rol inválido. Válidos: {', '.join(roles_validos)}")]
+    
+    # Crear usuario
+    usuario = await db.create_user(nombre, email, edad, rol)
+    
+    return [TextContent(type="text", text=f"Usuario creado: {usuario['id']}")]
+----
+
+== Devolución de resultados
+Las herramientas pueden devolver diferentes tipos de contenido:
+
+**Texto simple:**
+
+[source,python]
+----
+@app.tool(name="hora_actual", description="Devuelve la hora actual")
+async def hora_actual() -> list[TextContent]:
+    from datetime import datetime
+    return [TextContent(type="text", text=datetime.now().strftime("%H:%M:%S"))]
+----
+
+**Texto formateado:**
+
+[source,python]
+----
+@app.tool(name="info_sistema", description="Información del sistema")
+async def info_sistema() -> list[TextContent]:
+    import platform
+    import psutil
+    
+    info = f"""
+📊 Información del Sistema
+{'='*30}
+
+Sistema Operativo: {platform.system()} {platform.release()}
+Procesador: {platform.processor()}
+Arquitectura: {platform.architecture()[0]}
+
+CPU: {psutil.cpu_percent()}% uso
+Memoria: {psutil.virtual_memory().percent}% uso
+Disco: {psutil.disk_usage('/').percent}% uso
+"""
+    return [TextContent(type="text", text=info)]
+----
+
+**Markdown:**
+
+[source,python]
+----
+@app.tool(name="generar_readme", description="Genera un README")
+async def generar_readme(nombre_proyecto: str) -> list[TextContent]:
+    readme = f"""# {nombre_proyecto}
+
+## Descripción
+
+Descripción del proyecto...
+
+## Instalación
+
+```bash
+pip install {nombre_proyecto}
+```
+
+## Uso
+
+```python
+import {nombre_proyecto}
+```
+
+## Licencia
+
+MIT
+"""
+    return [TextContent(type="text", text=readme)]
+----
+
+**Múltiples contenidos:**
+
+[source,python]
+----
+@app.tool(name="buscar_y_resumir", description="Busca y resume")
+async def buscar_y_resumir(query: str) -> list[TextContent]:
+    resultados = await search(query)
+    
+    contents = []
+    
+    # Primero: resumen
+    contents.append(TextContent(
+        type="text",
+        text="## Resumen de búsqueda\n"
+    ))
+    
+    # Segundo: resultados
+    for i, r in enumerate(resultados, 1):
+        contents.append(TextContent(
+            type="text",
+            text=f"{i}. {r['titulo']}\n   {r['url']}\n   {r['descripcion']}\n"
+        ))
+    
+    return contents
+----
+
+**Imágenes:**
+
+[source,python]
+----
+import base64
+from pathlib import Path
+from mcp.types import ImageContent
+
+@app.tool(name="generar_grafico", description="Genera un gráfico")
+async def generar_grafico(datos: list[float]) -> list[ImageContent]:
+    import matplotlib.pyplot as plt
+    import io
+    
+    # Crear gráfico
+    fig, ax = plt.subplots()
+    ax.plot(datos)
+    ax.set_title("Gráfico de datos")
+    
+    # Guardar en buffer
+    buf = io.BytesIO()
+    fig.savefig(buf, format='png')
+    plt.close(fig)
+    buf.seek(0)
+    
+    # Convertir a base64
+    img_base64 = base64.b64encode(buf.read()).decode()
+    
+    return [ImageContent(
+        type="image",
+        data=img_base64,
+        mimeType="image/png"
+    )]
+----
+
+== 3.3. Herramientas con efectos secundarios
+== Concepto de efectos secundarios
+Un **efecto secundario** (side effect) es cualquier acción que modifica el estado del sistema:
+
+* Escribir archivos
+* Enviar emails
+* Actualizar bases de datos
+* Ejecutar comandos
+* Hacer peticiones HTTP POST/PUT/DELETE
+
+**Importante:** El protocolo MCP **no garantiza idempotencia**. Si una herramienta tiene efectos secundarios, debes diseñarla para manejar llamadas repetidas.
+
+== Herramientas de escritura de archivos
+[source,python]
+----
+from pathlib import Path
+from typing import Optional
+
+@app.tool(
+    name="escribir_archivo",
+    description="Escribe contenido a un archivo"
+)
+async def escribir_archivo(
+    ruta: str,
+    contenido: str,
+    crear_directorios: bool = False,
+    sobrescribir: bool = True
+) -> list[TextContent]:
+    """
+    Escribe contenido a un archivo.
+    
+    Args:
+        ruta: Ruta del archivo
+        contenido: Contenido a escribir
+        crear_directorios: Si True, crea los directorios necesarios
+        sobrescribir: Si False, error si el archivo ya existe
+    
+    Returns:
+        Mensaje de confirmación
+    """
+    path = Path(ruta)
+    
+    # Validar que no sale del directorio permitido
+    BASE_DIR = Path("/home/user/documents")
+    try:
+        path.resolve().relative_to(BASE_DIR.resolve())
+    except ValueError:
+        return [TextContent(type="text", text=f"Error: Acceso denegado. Ruta fuera de {BASE_DIR}")]
+    
+    # Verificar si existe
+    if path.exists() and not sobrescribir:
+        return [TextContent(type="text", text=f"Error: El archivo {ruta} ya existe")]
+    
+    # Crear directorios si es necesario
+    if crear_directorios and not path.parent.exists():
+        path.parent.mkdir(parents=True)
+    
+    # Escribir archivo
+    try:
+        path.write_text(contenido, encoding='utf-8')
+        return [TextContent(
+            type="text",
+            text=f"✅ Archivo escrito: {ruta}\n   Tamaño: {len(contenido)} caracteres"
+        )]
+    except Exception as e:
+        return [TextContent(type="text", text=f"Error al escribir: {e}")]
+----
+
+== Herramientas de base de datos
+[source,python]
+----
+import sqlite3
+from pathlib import Path
+
+@app.tool(
+    name="insertar_usuario",
+    description="Inserta un nuevo usuario en la base de datos"
+)
+async def insertar_usuario(
+    nombre: str,
+    email: str,
+    edad: int
+) -> list[TextContent]:
+    """
+    Inserta un usuario.
+    
+    Efectos secundarios:
+    - Escribe en la base de datos
+    - No es idempotente
+    """
+    DB_PATH = Path("./data/app.db")
+    
+    # Validar parámetros
+    if not nombre or len(nombre) < 2:
+        return [TextContent(type="text", text="Error: Nombre inválido")]
+    
+    if edad < 0 or edad > 150:
+        return [TextContent(type="text", text="Error: Edad inválida")]
+    
+    # Conectar a la base de datos
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    try:
+        # Verificar si el email ya existe
+        cursor.execute("SELECT id FROM usuarios WHERE email = ?", (email,))
+        if cursor.fetchone():
+            conn.close()
+            return [TextContent(type="text", text=f"Error: El email {email} ya está registrado")]
+        
+        # Insertar usuario
+        cursor.execute(
+            "INSERT INTO usuarios (nombre, email, edad, created_at) VALUES (?, ?, ?, datetime())",
+            (nombre, email, edad)
+        )
+        
+        usuario_id = cursor.lastrowid
+        conn.commit()
+        
+        return [TextContent(
+            type="text",
+            text=f"✅ Usuario creado\n   ID: {usuario_id}\n   Nombre: {nombre}\n   Email: {email}"
+        )]
+    
+    except Exception as e:
+        conn.rollback()
+        return [TextContent(type="text", text=f"Error: {e}")]
+    
+    finally:
+        conn.close()
+
+@app.tool(
+    name="actualizar_usuario",
+    description="Actualiza datos de un usuario"
+)
+async def actualizar_usuario(
+    usuario_id: int,
+    nombre: Optional[str] = None,
+    email: Optional[str] = None,
+    edad: Optional[int] = None
+) -> list[TextContent]:
+    """
+    Actualiza un usuario.
+    
+    Esta operación es idempotente: ejecutarla múltiples veces
+    tiene el mismo efecto que ejecutarla una vez.
+    """
+    DB_PATH = Path("./data/app.db")
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    try:
+        # Construir UPDATE dinámicamente
+        updates = []
+        params = []
+        
+        if nombre is not None:
+            updates.append("nombre = ?")
+            params.append(nombre)
+        if email is not None:
+            updates.append("email = ?")
+            params.append(email)
+        if edad is not None:
+            updates.append("edad = ?")
+            params.append(edad)
+        
+        if not updates:
+            return [TextContent(type="text", text="No se proporcionaron datos para actualizar")]
+        
+        params.append(usuario_id)
+        
+        cursor.execute(
+            f"UPDATE usuarios SET {', '.join(updates)} WHERE id = ?",
+            params
+        )
+        
+        if cursor.rowcount == 0:
+            return [TextContent(type="text", text=f"Error: Usuario {usuario_id} no encontrado")]
+        
+        conn.commit()
+        
+        return [TextContent(type="text", text=f"✅ Usuario {usuario_id} actualizado")]
+    
+    finally:
+        conn.close()
+----
+
+== Idempotencia
+**¿Qué es la idempotencia?**
+
+Una operación es **idempotente** si ejecutarla múltiples veces produce el mismo resultado que ejecutarla una vez.
+
+* `GET /users/1` - Idempotente (leer no cambia estado)
+* `PUT /users/1` - Idempotente (actualizar con los mismos datos produce el mismo resultado)
+* `POST /users` - No idempotente (cada POST crea un nuevo usuario)
+* `DELETE /users/1` - Idempotente (borrar algo ya borrado sigue borrado)
+
+**Cómo diseñar herramientas idempotentes:**
+
+[source,python]
+----
+import uuid
+
+@app.tool(
+    name="enviar_email",
+    description="Envía un email"
+)
+async def enviar_email(
+    destinatario: str,
+    asunto: str,
+    cuerpo: str,
+    idempotency_key: Optional[str] = None
+) -> list[TextContent]:
+    """
+    Envía un email.
+    
+    Args:
+        destinatario: Email del destinatario
+        asunto: Asunto del email
+        cuerpo: Cuerpo del email
+        idempotency_key: Clave de idempotencia (opcional)
+    
+    Si se proporciona idempotency_key:
+    - Si ya existe un email con esa clave, devuelve el resultado anterior
+    - Si no existe, envía el email y guarda la clave
+    """
+    # Si hay clave de idempotencia, verificar si ya se procesó
+    if idempotency_key:
+        resultado_existente = await db.get_email_by_key(idempotency_key)
+        if resultado_existente:
+            return [TextContent(
+                type="text",
+                text=f"Email ya enviado anteriormente: {resultado_existente['id']}"
+            )]
+    
+    # Generar clave si no se proporcionó
+    if not idempotency_key:
+        idempotency_key = str(uuid.uuid4())
+    
+    # Enviar email
+    email_id = await send_email(destinatario, asunto, cuerpo)
+    
+    # Guardar con clave de idempotencia
+    await db.save_email_with_key(email_id, idempotency_key)
+    
+    return [TextContent(
+        type="text",
+        text=f"✅ Email enviado\n   ID: {email_id}\n   Clave: {idempotency_key}"
+    )]
+
+# Uso desde el cliente:
+# Primera llamada - envía el email
+# await enviar_email("user@example.com", "Hola", "Cuerpo", "key-123")
+# Segunda llamada con la misma clave - devuelve el resultado anterior sin reenviar
+# await enviar_email("user@example.com", "Hola", "Cuerpo", "key-123")
+----
+
+== 3.4. Herramientas asíncronas
+== Operaciones de larga duración
+Las herramientas pueden tardar mucho tiempo en ejecutarse. MCP maneja esto de forma natural gracias a async/await:
+
+[source,python]
+----
+import asyncio
+from typing import AsyncIterator
+
+@app.tool(
+    name="procesar_archivos",
+    description="Procesa múltiples archivos en paralelo"
+)
+async def procesar_archivos(archivos: list[str]) -> list[TextContent]:
+    """
+    Procesa archivos de forma asíncrona.
+    
+    Ventajas de async:
+    - No bloquea el servidor mientras espera I/O
+    - Puede procesar múltiples archivos en paralelo
+    """
+    resultados = []
+    
+    async def procesar_uno(archivo: str) -> dict:
+        """Procesa un archivo."""
+        # Simular procesamiento
+        await asyncio.sleep(1)
+        return {"archivo": archivo, "estado": "procesado"}
+    
+    # Procesar en paralelo
+    tareas = [procesar_uno(a) for a in archivos]
+    resultados = await asyncio.gather(*tareas)
+    
+    # Formatear salida
+    lineas = [f"✅ {r['archivo']}: {r['estado']}" for r in resultados]
+    return [TextContent(type="text", text="\n".join(lineas))]
+----
+
+== Progress reporting
+Para operaciones largas, puedes reportar progreso al cliente:
+
+[source,python]
+----
+from mcp.types import ProgressToken
+from typing import Optional
+
+@app.tool(
+    name="backup_base_datos",
+    description="Realiza backup de la base de datos"
+)
+async def backup_base_datos(
+    tablas: list[str],
+    progress_token: Optional[ProgressToken] = None
+) -> list[TextContent]:
+    """
+    Backup con progreso.
+    
+    Args:
+        tablas: Lista de tablas a respaldar
+        progress_token: Token para reportar progreso (proporcionado por el cliente)
+    """
+    total = len(tablas)
+    resultados = []
+    
+    for i, tabla in enumerate(tablas):
+        # Reportar progreso
+        if progress_token:
+            await app.report_progress(
+                token=progress_token,
+                progress=i,
+                total=total,
+                message=f"Procesando tabla: {tabla}"
+            )
+        
+        # Procesar tabla
+        await backup_tabla(tabla)
+        resultados.append(f"✅ {tabla}")
+    
+    # Progreso final
+    if progress_token:
+        await app.report_progress(
+            token=progress_token,
+            progress=total,
+            total=total,
+            message="Backup completado"
+        )
+    
+    return [TextContent(type="text", text="\n".join(resultados))]
+----
+
+== Streaming de resultados
+Para resultados muy grandes, puedes usar streaming:
+
+[source,python]
+----
+from mcp.types import TextContent
+
+@app.tool(
+    name="buscar_archivos",
+    description="Busca archivos que coincidan con un patrón"
+)
+async def buscar_archivos(
+    directorio: str,
+    patron: str
+) -> list[TextContent]:
+    """
+    Busca archivos y devuelve resultados completos.
+    
+    Para resultados muy grandes, considera paginación o streaming.
+    """
+    from pathlib import Path
+    
+    base = Path(directorio)
+    resultados = []
+    
+    # Buscar archivos
+    for archivo in base.rglob(patron):
+        # Limitar resultados para evitar respuestas enormes
+        if len(resultados) >= 1000:
+            resultados.append("... (más de 1000 resultados, truncado)")
+            break
+        
+        resultados.append(str(archivo.relative_to(base)))
+    
+    if not resultados:
+        return [TextContent(type="text", text="No se encontraron archivos")]
+    
+    return [TextContent(type="text", text="\n".join(resultados))]
+
+# Alternativa: Paginación
+@app.tool(
+    name="buscar_archivos_paginado",
+    description="Busca archivos con paginación"
+)
+async def buscar_archivos_paginado(
+    directorio: str,
+    patron: str,
+    pagina: int = 1,
+    por_pagina: int = 100
+) -> list[TextContent]:
+    """Búsqueda con paginación."""
+    from pathlib import Path
+    
+    base = Path(directorio)
+    archivos = list(base.rglob(patron))
+    
+    inicio = (pagina - 1) * por_pagina
+    fin = inicio + por_pagina
+    total = len(archivos)
+    
+    archivos_pagina = archivos[inicio:fin]
+    
+    resultado = [
+        f"📁 Página {pagina} de {(total + por_pagina - 1) // por_pagina}",
+        f"📊 Total: {total} archivos",
+        ""
+    ]
+    
+    for archivo in archivos_pagina:
+        resultado.append(str(archivo.relative_to(base)))
+    
+    if fin < total:
+        resultado.append(f"\n... use página {pagina + 1} para más resultados")
+    
+    return [TextContent(type="text", text="\n".join(resultado))]
+----
+
+== 3.5. Casos prácticos
+== Herramienta de búsqueda web
+[source,python]
+----
+import httpx
+from mcp.server import Server
+from mcp.types import Tool, TextContent
+import json
+
+app = Server("web-search")
+
+# Cache simple
+CACHE = {}
+CACHE_TTL = 300  # 5 minutos
+
+async def search_duckduckgo(query: str, num_results: int = 5) -> list[dict]:
+    """
+    Busca en DuckDuckGo usando su API instantánea.
+    
+    Ventajas:
+    - No requiere API key
+    - Resultados rápidos
+    - Gratuito
+    
+    Limitaciones:
+    - Menos resultados que Google
+    - Sin personalización
+    """
+    import time
+    
+    # Verificar cache
+    cache_key = f"{query}:{num_results}"
+    if cache_key in CACHE:
+        data, timestamp = CACHE[cache_key]
+        if time.time() - timestamp < CACHE_TTL:
+            return data
+    
+    # Hacer petición
+    url = "https://api.duckduckgo.com/"
+    params = {
+        "q": query,
+        "format": "json",
+        "no_html": 1,
+        "skip_disambig": 1
+    }
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, params=params)
+        data = response.json()
+    
+    # Extraer resultados
+    results = []
+    
+    # Resultado principal (instant answer)
+    if data.get("AbstractText"):
+        results.append({
+            "titulo": "Resumen",
+            "url": data.get("AbstractURL", ""),
+            "descripcion": data.get("AbstractText", "")
+        })
+    
+    # Resultados relacionados
+    for topic in data.get("RelatedTopics", [])[:num_results - 1]:
+        if "Text" in topic and "FirstURL" in topic:
+            results.append({
+                "titulo": topic["Text"].split(" - ")[0] if " - " in topic["Text"] else topic["Text"][:50],
+                "url": topic["FirstURL"],
+                "descripcion": topic["Text"]
+            })
+    
+    # Guardar en cache
+    CACHE[cache_key] = (results, time.time())
+    
+    return results
+
+@app.list_tools()
+async def list_tools() -> list[Tool]:
+    return [
+        Tool(
+            name="buscar_web",
+            description="Busca en la web usando DuckDuckGo. Útil para obtener información actualizada de internet.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Término de búsqueda"
+                    },
+                    "num_results": {
+                        "type": "integer",
+                        "description": "Número de resultados (1-10)",
+                        "default": 5,
+                        "minimum": 1,
+                        "maximum": 10
+                    }
+                },
+                "required": ["query"]
+            }
+        )
+    ]
+
+@app.call_tool()
+async def call_tool(name: str, arguments: dict) -> list[TextContent]:
+    if name == "buscar_web":
+        query = arguments.get("query")
+        num_results = arguments.get("num_results", 5)
+        
+        results = await search_duckduckgo(query, num_results)
+        
+        if not results:
+            return [TextContent(type="text", text=f"No se encontraron resultados para: {query}")]
+        
+        output = [f"🔍 Resultados para: {query}\n"]
+        
+        for i, r in enumerate(results, 1):
+            output.append(f"\n{i}. {r['titulo']}")
+            output.append(f"   🔗 {r['url']}")
+            output.append(f"   📝 {r['descripcion'][:200]}...")
+        
+        return [TextContent(type="text", text="\n".join(output))]
+    
+    raise ValueError(f"Herramienta desconocida: {name}")
+----
+
+(El documento continúa con los módulos 4, 5 y 6...)
+
+== MÓDULO 4: PROMPTS Y SAMPLING
+[NOTE]
+.Duración
+== 4 horas== ====4.1. Definición de Prompts
+== ¿Qué es un Prompt en MCP?
+
+Un **Prompt** en MCP es una **plantilla predefinida** que el cliente puede usar para iniciar una conversación con contexto específico. A diferencia de simplemente enviar texto al LLM, los prompts MCP son estructuras reutilizables que:
+
+* Pueden tener **argumentos configurables**
+* Pueden **incluir recursos** (archivos, datos)
+* Son **descubribles** automáticamente por el cliente
+* **Estandarizan** interacciones comunes
+
+== Diferencia con prompts estáticos
+Un prompt estático es simplemente texto:
+
+[source,text]
+Prompt estático:
+"Analiza este código: {codigo}"
+
+Problemas:
+- No hay validación de argumentos
+- No se puede descubrir automáticamente
+- No puede incluir recursos binarios
+- El cliente debe saber cómo llamarlo
+
+Un **Prompt MCP** es una estructura rica:
+
+[source,python]
+----
+@app.prompt(
+    name="analizar_codigo",
+    description="Analiza código fuente y sugiere mejoras"
+)
+async def analizar_codigo(
+    archivo: str,
+    tipo_analisis: str = "completo",
+    incluir_refactor: bool = True
+) -> list[PromptMessage]:
+    # El prompt tiene:
+    # - Nombre único
+    # - Descripción para el LLM
+    # - Argumentos tipados
+    # - Validación automática
+    # - Puede incluir recursos
+    # - Es descubrible via list_prompts
+----
+----
+
+== Argumentos y plantillas
+Los prompts pueden tener argumentos de diferentes tipos:
+
+[source,python]
+----
+from mcp.types import Prompt, PromptArgument, PromptMessage, TextContent
+
+@app.prompt(
+    name="generar_readme",
+    description="Genera un archivo README para un proyecto"
+)
+async def generar_readme(
+    nombre_proyecto: str,
+    descripcion: str = "",
+    incluir_instalacion: bool = True,
+    incluir_uso: bool = True,
+    incluir_licencia: bool = True,
+    idioma: str = "es"
+) -> list[PromptMessage]:
+    """
+    Genera un README.
+    
+    Args:
+        nombre_proyecto: Nombre del proyecto (requerido)
+        descripcion: Descripción breve del proyecto
+        incluir_instalacion: Si incluir sección de instalación
+        incluir_uso: Si incluir sección de uso
+        incluir_licencia: Si incluir sección de licencia
+        idioma: Idioma del README (es, en, fr, de)
+    """
+    # Validar idioma
+    idiomas_validos = ["es", "en", "fr", "de"]
+    if idioma not in idiomas_validos:
+        idioma = "es"
+    
+    # Construir prompt
+    instrucciones = {
+        "es": "Genera un archivo README.md en español para el siguiente proyecto.",
+        "en": "Generate a README.md file in English for the following project.",
+        "fr": "Générez un fichier README.md en français pour le projet suivant.",
+        "de": "Erstellen Sie eine README.md-Datei auf Deutsch für das folgende Projekt."
+    }
+    
+    prompt = f"""{instrucciones.get(idioma, instrucciones['es'])}
+
+**Nombre del proyecto:** {nombre_proyecto}
+
+**Descripción:** {descripcion or "Sin descripción"}
+
+**Estructura requerida:**
+"""
+    
+    secciones = []
+    if incluir_instalacion:
+        secciones.append("- Sección de Instalación con comandos")
+    if incluir_uso:
+        secciones.append("- Sección de Uso con ejemplos de código")
+    if incluir_licencia:
+        secciones.append("- Sección de Licencia")
+    
+    prompt += "\n".join(secciones)
+    prompt += "\n\n**Formato:** Markdown"
+    
+    return [
+        PromptMessage(
+            role="user",
+            content=TextContent(type="text", text=prompt)
+        )
+    ]
+----
+
+== Prompts con recursos incrustados
+Los prompts pueden incluir archivos como parte del mensaje:
+
+[source,python]
+----
+from mcp.types import EmbeddedResource, TextResourceContents
+
+@app.prompt(
+    name="comparar_archivos",
+    description="Compara dos archivos y muestra las diferencias"
+)
+async def comparar_archivos(
+    archivo1: str,
+    archivo2: str,
+    mostrar_lineas: bool = True
+) -> list[PromptMessage]:
+    from pathlib import Path
+    
+    # Leer archivos
+    path1 = Path(archivo1)
+    path2 = Path(archivo2)
+    
+    if not path1.exists():
+        raise ValueError(f"Archivo no encontrado: {archivo1}")
+    if not path2.exists():
+        raise ValueError(f"Archivo no encontrado: {archivo2}")
+    
+    contenido1 = path1.read_text()
+    contenido2 = path2.read_text()
+    
+    mensajes = [
+        PromptMessage(
+            role="user",
+            content=TextContent(
+                type="text",
+                text="Compara los siguientes dos archivos y muestra las diferencias principales:\n"
+            )
+        ),
+        PromptMessage(
+            role="user",
+            content=EmbeddedResource(
+                type="resource",
+                resource=TextResourceContents(
+                    uri=f"file://{archivo1}",
+                    mimeType="text/plain",
+                    text=contenido1
+                )
+            )
+        ),
+        PromptMessage(
+            role="user",
+            content=TextResourceContents(
+                type="resource",
+                resource=TextResourceContents(
+                    uri=f"file://{archivo2}",
+                    mimeType="text/plain",
+                    text=contenido2
+                )
+            )
+        )
+    ]
+    
+    if mostrar_lineas:
+        mensajes.append(
+            PromptMessage(
+                role="user",
+                content=TextContent(
+                    type="text",
+                    text="Muestra los números de línea donde hay diferencias."
+                )
+            )
+        )
+    
+    return mensajes
+----
+
+== 4.2. Implementación de Prompts
+== Listar prompts disponibles
+[source,python]
+----
+from mcp.types import Prompt
+
+@app.list_prompts()
+async def list_prompts() -> list[Prompt]:
+    """Lista todos los prompts disponibles."""
+    return [
+        Prompt(
+            name="analizar_codigo",
+            description="Analiza código fuente y sugiere mejoras",
+            arguments=[
+                PromptArgument(
+                    name="archivo",
+                    description="Ruta del archivo a analizar",
+                    required=True
+                ),
+                PromptArgument(
+                    name="nivel_detalle",
+                    description="Nivel de detalle: basico, medio, completo",
+                    required=False
+                )
+            ]
+        ),
+        Prompt(
+            name="generar_documentacion",
+            description="Genera documentación para código",
+            arguments=[
+                PromptArgument(
+                    name="archivo",
+                    description="Ruta del archivo",
+                    required=True
+                ),
+                PromptArgument(
+                    name="formato",
+                    description="Formato: markdown, rst, html",
+                    required=False
+                )
+            ]
+        ),
+        Prompt(
+            name="refactorizar",
+            description="Sugiere refactorizaciones para mejorar el código",
+            arguments=[
+                PromptArgument(
+                    name="archivo",
+                    description="Ruta del archivo",
+                    required=True
+                ),
+                PromptArgument(
+                    name="objetivo",
+                    description="Objetivo: legibilidad, rendimiento, seguridad",
+                    required=False
+                )
+            ]
+        )
+    ]
+----
+
+== Obtener un prompt
+[source,python]
+----
+@app.get_prompt()
+async def get_prompt(name: str, arguments: dict) -> list[PromptMessage]:
+    """
+    Obtiene un prompt específico con argumentos.
+    
+    Args:
+        name: Nombre del prompt
+        arguments: Argumentos para el prompt
+    
+    Returns:
+        Lista de mensajes que forman el prompt
+    """
+    if name == "analizar_codigo":
+        archivo = arguments.get("archivo")
+        nivel = arguments.get("nivel_detalle", "completo")
+        
+        if not archivo:
+            raise ValueError("El argumento 'archivo' es requerido")
+        
+        # Leer archivo
+        from pathlib import Path
+        path = Path(archivo)
+        
+        if not path.exists():
+            raise ValueError(f"Archivo no encontrado: {archivo}")
+        
+        codigo = path.read_text()
+        extension = path.suffix.lower()
+        
+        # Detectar lenguaje
+        lenguajes = {
+            ".py": "Python",
+            ".js": "JavaScript",
+            ".ts": "TypeScript",
+            ".java": "Java",
+            ".go": "Go",
+            ".rs": "Rust",
+            ".cpp": "C++",
+            ".c": "C",
+            ".rb": "Ruby",
+            ".php": "PHP"
+        }
+        lenguaje = lenguajes.get(extension, "desconocido")
+        
+        # Construir prompt según nivel
+        niveles = {
+            "basico": "Identifica errores obvios y problemas de estilo.",
+            "medio": "Analiza calidad del código, patrones usados y posibles mejoras.",
+            "completo": "Realiza un análisis completo: calidad, seguridad, rendimiento, y proporciona código refactorizado."
+        }
+        
+        instruccion = niveles.get(nivel, niveles["completo"])
+        
+        return [
+            PromptMessage(
+                role="user",
+                content=TextContent(
+                    type="text",
+                    text=f"""Analiza el siguiente código {lenguaje}:
+
+{instruccion}
+
+Archivo: {archivo}
+Lenguaje: {lenguaje}
+
+Proporciona:
+1. Resumen del código
+2. Problemas identificados
+3. Sugerencias de mejora
+4. Código refactorizado (si aplica)
+"""
+                )
+            ),
+            PromptMessage(
+                role="user",
+                content=EmbeddedResource(
+                    type="resource",
+                    resource=TextResourceContents(
+                        uri=f"file://{archivo}",
+                        mimeType="text/plain",
+                        text=codigo
+                    )
+                )
+            )
+        ]
+    
+    elif name == "generar_documentacion":
+        # ... implementación similar
+        pass
+    
+    elif name == "refactorizar":
+        # ... implementación similar
+        pass
+    
+    else:
+        raise ValueError(f"Prompt desconocido: {name}")
+----
+
+== 4.3. Sampling: el modelo genera
+== Concepto de Sampling
+El **Sampling** es una característica única de MCP que permite al **servidor solicitar al cliente** que genere contenido usando el LLM. Esto invierte el flujo normal:
+
+* **Flujo normal**: Cliente → Servidor → Herramienta → Resultado
+* **Sampling**: Servidor → Cliente → LLM → Resultado
+
+**¿Por qué es útil?**
+
+1. **Análisis de datos**: El servidor tiene datos y necesita que el LLM los analice
+2. **Clasificación**: El servidor tiene texto y necesita clasificarlo
+3. **Transformación**: El servidor tiene contenido y necesita reformatearlo
+4. **Generación**: El servidor necesita generar contenido dinámicamente
+
+== Flujo de Sampling
+[source,text]
+┌─────────────────────────────────────────────────────────────────┐
+│                        FLUJO DE SAMPLING                         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│   ┌─────────────┐        ┌─────────────┐        ┌─────────────┐│
+│   │   Cliente    │        │   Servidor  │        │     LLM     ││
+│   │   (Claude)   │        │    (MCP)    │        │   (Modelo)  ││
+│   └──────┬──────┘        └──────┬──────┘        └──────┬──────┘│
+│          │                      │                      │        │
+│          │  1. Llama herramienta│                      │        │
+│          │ ────────────────────►│                      │        │
+│          │                      │                      │        │
+│          │                      │ 2. Necesita análisis│        │
+│          │                      │    del LLM          │        │
+│          │                      │                      │        │
+│          │  3. request_sampling │                      │        │
+│          │ ◄────────────────────│                      │        │
+│          │                      │                      │        │
+│          │  4. Envía al LLM     │                      │        │
+│          │ ──────────────────────────────────────────►│        │
+│          │                      │                      │        │
+│          │                      │                      │ 5. Procesa│
+│          │                      │                      │    y genera│
+│          │                      │                      │        │
+│          │  6. Respuesta del LLM│                      │        │
+│          │ ◄─────────────────────────────────────────│        │
+│          │                      │                      │        │
+│          │  7. Sampling response│                      │        │
+│          │ ────────────────────►│                      │        │
+│          │                      │                      │        │
+│          │                      │ 8. Procesa resultado│        │
+│          │                      │    y continúa       │        │
+│          │                      │                      │        │
+│          │  9. Tool response    │                      │        │
+│          │ ◄────────────────────│                      │        │
+│          │                      │                      │        │
+└─────────────────────────────────────────────────────────────────┘
+
+== Implementación de Sampling
+[source,python]
+----
+from mcp.types import SamplingParams
+
+@app.tool(
+    name="clasificar_texto",
+    description="Clasifica un texto en categorías usando el LLM"
+)
+async def clasificar_texto(
+    texto: str,
+    categorias: list[str]
+) -> list[TextContent]:
+    """
+    Clasifica texto usando sampling.
+    
+    El servidor solicita al cliente que use el LLM para clasificar.
+    """
+    # Validar entrada
+    if not texto:
+        raise ValueError("El texto no puede estar vacío")
+    
+    if not categorias:
+        raise ValueError("Debe proporcionar al menos una categoría")
+    
+    # Construir prompt para clasificación
+    prompt = f"""Clasifica el siguiente texto en EXACTAMENTE una de estas categorías:
+
+Categorías disponibles:
+{chr(10).join(f'- {cat}' for cat in categorias)}
+
+Texto a clasificar:
+{texto}
+
+Responde ÚNICAMENTE con el nombre de la categoría, sin explicaciones ni texto adicional.
+Tu respuesta debe ser una de estas categorías: {', '.join(categorias)}"""
+
+    # Solicitar sampling al cliente
+    try:
+        response = await app.request_sampling(
+            messages=[
+                {"role": "user", "content": [{"type": "text", "text": prompt}]}
+            ],
+            max_tokens=50,  # Suficiente para una categoría
+            temperature=0.1  # Baja temperatura para respuestas más deterministas
+        )
+        
+        # Extraer categoría
+        categoria = response.content.text.strip()
+        
+        # Validar que es una categoría válida
+        categorias_lower = [c.lower() for c in categorias]
+        if categoria.lower() not in categorias_lower:
+            # Intentar encontrar la categoría más cercana
+            for c in categorias:
+                if categoria.lower() in c.lower() or c.lower() in categoria.lower():
+                    categoria = c
+                    break
+            else:
+                return [TextContent(
+                    type="text",
+                    text=f"Error: El modelo respondió '{categoria}' que no es una categoría válida.\n"
+                         f"Categorías válidas: {', '.join(categorias)}"
+                )]
+        
+        return [TextContent(
+            type="text",
+            text=f"Categoría: {categoria}"
+        )]
+    
+    except Exception as e:
+        return [TextContent(
+            type="text",
+            text=f"Error durante la clasificación: {e}"
+        )]
+----
+
+== Configuración de Sampling
+[source,python]
+----
+from mcp.types import SamplingParams
+
+@app.tool(
+    name="resumir_texto",
+    description="Resume un texto largo"
+)
+async def resumir_texto(
+    texto: str,
+    max_palabras: int = 100,
+    idioma: str = "es"
+) -> list[TextContent]:
+    """Resume texto usando sampling."""
+    
+    idiomas = {
+        "es": "español",
+        "en": "inglés",
+        "fr": "francés",
+        "de": "alemán"
+    }
+    
+    idioma_destino = idiomas.get(idioma, "español")
+    
+    prompt = f"""Resume el siguiente texto en {idioma_destino}.
+
+El resumen debe tener máximo {max_palabras} palabras.
+Mantén las ideas principales y elimina los detalles innecesarios.
+
+Texto original:
+{texto}
+
+Resumen:"""
+
+    # Configurar sampling
+    params = SamplingParams(
+        max_tokens=max_palabras * 3,  # Tokens aprox = palabras * 3
+        temperature=0.3,  # Moderadamente determinista
+        stop_sequences=["\n\n", "---"]  # Detener en dobles saltos de línea
+    )
+    
+    response = await app.request_sampling(
+        messages=[{"role": "user", "content": [{"type": "text", "text": prompt}]}],
+        **params.__dict__
+    )
+    
+    resumen = response.content.text.strip()
+    
+    return [TextContent(
+        type="text",
+        text=f"**Resumen ({len(resumen.split())} palabras):**\n\n{resumen}"
+    )]
+----
+
+== Sampling multimodal
+El sampling también puede incluir imágenes:
+
+[source,python]
+----
+import base64
+from pathlib import Path
+from mcp.types import ImageContent
+
+@app.tool(
+    name="analizar_imagen",
+    description="Analiza una imagen y describe su contenido"
+)
+async def analizar_imagen(
+    ruta_imagen: str,
+    pregunta: str = "Describe esta imagen en detalle"
+) -> list[TextContent]:
+    """Analiza una imagen usando sampling multimodal."""
+    
+    # Leer imagen
+    path = Path(ruta_imagen)
+    if not path.exists():
+        raise ValueError(f"Imagen no encontrada: {ruta_imagen}")
+    
+    imagen_bytes = path.read_bytes()
+    imagen_base64 = base64.b64encode(imagen_bytes).decode()
+    
+    # Detectar MIME type
+    extension = path.suffix.lower()
+    mime_types = {
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".png": "image/png",
+        ".gif": "image/gif",
+        ".webp": "image/webp"
+    }
+    mime_type = mime_types.get(extension, "image/jpeg")
+    
+    # Solicitar análisis multimodal
+    response = await app.request_sampling(
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": pregunta},
+                    {
+                        "type": "image",
+                        "source": {
+                            "type": "base64",
+                            "media_type": mime_type,
+                            "data": imagen_base64
+                        }
+                    }
+                ]
+            }
+        ],
+        max_tokens=500
+    )
+    
+    return [TextContent(
+        type="text",
+        text=f"**Análisis de {path.name}:**\n\n{response.content.text}"
+    )]
+----
+
+== 4.4. Casos prácticos de Prompts y Sampling
+== Prompt de análisis de código completo
+[source,python]
+----
+@app.prompt(
+    name="auditar_seguridad",
+    description="Audita la seguridad de un archivo de código"
+)
+async def auditar_seguridad(
+    archivo: str,
+    incluir_ejemplos: bool = True,
+    severidad_minima: str = "media"
+) -> list[PromptMessage]:
+    """
+    Prompt para auditoría de seguridad.
+    
+    Args:
+        archivo: Ruta del archivo a auditar
+        incluir_ejemplos: Si incluir ejemplos de código vulnerable
+        severidad_minima: Severidad mínima a reportar (baja, media, alta, critica)
+    """
+    from pathlib import Path
+    
+    path = Path(archivo)
+    if not path.exists():
+        raise ValueError(f"Archivo no encontrado: {archivo}")
+    
+    codigo = path.read_text()
+    extension = path.suffix.lower()
+    
+    # Detectar lenguaje
+    lenguajes = {
+        ".py": "Python",
+        ".js": "JavaScript",
+        ".ts": "TypeScript",
+        ".java": "Java",
+        ".php": "PHP",
+        ".rb": "Ruby",
+        ".go": "Go"
+    }
+    lenguaje = lenguajes.get(extension, "desconocido")
+    
+    # Vulnerabilidades por lenguaje
+    vulns_por_lenguaje = {
+        "Python": [
+            "- Inyección SQL (SQLAlchemy, raw queries)",
+            "- Ejecución de código arbitrario (eval, exec)",
+            "- XSS (plantillas sin escape)",
+            "- Path traversal (os.path manipulations)",
+            "- Pickle inseguro (pickle.loads con datos no confiables)",
+            "- Dependencias vulnerables"
+        ],
+        "JavaScript": [
+            "- XSS (innerHTML, document.write)",
+            "- Inyección NoSQL (MongoDB)",
+            "- Prototype Pollution",
+            "- ReDoS (Regular Expression DoS)",
+            "- Insecure Dependencies (npm audit)",
+            "- CSRF (falta de tokens)"
+        ],
+        "Java": [
+            "- Inyección SQL (JDBC, JPA)",
+            "- Deserialización insegura",
+            "- XXE (XML External Entity)",
+            "- SSRF (Server-Side Request Forgery)",
+            "- Insecure Randomness"
+        ]
+    }
+    
+    vulns = vulns_por_lenguaje.get(lenguaje, ["- Vulnerabilidades genéricas"])
+    
+    prompt = f"""Realiza una auditoría de seguridad completa del siguiente código {lenguaje}.
+
+**Archivo:** {archivo}
+**Lenguaje:** {lenguaje}
+
+**Vulnerabilidades a buscar en {lenguaje}:**
+{chr(10).join(vulns)}
+
+**Nivel de severidad mínimo:** {severidad_minima}
+
+**Formato de reporte:**
+Para cada vulnerabilidad encontrada, proporciona:
+1. **Tipo de vulnerabilidad** (ej: Inyección SQL, XSS)
+2. **Severidad** (Crítica, Alta, Media, Baja)
+3. **Línea(s) afectada(s)**
+4. **Descripción del problema**
+5. **Código vulnerable** (fragmento específico)
+6. **Recomendación de corrección**
+"""
+
+    if incluir_ejemplos:
+        prompt += """
+7. **Código corregido** (ejemplo de cómo debería ser)
+"""
+
+    prompt += """
+**Prioriza las vulnerabilidades por severidad (Crítica > Alta > Media > Baja).**
+
+Código a auditar:
+"""
+
+    return [
+        PromptMessage(
+            role="user",
+            content=TextContent(type="text", text=prompt)
+        ),
+        PromptMessage(
+            role="user",
+            content=EmbeddedResource(
+                type="resource",
+                resource=TextResourceContents(
+                    uri=f"file://{archivo}",
+                    mimeType="text/plain",
+                    text=codigo
+                )
+            )
+        )
+    ]
+----
+
+== Herramienta de procesamiento de documentos con sampling
+[source,python]
+----
+from typing import Literal
+import asyncio
+
+@app.tool(
+    name="procesar_documento",
+    description="Procesa un documento con múltiples operaciones usando sampling"
+)
+async def procesar_documento(
+    archivo: str,
+    operaciones: list[Literal["resumir", "traducir", "clasificar", "extraer_keywords"]]
+) -> list[TextContent]:
+    """
+    Procesa un documento con múltiples operaciones.
+    
+    Args:
+        archivo: Ruta del archivo
+        operaciones: Lista de operaciones a realizar
+    
+    Cada operación usa sampling para procesar el contenido.
+    """
+    from pathlib import Path
+    
+    path = Path(archivo)
+    if not path.exists():
+        raise ValueError(f"Archivo no encontrado: {archivo}")
+    
+    contenido = path.read_text()
+    resultados = {}
+    
+    # Ejecutar operaciones en paralelo
+    async def ejecutar_operacion(operacion: str) -> tuple[str, str]:
+        if operacion == "resumir":
+            response = await app.request_sampling(
+                messages=[{
+                    "role": "user",
+                    "content": [{"type": "text", "text": f"Resume el siguiente texto:\n\n{contenido}"}]
+                }],
+                max_tokens=200,
+                temperature=0.3
+            )
+            return ("resumen", response.content.text)
+        
+        elif operacion == "traducir":
+            response = await app.request_sampling(
+                messages=[{
+                    "role": "user",
+                    "content": [{"type": "text", "text": f"Traduce el siguiente texto al inglés:\n\n{contenido}"}]
+                }],
+                max_tokens=len(contenido.split()) * 2,
+                temperature=0.2
+            )
+            return ("traduccion", response.content.text)
+        
+        elif operacion == "clasificar":
+            prompt = f"""Clasifica el siguiente texto en una de estas categorías:
+- Técnico
+- Científico
+- Periodístico
+- Literario
+- Legal
+- Otro
+
+Texto:
+{contenido[:1000]}  # Limitar para clasificación
+
+Responde SOLO con el nombre de la categoría."""
+            
+            response = await app.request_sampling(
+                messages=[{"role": "user", "content": [{"type": "text", "text": prompt}]}],
+                max_tokens=20,
+                temperature=0.1
+            )
+            return ("clasificacion", response.content.text.strip())
+        
+        elif operacion == "extraer_keywords":
+            prompt = f"""Extrae las 5 palabras clave más importantes del siguiente texto.
+
+Texto:
+{contenido[:2000]}  # Limitar para extracción
+
+Responde SOLO con las palabras clave separadas por comas."""
+            
+            response = await app.request_sampling(
+                messages=[{"role": "user", "content": [{"type": "text", "text": prompt}]}],
+                max_tokens=50,
+                temperature=0.3
+            )
+            return ("keywords", response.content.text.strip())
+        
+        return (operacion, "Operación no reconocida")
+    
+    # Ejecutar en paralelo
+    tareas = [ejecutar_operacion(op) for op in operaciones]
+    resultados_lista = await asyncio.gather(*tareas)
+    
+    # Formatear resultados
+    output = [f"📄 Resultados del procesamiento de: {archivo}\n"]
+    output.append(f"📊 Operaciones realizadas: {', '.join(operaciones)}\n")
+    
+    for nombre, resultado in resultados_lista:
+        output.append(f"\n{'='*50}")
+        output.append(f"📋 {nombre.upper()}")
+        output.append(f"{'='*50}\n")
+        output.append(resultado)
+    
+    return [TextContent(type="text", text="\n".join(output))]
+----
+
+== MÓDULO 5: INTEGRACIÓN Y CLIENTES
+[NOTE]
+.Duración
+== 5 horas== ====5.1. Claude Desktop como cliente
+== Configuración de servidores MCP
+Claude Desktop es el cliente principal para servidores MCP locales. Su configuración se almacena en un archivo JSON:
+
+**Ubicaciones del archivo de configuración:**
+
+* **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+* **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+* **Linux**: `~/.config/Claude/claude_desktop_config.json`
+
+**Estructura del archivo:**
+
+[source,json]
+----
+{
+  "mcpServers": {
+    "nombre-servidor": {
+      "command": "comando-para-ejecutar",
+      "args": ["argumento1", "argumento2"],
+      "env": {
+        "VARIABLE": "valor"
+      }
+    }
+  }
+}
+----
+
+**Ejemplos de configuración:**
+
+[source,json]
+----
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/documents"],
+      "env": {}
+    },
+    "postgres": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres"],
+      "env": {
+        "DATABASE_URL": "postgresql://user:pass@localhost/mydb"
+      }
+    },
+    "mi-servidor-python": {
+      "command": "python",
+      "args": ["-m", "mi_servidor.mcp"],
+      "env": {
+        "PYTHONPATH": "/home/user/projects/mi_servidor/src",
+        "LOG_LEVEL": "INFO"
+      }
+    },
+    "mi-servidor-node": {
+      "command": "node",
+      "args": ["/home/user/projects/mi_servidor/dist/index.js"],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    "servidor-con-venv": {
+      "command": "/home/user/projects/servidor/venv/bin/python",
+      "args": ["-m", "servidor.mcp"],
+      "env": {}
+    }
+  }
+}
+----
+
+== Uso de variables de entorno
+Puedes usar variables de entorno del sistema:
+
+[source,json]
+----
+{
+  "mcpServers": {
+    "mi-servidor": {
+      "command": "python",
+      "args": ["-m", "mi_servidor"],
+      "env": {
+        "API_KEY": "${MY_API_KEY}",
+        "DATABASE_URL": "${DATABASE_URL}",
+        "DEBUG": "1"
+      }
+    }
+  }
+}
+----
+
+Las variables `${VARIABLE}` se reemplazan con el valor de la variable de entorno del sistema.
+
+== Depuración de problemas
+**Verificar que el servidor se ejecuta:**
+
+[source,bash]
+----
+# Ejecutar el servidor directamente
+python -m mi_servidor.mcp
+
+# Verificar que responde
+# Debería mostrar logs de inicialización
+
+# Ejecutar con más detalle
+DEBUG=1 python -m mi_servidor.mcp
+----
+
+**Ver logs de Claude Desktop:**
+
+[source,bash]
+----
+# macOS
+tail -f ~/Library/Logs/Claude/mcp*.log
+
+# Linux
+tail -f ~/.config/Claude/logs/mcp*.log
+
+# Windows (PowerShell)
+Get-Content "$env:APPDATA\Claude\logs\mcp*.log" -Tail 100
+----
+
+**Probar con el Inspector:**
+
+[source,bash]
+----
+# Instalar el inspector
+npm install -g @modelcontextprotocol/inspector
+
+# Ejecutar el servidor con el inspector
+mcp-inspector python -m mi_servidor.mcp
+
+# Abre http://localhost:5173 en el navegador
+----
+
+**Problemas comunes:**
+
+1. **"Command not found"**: El comando no está en el PATH
+   - Solución: Usar ruta completa al ejecutable
+
+2. **"Module not found"**: El módulo Python no está instalado
+   - Solución: Instalar con `pip install -e .` o usar venv
+
+3. **"Permission denied"**: Permisos insuficientes
+   - Solución: `chmod +x` para scripts, verificar permisos de archivos
+
+4. **"Connection refused"**: El servidor remoto no está disponible
+   - Solución: Verificar URL, credenciales, firewall
+
+== 5.2. Claude Code como cliente
+== Integración con Claude Code CLI
+Claude Code es la interfaz de línea de comandos de Anthropic:
+
+[source,bash]
+----
+# Instalar Claude Code
+npm install -g @anthropic-ai/claude-code
+
+# O con bun
+bun install -g @anthropic-ai/claude-code
+
+# Verificar instalación
+claude-code --version
+----
+
+**Configuración:**
+
+[source,json]
+----
+// ~/.config/claude-code/config.json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/projects"]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      }
+    }
+  }
+}
+----
+
+**Uso:**
+
+[source,bash]
+----
+# Iniciar Claude Code
+claude-code
+
+# En el REPL:
+# > Usa la herramienta 'list_files' para ver los archivos del proyecto
+# > Lee el archivo 'src/main.py' y explícame qué hace
+# > Busca todos los archivos que contengan 'TODO'
+----
+
+== 5.3. Desarrollo de clientes MCP personalizados
+== SDK de cliente en Python
+[source,python]
+----
+import asyncio
+from mcp.client import Client
+from mcp.client.stdio import stdio_client
+
+async def main():
+    # Crear cliente
+    client = Client("mi-cliente")
+    
+    # Conectar al servidor
+    async with stdio_client(
+        command="python",
+        args=["-m", "mi_servidor_mcp"]
+    ) as (read, write):
+        await client.connect(read, write)
+        
+        # Listar herramientas
+        tools = await client.list_tools()
+        print("Herramientas disponibles:")
+        for tool in tools:
+            print(f"  - {tool.name}: {tool.description}")
+        
+        # Llamar a una herramienta
+        result = await client.call_tool(
+            "buscar_web",
+            {"query": "MCP protocol", "num_results": 3}
+        )
+        print(f"\nResultado:\n{result.content[0].text}")
+        
+        # Listar recursos
+        resources = await client.list_resources()
+        print("\nRecursos disponibles:")
+        for resource in resources:
+            print(f"  - {resource.uri}: {resource.name}")
+        
+        # Leer un recurso
+        content = await client.read_resource("config://app")
+        print(f"\nContenido:\n{content}")
+        
+        # Listar prompts
+        prompts = await client.list_prompts()
+        print("\nPrompts disponibles:")
+        for prompt in prompts:
+            print(f"  - {prompt.name}: {prompt.description}")
+        
+        # Usar un prompt
+        messages = await client.get_prompt(
+            "analizar_codigo",
+            {"archivo": "main.py"}
+        )
+        print(f"\nMensajes del prompt: {len(messages)} mensajes")
+
+asyncio.run(main())
+----
+
+== SDK de cliente en TypeScript
+[source,typescript]
+----
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+
+async function main() {
+  // Crear cliente
+  const client = new Client(
+    { name: "mi-cliente", version: "1.0.0" },
+    { capabilities: { tools: {}, resources: {}, prompts: {} } }
+  );
+  
+  // Crear transporte
+  const transport = new StdioClientTransport({
+    command: "python",
+    args: ["-m", "mi_servidor_mcp"]
+  });
+  
+  // Conectar
+  await client.connect(transport);
+  
+  // Listar herramientas
+  const tools = await client.request(
+    { method: "tools/list" },
+    ListToolsResultSchema
+  );
+  console.log("Herramientas:", tools.tools.map(t => t.name));
+  
+  // Llamar a una herramienta
+  const result = await client.request(
+    {
+      method: "tools/call",
+      params: {
+        name: "buscar_web",
+        arguments: { query: "MCP protocol", num_results: 3 }
+      }
+    },
+    CallToolResultSchema
+  );
+  console.log("Resultado:", result.content);
+  
+  // Desconectar
+  await client.close();
+}
+
+main().catch(console.error);
+----
+
+== 5.4. Integración con frameworks
+== Integración con LangChain
+[source,python]
+----
+from langchain.tools import Tool
+from mcp.client import Client
+from mcp.client.stdio import stdio_client
+import asyncio
+
+async def create_mcp_tool(client: Client, tool_name: str) -> Tool:
+    """Crea una herramienta LangChain desde una herramienta MCP."""
+    
+    # Obtener información de la herramienta
+    tools = await client.list_tools()
+    mcp_tool = next(t for t in tools if t.name == tool_name)
+    
+    async def run_tool(query: str) -> str:
+        """Ejecuta la herramienta MCP."""
+        # Parsear argumentos desde string JSON
+        import json
+        try:
+            args = json.loads(query)
+        except:
+            args = {"input": query}
+        
+        result = await client.call_tool(tool_name, args)
+        
+        # Extraer texto del resultado
+        return "\n".join(
+            c.text for c in result.content 
+            if hasattr(c, 'text')
+        )
+    
+    return Tool(
+        name=mcp_tool.name,
+        description=mcp_tool.description,
+        func=lambda q: asyncio.run(run_tool(q))
+    )
+
+# Uso con LangChain
+async def main():
+    client = Client("langchain-client")
+    
+    async with stdio_client(
+        command="python",
+        args=["-m", "mi_servidor"]
+    ) as (read, write):
+        await client.connect(read, write)
+        
+        # Crear herramientas
+        tools = [
+            await create_mcp_tool(client, "buscar_web"),
+            await create_mcp_tool(client, "leer_archivo"),
+            await create_mcp_tool(client, "ejecutar_codigo")
+        ]
+        
+        # Usar con LangChain
+        from langchain.agents import initialize_agent
+        from langchain.llms import OpenAI
+        
+        llm = OpenAI(temperature=0)
+        agent = initialize_agent(
+            tools,
+            llm,
+            agent="zero-shot-react-description"
+        )
+        
+        result = await agent.arun(
+            "Busca información sobre Model Context Protocol y resume los puntos principales"
+        )
+        print(result)
+
+asyncio.run(main())
+----
+
+== Integración con LlamaIndex
+[source,python]
+----
+from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
+from llama_index.core.tools import FunctionTool
+from mcp.client import Client
+from mcp.client.stdio import stdio_client
+import asyncio
+
+async def create_llamaindex_tool(client: Client, tool_name: str) -> FunctionTool:
+    """Crea una herramienta LlamaIndex desde una herramienta MCP."""
+    
+    async def mcp_tool_wrapper(**kwargs):
+        result = await client.call_tool(tool_name, kwargs)
+        return "\n".join(
+            c.text for c in result.content 
+            if hasattr(c, 'text')
+        )
+    
+    # Obtener metadatos
+    tools = await client.list_tools()
+    mcp_tool = next(t for t in tools if t.name == tool_name)
+    
+    return FunctionTool.from_defaults(
+        fn=mcp_tool_wrapper,
+        name=mcp_tool.name,
+        description=mcp_tool.description
+    )
+
+async def main():
+    client = Client("llamaindex-client")
+    
+    async with stdio_client(
+        command="python",
+        args=["-m", "mi_servidor"]
+    ) as (read, write):
+        await client.connect(read, write)
+        
+        # Crear herramientas
+        tools = [
+            await create_llamaindex_tool(client, "buscar_web"),
+            await create_llamaindex_tool(client, "leer_documento")
+        ]
+        
+        # Usar con LlamaIndex
+        from llama_index.core.agent import ReActAgent
+        from llama_index.llms.openai import OpenAI
+        
+        llm = OpenAI(model="gpt-4")
+        agent = ReActAgent.from_tools(tools, llm=llm)
+        
+        response = await agent.achat(
+            "Busca información sobre Model Context Protocol y crea un resumen"
+        )
+        print(response.response)
+
+asyncio.run(main())
+----
+
+== 5.5. Casos prácticos
+== Bot de Telegram con MCP
+[source,python]
+----
+import asyncio
+import telegram
+from mcp.client import Client
+from mcp.client.stdio import stdio_client
+import json
+
+class TelegramMCPBot:
+    """Bot de Telegram que usa un servidor MCP."""
+    
+    def __init__(self, telegram_token: str, mcp_command: str, mcp_args: list):
+        self.telegram = telegram.Bot(token=telegram_token)
+        self.mcp_command = mcp_command
+        self.mcp_args = mcp_args
+        self.client = Client("telegram-bot")
+        self.tools = {}
+    
+    async def start(self):
+        """Inicia el bot."""
+        # Conectar a MCP
+        async with stdio_client(
+            command=self.mcp_command,
+            args=self.mcp_args
+        ) as (read, write):
+            await self.client.connect(read, write)
+            
+            # Cargar herramientas
+            tools = await self.client.list_tools()
+            self.tools = {t.name: t for t in tools}
+            
+            # Iniciar bot
+            await self.run_bot()
+    
+    async def run_bot(self):
+        """Ejecuta el bot de Telegram."""
+        from telegram import Update
+        from telegram.ext import Application, CommandHandler, MessageHandler, filters
+        
+        app = Application.builder().token(self.telegram.token).build()
+        
+        # Handlers
+        app.add_handler(CommandHandler("start", self.start_command))
+        app.add_handler(CommandHandler("tools", self.list_tools_command))
+        app.add_handler(MessageHandler(filters.TEXT, self.handle_message))
+        
+        await app.run_polling()
+    
+    async def start_command(self, update, context):
+        """Comando /start."""
+        await update.message.reply_text(
+            "¡Hola! Soy un bot conectado a un servidor MCP.\n\n"
+            "Comandos disponibles:\n"
+            "/tools - Lista herramientas disponibles\n"
+            "/tool <nombre> <args> - Ejecuta una herramienta\n\n"
+            "Escribe cualquier mensaje para procesarlo con el LLM."
+        )
+    
+    async def list_tools_command(self, update, context):
+        """Comando /tools."""
+        tools_list = "\n".join([
+            f"• {name}: {t.description.split('.')[0]}"
+            for name, t in self.tools.items()
+        ])
+        await update.message.reply_text(
+            f"Herramientas disponibles:\n\n{tools_list}"
+        )
+    
+    async def handle_message(self, update, context):
+        """Maneja mensajes de texto."""
+        message = update.message.text
+        
+        # Detectar comando de herramienta
+        if message.startswith("/tool "):
+            await self.handle_tool_command(update, message[6:])
+            return
+        
+        # Usar sampling para procesar el mensaje
+        try:
+            response = await self.client.request_sampling(
+                messages=[{
+                    "role": "user",
+                    "content": [{"type": "text", "text": message}]
+                }],
+                max_tokens=500
+            )
+            await update.message.reply_text(response.content.text)
+        except Exception as e:
+            await update.message.reply_text(f"Error: {e}")
+    
+    async def handle_tool_command(self, update, command: str):
+        """Maneja comando /tool."""
+        parts = command.split(maxsplit=1)
+        tool_name = parts[0]
+        args_str = parts[1] if len(parts) > 1 else "{}"
+        
+        if tool_name not in self.tools:
+            await update.message.reply_text(
+                f"Herramienta no encontrada: {tool_name}\n"
+                f"Usa /tools para ver las disponibles."
+            )
+            return
+        
+        try:
+            args = json.loads(args_str)
+        except:
+            args = {"input": args_str}
+        
+        try:
+            result = await self.client.call_tool(tool_name, args)
+            text = "\n".join(
+                c.text for c in result.content
+                if hasattr(c, 'text')
+            )
+            await update.message.reply_text(text[:4000])  # Límite de Telegram
+        except Exception as e:
+            await update.message.reply_text(f"Error: {e}")
+
+# Uso
+async def main():
+    bot = TelegramMCPBot(
+        telegram_token="TU_TELEGRAM_TOKEN",
+        mcp_command="python",
+        mcp_args=["-m", "mi_servidor_mcp"]
+    )
+    await bot.start()
+
+asyncio.run(main())
+----
+
+== MÓDULO 6: SEGURIDAD Y TEMAS AVANZADOS
+[NOTE]
+.Duración
+== 4 horas== ====6.1. Seguridad en MCP
+== Principios de seguridad
+La seguridad en MCP se basa en varios principios:
+
+1. **Principio de mínimo privilegio**: Los servidores solo deben tener acceso a lo que necesitan
+2. **Consentimiento del usuario**: El cliente debe aprobar acciones sensibles
+3. **Validación de entrada**: Todos los datos externos deben ser validados
+4. **Aislamiento**: Los servidores deben estar aislados entre sí
+5. **Auditoría**: Todas las acciones deben ser registradas
+
+== Validación de entradas
+[source,python]
+----
+import re
+from pathlib import Path
+from typing import Any
+
+class InputValidator:
+    """Validador de entradas para MCP."""
+    
+    @staticmethod
+    def validate_path(path: str, base_dir: Path) -> Path:
+        """Valida que un path esté dentro del directorio permitido."""
+        full_path = (base_dir / path).resolve()
+        
+        # Verificar que está dentro del directorio base
+        try:
+            full_path.relative_to(base_dir.resolve())
+        except ValueError:
+            raise ValueError(f"Acceso denegado: {path} está fuera del directorio permitido")
+        
+        # Verificar que no contiene directory traversal
+        if ".." in path:
+            raise ValueError("Path no puede contener '..'")
+        
+        # Verificar que no es un symlink malicioso
+        if full_path.is_symlink():
+            real_path = full_path.resolve()
+            try:
+                real_path.relative_to(base_dir.resolve())
+            except ValueError:
+                raise ValueError(f"Symlink apunta fuera del directorio permitido")
+        
+        return full_path
+    
+    @staticmethod
+    def validate_sql(query: str, allowed_tables: list[str]) -> None:
+        """Valida que una consulta SQL sea segura."""
+        query_upper = query.strip().upper()
+        
+        # Solo permitir SELECT
+        if not query_upper.startswith("SELECT"):
+            raise ValueError("Solo se permiten consultas SELECT")
+        
+        # Verificar palabras peligrosas
+        dangerous_words = [
+            "DROP", "DELETE", "INSERT", "UPDATE", "ALTER", "CREATE",
+            "TRUNCATE", "EXEC", "EXECUTE", "--", ";/*", "UNION"
+        ]
+        
+        for word in dangerous_words:
+            if word in query_upper:
+                raise ValueError(f"Consulta contiene palabra no permitida: {word}")
+        
+        # Verificar que solo accede a tablas permitidas
+        for table in allowed_tables:
+            if table.upper() in query_upper:
+                return  # Tabla permitida encontrada
+        
+        raise ValueError(f"Consulta debe acceder solo a tablas: {', '.join(allowed_tables)}")
+    
+    @staticmethod
+    def validate_email(email: str) -> bool:
+        """Valida formato de email."""
+        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(pattern, email):
+            raise ValueError(f"Email inválido: {email}")
+        return True
+    
+    @staticmethod
+    def sanitize_for_display(text: str) -> str:
+        """Sanitiza texto para mostrar en UI."""
+        import html
+        # Escapar HTML
+        text = html.escape(text)
+        # Remover caracteres de control
+        text = "".join(c for c in text if c.isprintable() or c in "\n\t")
+        return text
+
+# Uso en servidor MCP
+VALIDATOR = InputValidator()
+
+@app.tool(name="leer_archivo_seguro")
+async def leer_archivo_seguro(path: str) -> list[TextContent]:
+    """Lee un archivo de forma segura."""
+    BASE_DIR = Path("/home/user/documents")
+    
+    # Validar path
+    safe_path = VALIDATOR.validate_path(path, BASE_DIR)
+    
+    # Leer archivo
+    if not safe_path.exists():
+        raise ValueError(f"Archivo no encontrado: {path}")
+    
+    content = safe_path.read_text()
+    
+    # Sanitizar para mostrar
+    safe_content = VALIDATOR.sanitize_for_display(content)
+    
+    return [TextContent(type="text", text=safe_content)]
+----
+
+== Rate limiting y cuotas
+[source,python]
+----
+import time
+from collections import defaultdict
+from typing import Optional
+
+class RateLimiter:
+    """Limitador de tasa por usuario."""
+    
+    def __init__(
+        self,
+        max_requests_per_minute: int = 60,
+        max_requests_per_hour: int = 1000,
+        max_requests_per_day: int = 10000
+    ):
+        self.max_requests_per_minute = max_requests_per_minute
+        self.max_requests_per_hour = max_requests_per_hour
+        self.max_requests_per_day = max_requests_per_day
+        
+        # Almacena timestamps de requests
+        self.requests = defaultdict(list)
+    
+    def check(self, user_id: str) -> tuple[bool, Optional[str]]:
+        """Verifica si el usuario puede hacer una petición."""
+        now = time.time()
+        
+        # Limpiar requests antiguos
+        self.requests[user_id] = [
+            t for t in self.requests[user_id]
+            if now - t < 86400  # 24 horas
+        ]
+        
+        # Contar requests en diferentes ventanas
+        requests_last_minute = sum(1 for t in self.requests[user_id] if now - t < 60)
+        requests_last_hour = sum(1 for t in self.requests[user_id] if now - t < 3600)
+        requests_last_day = len(self.requests[user_id])
+        
+        # Verificar límites
+        if requests_last_minute >= self.max_requests_per_minute:
+            retry_after = 60 - (now - min(t for t in self.requests[user_id] if now - t < 60))
+            return False, f"Rate limit excedido. Reintenta en {int(retry_after)} segundos."
+        
+        if requests_last_hour >= self.max_requests_per_hour:
+            retry_after = 3600 - (now - min(t for t in self.requests[user_id] if now - t < 3600))
+            return False, f"Rate limit excedido. Reintenta en {int(retry_after / 60)} minutos."
+        
+        if requests_last_day >= self.max_requests_per_day:
+            retry_after = 86400 - (now - min(self.requests[user_id]))
+            return False, f"Rate limit excedido. Reintenta en {int(retry_after / 3600)} horas."
+        
+        # Registrar request
+        self.requests[user_id].append(now)
+        return True, None
+    
+    def get_stats(self, user_id: str) -> dict:
+        """Obtiene estadísticas de uso."""
+        now = time.time()
+        requests_last_minute = sum(1 for t in self.requests[user_id] if now - t < 60)
+        requests_last_hour = sum(1 for t in self.requests[user_id] if now - t < 3600)
+        requests_last_day = len(self.requests[user_id])
+        
+        return {
+            "requests_last_minute": requests_last_minute,
+            "requests_last_hour": requests_last_hour,
+            "requests_last_day": requests_last_day,
+            "limits": {
+                "per_minute": self.max_requests_per_minute,
+                "per_hour": self.max_requests_per_hour,
+                "per_day": self.max_requests_per_day
+            }
+        }
+
+# Uso en servidor MCP
+rate_limiter = RateLimiter(
+    max_requests_per_minute=60,
+    max_requests_per_hour=1000,
+    max_requests_per_day=10000
+)
+
+@app.tool(name="herramienta_con_limite")
+async def herramienta_con_limite(input_data: str) -> list[TextContent]:
+    """Herramienta con rate limiting."""
+    user_id = app.get_user_id()  # Obtenido del contexto
+    
+    # Verificar rate limit
+    allowed, error_msg = rate_limiter.check(user_id)
+    if not allowed:
+        raise ValueError(error_msg)
+    
+    # Procesar
+    result = f"Procesado: {input_data}"
+    
+    return [TextContent(type="text", text=result)]
+
+@app.resource("stats://rate_limit")
+async def get_rate_limit_stats() -> Resource:
+    """Estadísticas de rate limit."""
+    user_id = app.get_user_id()
+    stats = rate_limiter.get_stats(user_id)
+    
+    return Resource(
+        uri="stats://rate_limit",
+        mimeType="application/json",
+        text=json.dumps(stats, indent=2)
+    )
+----
+
+== 6.2. Autenticación
+== OAuth 2.0
+[source,python]
+----
+import httpx
+from typing import Optional
+import secrets
+from datetime import datetime, timedelta
+
+class OAuthManager:
+    """Gestor de autenticación OAuth 2.0."""
+    
+    def __init__(
+        self,
+        client_id: str,
+        client_secret: str,
+        authorize_url: str,
+        token_url: str,
+        redirect_uri: str
+    ):
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.authorize_url = authorize_url
+        self.token_url = token_url
+        self.redirect_uri = redirect_uri
+        self.tokens = {}  # user_id -> token_data
+    
+    def get_authorize_url(self, state: str, scope: str = "read write") -> str:
+        """Genera URL de autorización."""
+        params = {
+            "client_id": self.client_id,
+            "redirect_uri": self.redirect_uri,
+            "response_type": "code",
+            "state": state,
+            "scope": scope
+        }
+        query = "&".join(f"{k}={v}" for k, v in params.items())
+        return f"{self.authorize_url}?{query}"
+    
+    async def exchange_code(self, code: str, user_id: str) -> dict:
+        """Intercambia código de autorización por token."""
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                self.token_url,
+                data={
+                    "client_id": self.client_id,
+                    "client_secret": self.client_secret,
+                    "code": code,
+                    "redirect_uri": self.redirect_uri,
+                    "grant_type": "authorization_code"
+                }
+            )
+            
+            if response.status_code != 200:
+                raise ValueError(f"Error obteniendo token: {response.text}")
+            
+            token_data = response.json()
+            token_data["expires_at"] = (
+                datetime.utcnow() + timedelta(seconds=token_data.get("expires_in", 3600))
+            ).isoformat()
+            
+            self.tokens[user_id] = token_data
+            return token_data
+    
+    async def refresh_token(self, user_id: str) -> dict:
+        """Refresca el token de acceso."""
+        if user_id not in self.tokens:
+            raise ValueError("Usuario no autenticado")
+        
+        refresh_token = self.tokens[user_id].get("refresh_token")
+        if not refresh_token:
+            raise ValueError("No hay refresh token disponible")
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                self.token_url,
+                data={
+                    "client_id": self.client_id,
+                    "client_secret": self.client_secret,
+                    "refresh_token": refresh_token,
+                    "grant_type": "refresh_token"
+                }
+            )
+            
+            if response.status_code != 200:
+                raise ValueError(f"Error refrescando token: {response.text}")
+            
+            token_data = response.json()
+            token_data["expires_at"] = (
+                datetime.utcnow() + timedelta(seconds=token_data.get("expires_in", 3600))
+            ).isoformat()
+            
+            self.tokens[user_id] = token_data
+            return token_data
+    
+    def get_token(self, user_id: str) -> Optional[str]:
+        """Obtiene el token de acceso para un usuario."""
+        if user_id not in self.tokens:
+            return None
+        
+        token_data = self.tokens[user_id]
+        
+        # Verificar si ha expirado
+        expires_at = datetime.fromisoformat(token_data["expires_at"])
+        if datetime.utcnow() >= expires_at:
+            return None
+        
+        return token_data.get("access_token")
+    
+    def is_authenticated(self, user_id: str) -> bool:
+        """Verifica si el usuario está autenticado."""
+        return self.get_token(user_id) is not None
+
+# Uso en servidor MCP
+oauth = OAuthManager(
+    client_id="tu-client-id",
+    client_secret="tu-client-secret",
+    authorize_url="https://provider.com/oauth/authorize",
+    token_url="https://provider.com/oauth/token",
+    redirect_uri="http://localhost:8080/callback"
+)
+
+@app.tool(name="oauth_login")
+async def oauth_login() -> list[TextContent]:
+    """Inicia flujo OAuth."""
+    user_id = app.get_user_id()
+    state = f"mcp_{user_id}_{secrets.token_urlsafe(16)}"
+    
+    url = oauth.get_authorize_url(state)
+    
+    return [TextContent(
+        type="text",
+        text=f"Visita esta URL para autorizar:\n{url}\n\n"
+             f"State: {state}\n"
+             f"Después de autorizar, usa /oauth_complete con el código recibido."
+    )]
+
+@app.tool(name="oauth_complete")
+async def oauth_complete(code: str) -> list[TextContent]:
+    """Completa flujo OAuth."""
+    user_id = app.get_user_id()
+    
+    try:
+        token_data = await oauth.exchange_code(code, user_id)
+        return [TextContent(
+            type="text",
+            text=f"✅ Autenticación completada.\n"
+                 f"Token type: {token_data.get('token_type')}\n"
+                 f"Expires in: {token_data.get('expires_in')} segundos"
+        )]
+    except Exception as e:
+        return [TextContent(
+            type="text",
+            text=f"❌ Error en autenticación: {e}"
+        )]
+----
+
+== API Keys
+[source,python]
+----
+import secrets
+from datetime import datetime, timedelta
+from typing import Optional
+
+class APIKeyManager:
+    """Gestor de API Keys."""
+    
+    def __init__(self):
+        self.keys = {}  # api_key -> {user_id, expires_at, scopes}
+    
+    def generate_key(
+        self,
+        user_id: str,
+        expires_days: int = 30,
+        scopes: list[str] = None
+    ) -> str:
+        """Genera una nueva API key."""
+        api_key = f"mcp_{secrets.token_urlsafe(32)}"
+        
+        self.keys[api_key] = {
+            "user_id": user_id,
+            "created_at": datetime.utcnow(),
+            "expires_at": datetime.utcnow() + timedelta(days=expires_days),
+            "scopes": scopes or ["read"]
+        }
+        
+        return api_key
+    
+    def validate_key(self, api_key: str) -> tuple[bool, Optional[dict]]:
+        """Valida una API key."""
+        if api_key not in self.keys:
+            return False, {"error": "API key no válida"}
+        
+        key_data = self.keys[api_key]
+        
+        # Verificar expiración
+        if datetime.utcnow() > key_data["expires_at"]:
+            return False, {"error": "API key expirada"}
+        
+        return True, key_data
+    
+    def revoke_key(self, api_key: str) -> bool:
+        """Revoca una API key."""
+        if api_key in self.keys:
+            del self.keys[api_key]
+            return True
+        return False
+    
+    def list_keys(self, user_id: str) -> list[dict]:
+        """Lista las API keys de un usuario."""
+        return [
+            {
+                "key": k[:10] + "...",  # Solo mostrar prefijo
+                "created_at": v["created_at"].isoformat(),
+                "expires_at": v["expires_at"].isoformat(),
+                "scopes": v["scopes"]
+            }
+            for k, v in self.keys.items()
+            if v["user_id"] == user_id
+        ]
+
+# Middleware de autenticación
+api_key_manager = APIKeyManager()
+
+def require_api_key(scopes: list[str] = None):
+    """Decorador que requiere API key válida."""
+    def decorator(func):
+        async def wrapper(*args, **kwargs):
+            # Obtener API key del contexto
+            api_key = app.get_api_key()  # Desde headers o params
+            
+            if not api_key:
+                raise ValueError("API key requerida")
+            
+            # Validar
+            valid, result = api_key_manager.validate_key(api_key)
+            
+            if not valid:
+                raise ValueError(result.get("error", "API key inválida"))
+            
+            # Verificar scopes
+            if scopes:
+                key_scopes = result.get("scopes", [])
+                if not all(s in key_scopes for s in scopes):
+                    raise ValueError(f"API key no tiene los scopes requeridos: {scopes}")
+            
+            # Inyectar user_id
+            kwargs["user_id"] = result["user_id"]
+            
+            return await func(*args, **kwargs)
+        
+        return wrapper
+    return decorator
+
+# Uso
+@app.tool(name="generar_api_key")
+async def generar_api_key(expires_days: int = 30) -> list[TextContent]:
+    """Genera una API key para el usuario actual."""
+    user_id = app.get_user_id()
+    api_key = api_key_manager.generate_key(user_id, expires_days)
+    
+    return [TextContent(
+        type="text",
+        text=f"Tu API key: {api_key}\n\n"
+             f"⚠️ Guárdala en un lugar seguro. No la compartirás con nadie.\n"
+             f"Expira en {expires_days} días."
+    )]
+
+@app.tool(name="herramienta_protegida")
+@require_api_key(scopes=["read", "write"])
+async def herramienta_protegida(user_id: str, data: str) -> list[TextContent]:
+    """Herramienta que requiere API key."""
+    return [TextContent(
+        type="text",
+        text=f"Usuario {user_id}: {data}"
+    )]
+----
+
+== 6.3. Despliegue y CI/CD
+== Docker
+[source,dockerfile]
+----
+# Dockerfile para servidor MCP
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Instalar dependencias
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar código
+COPY . .
+
+# Usuario no-root para seguridad
+RUN useradd -m mcpuser && chown -R mcpuser:mcpuser /app
+USER mcpuser
+
+# Variables de entorno
+ENV PYTHONUNBUFFERED=1
+ENV MCP_PORT=8080
+
+# Puerto
+EXPOSE 8080
+
+# Comando
+CMD ["python", "-m", "mi_servidor_mcp"]
+----
+
+[source,yaml]
+----
+# docker-compose.yml
+version: '3.8'
+
+services:
+  mcp-server:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - DATABASE_URL=postgresql://user:pass@db:5432/mydb
+      - API_KEY=${API_KEY}
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - db
+    restart: unless-stopped
+  
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=mydb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+----
+
+== GitHub Actions
+[source,yaml]
+----
+# .github/workflows/ci.yml
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        pip install -e .
+        pip install pytest pytest-cov
+    
+    - name: Run tests
+      run: pytest --cov=src --cov-report=xml
+    
+    - name: Upload coverage
+      uses: codecov/codecov-action@v4
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Build Docker image
+      run: |
+        docker build -t mcp-server:${{ github.sha }} .
+        docker tag mcp-server:${{ github.sha }} mcp-server:latest
+    
+    - name: Push to registry
+      run: |
+        echo ${{ secrets.REGISTRY_PASSWORD }} | docker login -u ${{ secrets.REGISTRY_USER }} --password-stdin
+        docker push registry.example.com/mcp-server:${{ github.sha }}
+        docker push registry.example.com/mcp-server:latest
+----
+
+== 6.4. MCP Registry y ecosistema
+== Qué es el MCP Registry
+El **MCP Registry** es un repositorio centralizado de servidores MCP que permite:
+
+* Descubrir servidores disponibles
+* Instalar servidores fácilmente
+* Compartir servidores con la comunidad
+* Mantener versiones
+
+**Uso del Registry:**
+
+[source,bash]
+----
+# Buscar servidores
+mcp search filesystem
+mcp search database
+mcp search github
+
+# Instalar servidor
+mcp install @modelcontextprotocol/server-filesystem
+mcp install @modelcontextprotocol/server-postgres
+
+# Listar servidores instalados
+mcp list
+
+# Actualizar servidor
+mcp update @modelcontextprotocol/server-filesystem
+----
+
+== Servidores MCP populares
+[cols="1,2,1"]
+|===
+| Servidor | Descripción | Enlace
+
+| server-filesystem
+| Acceso al sistema de archivos
+| @modelcontextprotocol/server-filesystem
+
+| server-postgres
+| Conexión a PostgreSQL
+| @modelcontextprotocol/server-postgres
+
+| server-sqlite
+| Conexión a SQLite
+| @modelcontextprotocol/server-sqlite
+
+| server-github
+| Integración con GitHub
+| @modelcontextprotocol/server-github
+
+| server-slack
+| Integración con Slack
+| @modelcontextprotocol/server-slack
+
+| server-brave-search
+| Búsqueda web con Brave
+| @modelcontextprotocol/server-brave-search
+
+| server-puppeteer
+| Automatización de navegador
+| @modelcontextprotocol/server-puppeteer
+|===
+
+== 6.5. Mejores prácticas
+== Documentación de herramientas
+[source,python]
+----
+@app.tool(
+    name="buscar_documentos",
+    description="""
+Busca documentos en la base de datos.
+
+Esta herramienta busca documentos que coincidan con los criterios
+especificados. Los resultados se ordenan por relevancia.
+
+**Parámetros:**
+- query: Término de búsqueda (requerido)
+- categoria: Filtrar por categoría (opcional)
+- fecha_desde: Fecha mínima en formato ISO (opcional)
+- fecha_hasta: Fecha máxima en formato ISO (opcional)
+- limite: Número máximo de resultados (default: 10, max: 100)
+
+**Ejemplos:**
+- buscar_documentos("inteligencia artificial")
+- buscar_documentos("python", categoria="programación")
+- buscar_documentos("IA", fecha_desde="2024-01-01")
+
+**Errores comunes:**
+- ValueError: Si el query está vacío
+- ValueError: Si limite > 100
+"""
+)
+async def buscar_documentos(
+    query: str,
+    categoria: Optional[str] = None,
+    fecha_desde: Optional[str] = None,
+    fecha_hasta: Optional[str] = None,
+    limite: int = 10
+) -> list[TextContent]:
+    # Implementación
+    pass
+----
+
+== Logging y auditoría
+[source,python]
+----
+import logging
+import json
+from datetime import datetime
+
+# Configurar logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('mcp_audit.log'),
+        logging.StreamHandler()
+    ]
+)
+
+audit_logger = logging.getLogger('mcp_audit')
+
+class AuditLog:
+    """Registro de auditoría para MCP."""
+    
+    @staticmethod
+    def log(
+        action: str,
+        user_id: str,
+        tool: Optional[str] = None,
+        resource: Optional[str] = None,
+        arguments: Optional[dict] = None,
+        result: Optional[str] = None,
+        error: Optional[str] = None
+    ):
+        """Registra una acción."""
+        entry = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "action": action,
+            "user_id": user_id,
+            "tool": tool,
+            "resource": resource,
+            "arguments": arguments,
+            "result": result,
+            "error": error
+        }
+        
+        if error:
+            audit_logger.error(json.dumps(entry))
+        else:
+            audit_logger.info(json.dumps(entry))
+
+# Uso en herramientas
+@app.tool(name="herramienta_auditada")
+async def herramienta_auditada(data: str) -> list[TextContent]:
+    user_id = app.get_user_id()
+    
+    AuditLog.log(
+        action="tool_call_start",
+        user_id=user_id,
+        tool="herramienta_auditada",
+        arguments={"data": data}
+    )
+    
+    try:
+        result = f"Procesado: {data}"
+        
+        AuditLog.log(
+            action="tool_call_success",
+            user_id=user_id,
+            tool="herramienta_auditada",
+            result="OK"
+        )
+        
+        return [TextContent(type="text", text=result)]
+    
+    except Exception as e:
+        AuditLog.log(
+            action="tool_call_error",
+            user_id=user_id,
+            tool="herramienta_auditada",
+            error=str(e)
+        )
+        raise
+----
+
+== RECURSOS ADICIONALES
+== Documentación oficial
+* https://modelcontextprotocol.io[Documentación de MCP]
+* https://github.com/modelcontextprotocol[Repositorio oficial en GitHub]
+* https://github.com/modelcontextprotocol/servers[Servidores MCP de ejemplo]
+* https://modelcontextprotocol.io/spec[Especificación del protocolo]
+
+== Herramientas
+* `mcp`: CLI para desarrollo de servidores
+* `mcp-inspector`: Inspector visual para debugging
+* SDK Python: `pip install mcp`
+* SDK TypeScript: `npm install @modelcontextprotocol/sdk`
+
+== Comunidad
+* https://discord.gg/clawd[Discord de OpenClaw]
+* https://github.com/modelcontextprotocol/discussions[Discusiones en GitHub]
+
+== DISTRIBUCIÓN HORARIA
+[cols="3,2,2"]
+|===
+| Módulo | Horas | Porcentaje
+
+| M1. Introducción y Conceptos
+| 3h
+| 12%
+
+| M2. Recursos en MCP
+| 4h
+| 16%
+
+| M3. Herramientas en MCP
+| 5h
+| 20%
+
+| M4. Prompts y Sampling
+| 4h
+| 16%
+
+| M5. Integración y Clientes
+| 5h
+| 20%
+
+| M6. Seguridad y Temas Avanzados
+| 4h
+| 16%
+
+| **TOTAL**
+| **25h**
+| **100%**
+|===

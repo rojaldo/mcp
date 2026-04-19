@@ -1,0 +1,5227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.26">
+<meta name="author" content="Bot-Bunnny">
+<title>FastMCP: Guía Completa de Documentación</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<style>
+/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+/* Uncomment the following line when using as a custom stylesheet */
+/* @import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"; */
+html{font-family:sans-serif;-webkit-text-size-adjust:100%}
+a{background:none}
+a:focus{outline:thin dotted}
+a:active,a:hover{outline:0}
+h1{font-size:2em;margin:.67em 0}
+b,strong{font-weight:bold}
+abbr{font-size:.9em}
+abbr[title]{cursor:help;border-bottom:1px dotted #dddddf;text-decoration:none}
+dfn{font-style:italic}
+hr{height:0}
+mark{background:#ff0;color:#000}
+code,kbd,pre,samp{font-family:monospace;font-size:1em}
+pre{white-space:pre-wrap}
+q{quotes:"\201C" "\201D" "\2018" "\2019"}
+small{font-size:80%}
+sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.25em}
+img{border:0}
+svg:not(:root){overflow:hidden}
+figure{margin:0}
+audio,video{display:inline-block}
+audio:not([controls]){display:none;height:0}
+fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
+legend{border:0;padding:0}
+button,input,select,textarea{font-family:inherit;font-size:100%;margin:0}
+button,input{line-height:normal}
+button,select{text-transform:none}
+button,html input[type=button],input[type=reset],input[type=submit]{-webkit-appearance:button;cursor:pointer}
+button[disabled],html input[disabled]{cursor:default}
+input[type=checkbox],input[type=radio]{padding:0}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}
+textarea{overflow:auto;vertical-align:top}
+table{border-collapse:collapse;border-spacing:0}
+*,::before,::after{box-sizing:border-box}
+html,body{font-size:100%}
+body{background:#fff;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Noto Serif","DejaVu Serif",serif;line-height:1;position:relative;cursor:auto;-moz-tab-size:4;-o-tab-size:4;tab-size:4;word-wrap:anywhere;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}
+a:hover{cursor:pointer}
+img,object,embed{max-width:100%;height:auto}
+object,embed{height:100%}
+img{-ms-interpolation-mode:bicubic}
+.left{float:left!important}
+.right{float:right!important}
+.text-left{text-align:left!important}
+.text-right{text-align:right!important}
+.text-center{text-align:center!important}
+.text-justify{text-align:justify!important}
+.hide{display:none}
+img,object,svg{display:inline-block;vertical-align:middle}
+textarea{height:auto;min-height:50px}
+select{width:100%}
+.subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
+div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0}
+a{color:#2156a5;text-decoration:underline;line-height:inherit}
+a:hover,a:focus{color:#1d4b8f}
+a img{border:0}
+p{line-height:1.6;margin-bottom:1.25em;text-rendering:optimizeLegibility}
+p aside{font-size:.875em;line-height:1.35;font-style:italic}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{font-family:"Open Sans","DejaVu Sans",sans-serif;font-weight:300;font-style:normal;color:#ba3925;text-rendering:optimizeLegibility;margin-top:1em;margin-bottom:.5em;line-height:1.0125em}
+h1 small,h2 small,h3 small,#toctitle small,.sidebarblock>.content>.title small,h4 small,h5 small,h6 small{font-size:60%;color:#e99b8f;line-height:0}
+h1{font-size:2.125em}
+h2{font-size:1.6875em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.375em}
+h4,h5{font-size:1.125em}
+h6{font-size:1em}
+hr{border:solid #dddddf;border-width:1px 0 0;clear:both;margin:1.25em 0 1.1875em}
+em,i{font-style:italic;line-height:inherit}
+strong,b{font-weight:bold;line-height:inherit}
+small{font-size:60%;line-height:inherit}
+code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
+ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
+ul,ol{margin-left:1.5em}
+ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
+ul.circle{list-style-type:circle}
+ul.disc{list-style-type:disc}
+ul.square{list-style-type:square}
+ul.circle ul:not([class]),ul.disc ul:not([class]),ul.square ul:not([class]){list-style:inherit}
+ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
+dl dt{margin-bottom:.3125em;font-weight:bold}
+dl dd{margin-bottom:1.25em}
+blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
+blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
+@media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
+h1{font-size:2.75em}
+h2{font-size:2.3125em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
+h4{font-size:1.4375em}}
+table{background:#fff;margin-bottom:1.25em;border:1px solid #dedede;word-wrap:normal}
+table thead,table tfoot{background:#f7f8f7}
+table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
+table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
+table tr.even,table tr.alt{background:#f8f8f7}
+table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{line-height:1.6}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
+h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
+.center{margin-left:auto;margin-right:auto}
+.stretch{width:100%}
+.clearfix::before,.clearfix::after,.float-group::before,.float-group::after{content:" ";display:table}
+.clearfix::after,.float-group::after{clear:both}
+:not(pre).nobreak{word-wrap:normal}
+:not(pre).nowrap{white-space:nowrap}
+:not(pre).pre-wrap{white-space:pre-wrap}
+:not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
+pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
+pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
+pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
+em em{font-style:normal}
+strong strong{font-weight:400}
+.keyseq{color:rgba(51,51,51,.8)}
+kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background:#f7f7f7;border:1px solid #ccc;border-radius:3px;box-shadow:0 1px 0 rgba(0,0,0,.2),inset 0 0 0 .1em #fff;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
+.keyseq kbd:first-child{margin-left:0}
+.keyseq kbd:last-child{margin-right:0}
+.menuseq,.menuref{color:#000}
+.menuseq b:not(.caret),.menuref{font-weight:inherit}
+.menuseq{word-spacing:-.02em}
+.menuseq b.caret{font-size:1.25em;line-height:.8}
+.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
+b.button::before,b.button::after{position:relative;top:-1px;font-weight:400}
+b.button::before{content:"[";padding:0 3px 0 2px}
+b.button::after{content:"]";padding:0 2px 0 3px}
+p a>code:hover{color:rgba(0,0,0,.9)}
+#header,#content,#footnotes,#footer{width:100%;margin:0 auto;max-width:62.5em;*zoom:1;position:relative;padding-left:.9375em;padding-right:.9375em}
+#header::before,#header::after,#content::before,#content::after,#footnotes::before,#footnotes::after,#footer::before,#footer::after{content:" ";display:table}
+#header::after,#content::after,#footnotes::after,#footer::after{clear:both}
+#content{margin-top:1.25em}
+#content::before{content:none}
+#header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
+#header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
+#header .details span:first-child{margin-left:-.125em}
+#header .details span.email a{color:rgba(0,0,0,.85)}
+#header .details br{display:none}
+#header .details br+span::before{content:"\00a0\2013\00a0"}
+#header .details br+span.author::before{content:"\00a0\22c5\00a0";color:rgba(0,0,0,.85)}
+#header .details br+span#revremark::before{content:"\00a0|\00a0"}
+#header #revnumber{text-transform:capitalize}
+#header #revnumber::after{content:"\00a0"}
+#content>h1:first-child:not([class]){color:rgba(0,0,0,.85);border-bottom:1px solid #dddddf;padding-bottom:8px;margin-top:0;padding-top:1rem;margin-bottom:1.25rem}
+#toc{border-bottom:1px solid #e7e7e9;padding-bottom:.5em}
+#toc>ul{margin-left:.125em}
+#toc ul.sectlevel0>li>a{font-style:italic}
+#toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
+#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
+#toc li{line-height:1.3334;margin-top:.3334em}
+#toc a{text-decoration:none}
+#toc a:active{text-decoration:underline}
+#toctitle{color:#7a2518;font-size:1.2em}
+@media screen and (min-width:768px){#toctitle{font-size:1.375em}
+body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
+#toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
+#toc.toc2>ul{font-size:.9em;margin-bottom:0}
+#toc.toc2 ul ul{margin-left:0;padding-left:1em}
+#toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
+body.toc2.toc-right{padding-left:0;padding-right:15em}
+body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #e7e7e9;left:auto;right:0}}
+@media screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
+#toc.toc2{width:20em}
+#toc.toc2 #toctitle{font-size:1.375em}
+#toc.toc2>ul{font-size:.95em}
+#toc.toc2 ul ul{padding-left:1.25em}
+body.toc2.toc-right{padding-left:0;padding-right:20em}}
+#content #toc{border:1px solid #e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;border-radius:4px}
+#content #toc>:first-child{margin-top:0}
+#content #toc>:last-child{margin-bottom:0}
+#footer{max-width:none;background:rgba(0,0,0,.8);padding:1.25em}
+#footer-text{color:hsla(0,0%,100%,.8);line-height:1.44}
+#content{margin-bottom:.625em}
+.sect1{padding-bottom:.625em}
+@media screen and (min-width:768px){#content{margin-bottom:1.25em}
+.sect1{padding-bottom:1.25em}}
+.sect1:last-child{padding-bottom:0}
+.sect1+.sect1{border-top:1px solid #e7e7e9}
+#content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
+#content h1>a.anchor::before,h2>a.anchor::before,h3>a.anchor::before,#toctitle>a.anchor::before,.sidebarblock>.content>.title>a.anchor::before,h4>a.anchor::before,h5>a.anchor::before,h6>a.anchor::before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
+#content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
+#content h1>a.link,h2>a.link,h3>a.link,#toctitle>a.link,.sidebarblock>.content>.title>a.link,h4>a.link,h5>a.link,h6>a.link{color:#ba3925;text-decoration:none}
+#content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
+details,.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
+details{margin-left:1.25rem}
+details>summary{cursor:pointer;display:block;position:relative;line-height:1.6;margin-bottom:.625rem;outline:none;-webkit-tap-highlight-color:transparent}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"";border:solid transparent;border-left:solid;border-width:.3em 0 .3em .5em;position:absolute;top:.5em;left:-1.25rem;transform:translateX(15%)}
+details[open]>summary::before{border:solid transparent;border-top:solid;border-width:.5em .3em 0;transform:translateY(15%)}
+details>summary::after{content:"";width:1.25rem;height:1em;position:absolute;top:.3em;left:-1.25rem}
+.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{text-rendering:optimizeLegibility;text-align:left;font-family:"Noto Serif","DejaVu Serif",serif;font-size:1rem;font-style:italic}
+table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
+.paragraph.lead>p,#preamble>.sectionbody>[class=paragraph]:first-of-type p{font-size:1.21875em;line-height:1.6;color:rgba(0,0,0,.85)}
+.admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
+.admonitionblock>table td.icon{text-align:center;width:80px}
+.admonitionblock>table td.icon img{max-width:none}
+.admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
+.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
+.admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
+.sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
+.sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
+.exampleblock>.content>:first-child,.sidebarblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child,.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
+@media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
+@media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
+.literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
+.literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
+.listingblock>.content{position:relative}
+.listingblock pre>code{display:block}
+.listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
+.listingblock:hover code[data-lang]::before{display:block}
+.listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
+.listingblock.terminal pre .command:not([data-prompt])::before{content:"$"}
+.listingblock pre.highlightjs{padding:0}
+.listingblock pre.highlightjs>code{padding:1em;border-radius:4px}
+.listingblock pre.prettyprint{border-width:0}
+.prettyprint{background:#f7f7f8}
+pre.prettyprint .linenums{line-height:1.45;margin-left:2em}
+pre.prettyprint li{background:none;list-style-type:inherit;padding-left:0}
+pre.prettyprint li code[data-lang]::before{opacity:1}
+pre.prettyprint li:not(:first-child) code[data-lang]::before{display:none}
+table.linenotable{border-collapse:separate;border:0;margin-bottom:0;background:none}
+table.linenotable td[class]{color:inherit;vertical-align:top;padding:0;line-height:inherit;white-space:normal}
+table.linenotable td.code{padding-left:.75em}
+table.linenotable td.linenos,pre.pygments .linenos{border-right:1px solid;opacity:.35;padding-right:.5em;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
+pre.pygments span.linenos{display:inline-block;margin-right:.75em}
+.quoteblock{margin:0 1em 1.25em 1.5em;display:table}
+.quoteblock:not(.excerpt)>.title{margin-left:-1.5em;margin-bottom:.75em}
+.quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
+.quoteblock blockquote{margin:0;padding:0;border:0}
+.quoteblock blockquote::before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
+.quoteblock blockquote>.paragraph:last-child p{margin-bottom:0}
+.quoteblock .attribution{margin-top:.75em;margin-right:.5ex;text-align:right}
+.verseblock{margin:0 1em 1.25em}
+.verseblock pre{font-family:"Open Sans","DejaVu Sans",sans-serif;font-size:1.15rem;color:rgba(0,0,0,.85);font-weight:300;text-rendering:optimizeLegibility}
+.verseblock pre strong{font-weight:400}
+.verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
+.quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
+.quoteblock .attribution br,.verseblock .attribution br{display:none}
+.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
+.quoteblock.abstract blockquote::before,.quoteblock.excerpt blockquote::before,.quoteblock .quoteblock blockquote::before{display:none}
+.quoteblock.abstract blockquote,.quoteblock.abstract p,.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{line-height:1.6;word-spacing:0}
+.quoteblock.abstract{margin:0 1em 1.25em;display:block}
+.quoteblock.abstract>.title{margin:0 0 .375em;font-size:1.15em;text-align:center}
+.quoteblock.excerpt>blockquote,.quoteblock .quoteblock{padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
+.quoteblock.excerpt,.quoteblock .quoteblock{margin-left:0}
+.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
+.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;font-size:.85rem;text-align:left;margin-right:0}
+p.tableblock:last-child{margin-bottom:0}
+td.tableblock>.content{margin-bottom:1.25em;word-wrap:anywhere}
+td.tableblock>.content>:last-child{margin-bottom:-1.25em}
+table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
+table.grid-all>*>tr>*{border-width:1px}
+table.grid-cols>*>tr>*{border-width:0 1px}
+table.grid-rows>*>tr>*{border-width:1px 0}
+table.frame-all{border-width:1px}
+table.frame-ends{border-width:1px 0}
+table.frame-sides{border-width:0 1px}
+table.frame-none>colgroup+*>:first-child>*,table.frame-sides>colgroup+*>:first-child>*{border-top-width:0}
+table.frame-none>:last-child>:last-child>*,table.frame-sides>:last-child>:last-child>*{border-bottom-width:0}
+table.frame-none>*>tr>:first-child,table.frame-ends>*>tr>:first-child{border-left-width:0}
+table.frame-none>*>tr>:last-child,table.frame-ends>*>tr>:last-child{border-right-width:0}
+table.stripes-all>*>tr,table.stripes-odd>*>tr:nth-of-type(odd),table.stripes-even>*>tr:nth-of-type(even),table.stripes-hover>*>tr:hover{background:#f8f8f7}
+th.halign-left,td.halign-left{text-align:left}
+th.halign-right,td.halign-right{text-align:right}
+th.halign-center,td.halign-center{text-align:center}
+th.valign-top,td.valign-top{vertical-align:top}
+th.valign-bottom,td.valign-bottom{vertical-align:bottom}
+th.valign-middle,td.valign-middle{vertical-align:middle}
+table thead th,table tfoot th{font-weight:bold}
+tbody tr th{background:#f7f8f7}
+tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
+p.tableblock>code:only-child{background:none;padding:0}
+p.tableblock{font-size:1em}
+ol{margin-left:1.75em}
+ul li ol{margin-left:1.5em}
+dl dd{margin-left:1.125em}
+dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
+li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
+ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
+ul.unstyled,ol.unstyled{margin-left:0}
+li>p:empty:only-child::before{content:"";display:inline-block}
+ul.checklist>li>p:first-child{margin-left:-1em}
+ul.checklist>li>p:first-child>.fa-square-o:first-child,ul.checklist>li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
+ul.checklist>li>p:first-child>input[type=checkbox]:first-child{margin-right:.25em}
+ul.inline{display:flex;flex-flow:row wrap;list-style:none;margin:0 0 .625em -1.25em}
+ul.inline>li{margin-left:1.25em}
+.unstyled dl dt{font-weight:400;font-style:normal}
+ol.arabic{list-style-type:decimal}
+ol.decimal{list-style-type:decimal-leading-zero}
+ol.loweralpha{list-style-type:lower-alpha}
+ol.upperalpha{list-style-type:upper-alpha}
+ol.lowerroman{list-style-type:lower-roman}
+ol.upperroman{list-style-type:upper-roman}
+ol.lowergreek{list-style-type:lower-greek}
+.hdlist>table,.colist>table{border:0;background:none}
+.hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
+td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
+td.hdlist1{font-weight:bold;padding-bottom:1.25em}
+td.hdlist2{word-wrap:anywhere}
+.literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
+.colist td:not([class]):first-child{padding:.4em .75em 0;line-height:1;vertical-align:top}
+.colist td:not([class]):first-child img{max-width:none}
+.colist td:not([class]):last-child{padding:.25em 0}
+.thumb,.th{line-height:0;display:inline-block;border:4px solid #fff;box-shadow:0 0 0 1px #ddd}
+.imageblock.left{margin:.25em .625em 1.25em 0}
+.imageblock.right{margin:.25em 0 1.25em .625em}
+.imageblock>.title{margin-bottom:0}
+.imageblock.thumb,.imageblock.th{border-width:6px}
+.imageblock.thumb>.title,.imageblock.th>.title{padding:0 .125em}
+.image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
+.image.left{margin-right:.625em}
+.image.right{margin-left:.625em}
+a.image{text-decoration:none;display:inline-block}
+a.image object{pointer-events:none}
+sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
+sup.footnote a,sup.footnoteref a{text-decoration:none}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
+#footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
+#footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
+#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
+#footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
+#footnotes .footnote:last-of-type{margin-bottom:0}
+#content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
+div.unbreakable{page-break-inside:avoid}
+.big{font-size:larger}
+.small{font-size:smaller}
+.underline{text-decoration:underline}
+.overline{text-decoration:overline}
+.line-through{text-decoration:line-through}
+.aqua{color:#00bfbf}
+.aqua-background{background:#00fafa}
+.black{color:#000}
+.black-background{background:#000}
+.blue{color:#0000bf}
+.blue-background{background:#0000fa}
+.fuchsia{color:#bf00bf}
+.fuchsia-background{background:#fa00fa}
+.gray{color:#606060}
+.gray-background{background:#7d7d7d}
+.green{color:#006000}
+.green-background{background:#007d00}
+.lime{color:#00bf00}
+.lime-background{background:#00fa00}
+.maroon{color:#600000}
+.maroon-background{background:#7d0000}
+.navy{color:#000060}
+.navy-background{background:#00007d}
+.olive{color:#606000}
+.olive-background{background:#7d7d00}
+.purple{color:#600060}
+.purple-background{background:#7d007d}
+.red{color:#bf0000}
+.red-background{background:#fa0000}
+.silver{color:#909090}
+.silver-background{background:#bcbcbc}
+.teal{color:#006060}
+.teal-background{background:#007d7d}
+.white{color:#bfbfbf}
+.white-background{background:#fafafa}
+.yellow{color:#bfbf00}
+.yellow-background{background:#fafa00}
+span.icon>.fa{cursor:default}
+a span.icon>.fa{cursor:inherit}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note::before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip::before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning::before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution::before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important::before{content:"\f06a";color:#bf0000}
+.conum[data-value]{display:inline-block;color:#fff!important;background:rgba(0,0,0,.8);border-radius:50%;text-align:center;font-size:.75em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Open Sans","DejaVu Sans",sans-serif;font-style:normal;font-weight:bold}
+.conum[data-value] *{color:#fff!important}
+.conum[data-value]+b{display:none}
+.conum[data-value]::after{content:attr(data-value)}
+pre .conum[data-value]{position:relative;top:-.125em}
+b.conum *{color:inherit!important}
+.conum:not([data-value]):empty{display:none}
+dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
+h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
+p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
+p,blockquote,dt,td.content,td.hdlist1,span.alt,summary{font-size:1.0625rem}
+p{margin-bottom:1.25rem}
+.sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
+.exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
+.print-only{display:none!important}
+@page{margin:1.25cm .75cm}
+@media print{*{box-shadow:none!important;text-shadow:none!important}
+html{font-size:80%}
+a{color:inherit!important;text-decoration:underline!important}
+a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
+a[href^="http:"]:not(.bare)::after,a[href^="https:"]:not(.bare)::after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
+abbr[title]{border-bottom:1px dotted}
+abbr[title]::after{content:" (" attr(title) ")"}
+pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
+thead{display:table-header-group}
+svg{max-width:100%}
+p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
+h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
+#header,#content,#footnotes,#footer{max-width:none}
+#toc,.sidebarblock,.exampleblock>.content{background:none!important}
+#toc{border-bottom:1px solid #dddddf!important;padding-bottom:0!important}
+body.book #header{text-align:center}
+body.book #header>h1:first-child{border:0!important;margin:2.5em 0 1em}
+body.book #header .details{border:0!important;display:block;padding:0!important}
+body.book #header .details span:first-child{margin-left:0!important}
+body.book #header .details br{display:block}
+body.book #header .details br+span::before{content:none!important}
+body.book #toc{border:0!important;text-align:left!important;padding:0!important;margin:0!important}
+body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-break-before:always}
+.listingblock code[data-lang]::before{display:block}
+#footer{padding:0 .9375em}
+.hide-on-print{display:none!important}
+.print-only{display:block!important}
+.hide-for-print{display:none!important}
+.show-for-print{display:inherit!important}}
+@media amzn-kf8,print{#header>h1:first-child{margin-top:1.25rem}
+.sect1{padding:0!important}
+.sect1+.sect1{border:0}
+#footer{background:none}
+#footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<h1>FastMCP: Guía Completa de Documentación</h1>
+<div class="details">
+<span id="author" class="author">Bot-Bunnny</span><br>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_introducción_a_fastmcp">Introducción a FastMCP</a>
+<ul class="sectlevel2">
+<li><a href="#_qué_es_fastmcp">¿Qué es FastMCP?</a></li>
+<li><a href="#_por_qué_fastmcp">¿Por qué FastMCP?</a>
+<ul class="sectlevel3">
+<li><a href="#_sin_fastmcp_el_sdk_oficial_de_python">Sin FastMCP: El SDK oficial de Python</a></li>
+<li><a href="#_con_fastmcp_elegancia_y_simplicidad">Con FastMCP: Elegancia y Simplicidad</a></li>
+</ul>
+</li>
+<li><a href="#_características_principales">Características Principales</a></li>
+<li><a href="#_comparación_fastmcp_vs_sdk_oficial">Comparación: FastMCP vs SDK Oficial</a></li>
+</ul>
+</li>
+<li><a href="#_instalación_y_configuración">Instalación y Configuración</a>
+<ul class="sectlevel2">
+<li><a href="#_requisitos">Requisitos</a></li>
+<li><a href="#_instalación_con_pip">Instalación con pip</a></li>
+<li><a href="#_instalación_con_uv_recomendado">Instalación con uv (Recomendado)</a></li>
+<li><a href="#_verificar_instalación">Verificar Instalación</a></li>
+<li><a href="#_estructura_de_proyecto_recomendada">Estructura de Proyecto Recomendada</a></li>
+<li><a href="#_configuración_con_pyproject_toml">Configuración con pyproject.toml</a></li>
+</ul>
+</li>
+<li><a href="#_el_servidor_fastmcp">El Servidor FastMCP</a>
+<ul class="sectlevel2">
+<li><a href="#_crear_un_servidor_básico">Crear un Servidor Básico</a></li>
+<li><a href="#_instrucciones_del_servidor">Instrucciones del Servidor</a></li>
+<li><a href="#_parámetros_de_configuración_del_servidor">Parámetros de Configuración del Servidor</a></li>
+<li><a href="#_los_tres_componentes_mcp">Los Tres Componentes MCP</a>
+<ul class="sectlevel3">
+<li><a href="#_tools_herramientas">Tools (Herramientas)</a></li>
+<li><a href="#_resources_recursos">Resources (Recursos)</a></li>
+<li><a href="#_prompts_plantillas">Prompts (Plantillas)</a></li>
+</ul>
+</li>
+<li><a href="#_ejecutar_el_servidor">Ejecutar el Servidor</a>
+<ul class="sectlevel3">
+<li><a href="#_stdio_por_defecto">STDIO (Por Defecto)</a></li>
+<li><a href="#_http_streamable">HTTP Streamable</a></li>
+<li><a href="#_sse_legacy">SSE (Legacy)</a></li>
+</ul>
+</li>
+<li><a href="#_usando_el_cli_de_fastmcp">Usando el CLI de FastMCP</a></li>
+</ul>
+</li>
+<li><a href="#_tools_herramientas_2">Tools (Herramientas)</a>
+<ul class="sectlevel2">
+<li><a href="#_concepto_de_tools">Concepto de Tools</a></li>
+<li><a href="#_crear_un_tool_básico">Crear un Tool Básico</a></li>
+<li><a href="#_inferencia_de_tipos_automática">Inferencia de Tipos Automática</a></li>
+<li><a href="#_parámetros_de_tool">Parámetros de Tool</a></li>
+<li><a href="#_tools_asíncronos">Tools Asíncronos</a></li>
+<li><a href="#_validación_de_entrada">Validación de Entrada</a>
+<ul class="sectlevel3">
+<li><a href="#_modo_flexible_por_defecto">Modo Flexible (Por Defecto)</a></li>
+<li><a href="#_modo_estricto">Modo Estricto</a></li>
+</ul>
+</li>
+<li><a href="#_retorno_de_tool">Retorno de Tool</a></li>
+<li><a href="#_ejemplo_completo_servidor_de_tools">Ejemplo Completo: Servidor de Tools</a></li>
+<li><a href="#_testing_de_tools">Testing de Tools</a></li>
+</ul>
+</li>
+<li><a href="#_resources_recursos_2">Resources (Recursos)</a>
+<ul class="sectlevel2">
+<li><a href="#_concepto_de_resources">Concepto de Resources</a></li>
+<li><a href="#_crear_resources_estáticos">Crear Resources Estáticos</a></li>
+<li><a href="#_uri_de_resources">URI de Resources</a></li>
+<li><a href="#_resource_templates">Resource Templates</a></li>
+<li><a href="#_resources_con_tipos_complejos">Resources con Tipos Complejos</a></li>
+<li><a href="#_resources_binarios">Resources Binarios</a></li>
+<li><a href="#_acceso_a_resources_desde_el_cliente">Acceso a Resources desde el Cliente</a></li>
+<li><a href="#_resources_dinámicos_con_providers">Resources Dinámicos con Providers</a></li>
+<li><a href="#_ejemplo_completo_servidor_de_resources">Ejemplo Completo: Servidor de Resources</a></li>
+</ul>
+</li>
+<li><a href="#_prompts">Prompts</a>
+<ul class="sectlevel2">
+<li><a href="#_concepto_de_prompts">Concepto de Prompts</a></li>
+<li><a href="#_crear_prompts_básicos">Crear Prompts Básicos</a></li>
+<li><a href="#_prompts_estructurados">Prompts Estructurados</a></li>
+<li><a href="#_prompts_con_argumentos_opcionales">Prompts con Argumentos Opcionales</a></li>
+<li><a href="#_prompts_dinámicos">Prompts Dinámicos</a></li>
+<li><a href="#_acceso_a_prompts_desde_el_cliente">Acceso a Prompts desde el Cliente</a></li>
+<li><a href="#_ejemplo_completo_servidor_de_prompts">Ejemplo Completo: Servidor de Prompts</a></li>
+</ul>
+</li>
+<li><a href="#_context">Context</a>
+<ul class="sectlevel2">
+<li><a href="#_qué_es_el_context">¿Qué es el Context?</a></li>
+<li><a href="#_acceder_al_context">Acceder al Context</a>
+<ul class="sectlevel3">
+<li><a href="#_método_recomendado_dependency_injection">Método Recomendado (Dependency Injection)</a></li>
+<li><a href="#_método_legacy_type_hint">Método Legacy (Type Hint)</a></li>
+</ul>
+</li>
+<li><a href="#_logging">Logging</a></li>
+<li><a href="#_progress_reporting">Progress Reporting</a></li>
+<li><a href="#_resource_access_desde_tools">Resource Access desde Tools</a></li>
+<li><a href="#_session_state">Session State</a></li>
+<li><a href="#_llm_sampling">LLM Sampling</a></li>
+<li><a href="#_user_elicitation">User Elicitation</a></li>
+<li><a href="#_ejemplo_completo_uso_de_context">Ejemplo Completo: Uso de Context</a></li>
+</ul>
+</li>
+<li><a href="#_cliente_fastmcp">Cliente FastMCP</a>
+<ul class="sectlevel2">
+<li><a href="#_concepto_de_cliente">Concepto de Cliente</a></li>
+<li><a href="#_crear_un_cliente">Crear un Cliente</a></li>
+<li><a href="#_tipos_de_transporte">Tipos de Transporte</a>
+<ul class="sectlevel3">
+<li><a href="#_in_memory_testing">In-Memory (Testing)</a></li>
+<li><a href="#_stdio_subprocess">STDIO (Subprocess)</a></li>
+<li><a href="#_http_web_service">HTTP (Web Service)</a></li>
+</ul>
+</li>
+<li><a href="#_ciclo_de_vida_de_conexión">Ciclo de Vida de Conexión</a></li>
+<li><a href="#_operaciones_del_cliente">Operaciones del Cliente</a>
+<ul class="sectlevel3">
+<li><a href="#_tools">Tools</a></li>
+<li><a href="#_resources">Resources</a></li>
+<li><a href="#_prompts_2">Prompts</a></li>
+</ul>
+</li>
+<li><a href="#_callback_handlers">Callback Handlers</a></li>
+<li><a href="#_testing_con_cliente">Testing con Cliente</a></li>
+<li><a href="#_ejemplo_completo_cliente_avanzado">Ejemplo Completo: Cliente Avanzado</a></li>
+</ul>
+</li>
+<li><a href="#_middlewares">Middlewares</a>
+<ul class="sectlevel2">
+<li><a href="#_concepto_de_middleware">Concepto de Middleware</a></li>
+<li><a href="#_middleware_básico">Middleware Básico</a></li>
+<li><a href="#_middleware_de_logging_completo">Middleware de Logging Completo</a></li>
+<li><a href="#_middleware_de_rate_limiting">Middleware de Rate Limiting</a></li>
+<li><a href="#_middleware_de_autenticación">Middleware de Autenticación</a></li>
+<li><a href="#_middleware_de_métricas">Middleware de Métricas</a></li>
+<li><a href="#_múltiples_middlewares">Múltiples Middlewares</a></li>
+</ul>
+</li>
+<li><a href="#_autenticación_y_seguridad">Autenticación y Seguridad</a>
+<ul class="sectlevel2">
+<li><a href="#_autenticación_http">Autenticación HTTP</a>
+<ul class="sectlevel3">
+<li><a href="#_bearer_token">Bearer Token</a></li>
+<li><a href="#_oauth_2_0">OAuth 2.0</a></li>
+</ul>
+</li>
+<li><a href="#_acceder_a_información_de_autenticación">Acceder a Información de Autenticación</a></li>
+<li><a href="#_ocultar_detalles_de_error">Ocultar Detalles de Error</a></li>
+</ul>
+</li>
+<li><a href="#_lifetime_hooks">Lifetime Hooks</a>
+<ul class="sectlevel2">
+<li><a href="#_concepto_de_lifespan">Concepto de Lifespan</a></li>
+<li><a href="#_lifespan_básico">Lifespan Básico</a></li>
+<li><a href="#_acceder_a_recursos_del_lifespan">Acceder a Recursos del Lifespan</a></li>
+<li><a href="#_lifespan_con_context_state">Lifespan con Context State</a></li>
+</ul>
+</li>
+<li><a href="#_despliegue_y_transportes">Despliegue y Transportes</a>
+<ul class="sectlevel2">
+<li><a href="#_transportes_disponibles">Transportes Disponibles</a></li>
+<li><a href="#_stdio_por_defecto_2">STDIO (Por Defecto)</a></li>
+<li><a href="#_http_streamable_2">HTTP Streamable</a></li>
+<li><a href="#_rutas_personalizadas_http">Rutas Personalizadas (HTTP)</a></li>
+<li><a href="#_integración_con_fastapi">Integración con FastAPI</a></li>
+<li><a href="#_docker">Docker</a></li>
+<li><a href="#_cli_de_fastmcp">CLI de FastMCP</a></li>
+</ul>
+</li>
+<li><a href="#_ejemplo_completo_servidor_de_producción">Ejemplo Completo: Servidor de Producción</a></li>
+<li><a href="#_mejores_prácticas">Mejores Prácticas</a>
+<ul class="sectlevel2">
+<li><a href="#_organización_del_código">Organización del Código</a></li>
+<li><a href="#_tips_y_consejos">Tips y Consejos</a>
+<ul class="sectlevel3">
+<li><a href="#_usa_type_hints_siempre">Usa Type Hints Siempre</a></li>
+<li><a href="#_documenta_con_docstrings">Documenta con Docstrings</a></li>
+<li><a href="#_maneja_errores_apropiadamente">Maneja Errores Apropiadamente</a></li>
+<li><a href="#_usa_context_para_logging">Usa Context para Logging</a></li>
+<li><a href="#_testing_adecuado">Testing Adecuado</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_referencia_rápida">Referencia Rápida</a>
+<ul class="sectlevel2">
+<li><a href="#_decoradores">Decoradores</a></li>
+<li><a href="#_context_methods">Context Methods</a></li>
+<li><a href="#_cliente_methods">Cliente Methods</a></li>
+<li><a href="#_ejecutar_servidor">Ejecutar Servidor</a></li>
+</ul>
+</li>
+<li><a href="#_conclusión">Conclusión</a>
+<ul class="sectlevel2">
+<li><a href="#_próximos_pasos">Próximos Pasos</a></li>
+<li><a href="#_recursos">Recursos</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_introducción_a_fastmcp">Introducción a FastMCP</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_qué_es_fastmcp">¿Qué es FastMCP?</h3>
+<div class="paragraph">
+<p>FastMCP es un framework de Python que simplifica drásticamente la creación de servidores MCP (Model Context Protocol). Diseñado por el equipo de Prefect, proporciona una interfaz declarativa y "Pythonica" para exponer herramientas, recursos y prompts a clientes MCP como Claude Desktop, VS Code con Copilot, y otros asistentes de IA.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>FastMCP no es un servidor MCP más — es la forma más elegante y productiva de crear servidores MCP en Python. Su filosofía es similar a la de FastAPI: código limpio, tipado fuerte, y documentación automática.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_por_qué_fastmcp">¿Por qué FastMCP?</h3>
+<div class="sect3">
+<h4 id="_sin_fastmcp_el_sdk_oficial_de_python">Sin FastMCP: El SDK oficial de Python</h4>
+<div class="paragraph">
+<p>Con el SDK oficial de MCP, crear un servidor simple requiere mucho código repetitivo:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python"># Sin FastMCP - SDK oficial de MCP
+from mcp.server import Server
+from mcp.server.stdio import stdio_server
+from mcp.types import Tool, TextContent
+import mcp.types as types
+import json
+
+# Crear servidor manualmente
+server = Server("example-server")
+
+# Definir lista de herramientas
+@server.list_tools()
+async def list_tools():
+    return [
+        Tool(
+            name="greet",
+            description="Greet a user by name",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string", "description": "The name to greet"}
+                },
+                "required": ["name"]
+            }
+        )
+    ]
+
+# Implementar la herramienta
+@server.call_tool()
+async def call_tool(name: str, arguments: dict):
+    if name == "greet":
+        user_name = arguments.get("name", "World")
+        return [TextContent(type="text", text=f"Hello, {user_name}!")]
+    raise ValueError(f"Unknown tool: {name}")
+
+# Ejecutar servidor
+async def main():
+    async with stdio_server() as (read_stream, write_stream):
+        await server.run(
+            read_stream,
+            write_stream,
+            server.create_initialization_options()
+        )
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_con_fastmcp_elegancia_y_simplicidad">Con FastMCP: Elegancia y Simplicidad</h4>
+<div class="paragraph">
+<p>Con FastMCP, el mismo servidor es dramáticamente más simple:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python"># Con FastMCP - Limpio y declarativo
+from fastmcp import FastMCP
+
+mcp = FastMCP("MyServer")
+
+@mcp.tool
+def greet(name: str) -&gt; str:
+    """Greet a user by name."""
+    return f"Hello, {name}!"
+
+if __name__ == "__main__":
+    mcp.run()</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>FastMCP automáticamente:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Genera el JSON Schema desde las firmas de función</p>
+</li>
+<li>
+<p>Maneja la serialización de tipos de retorno</p>
+</li>
+<li>
+<p>Infiere tipos de parámetros desde anotaciones</p>
+</li>
+<li>
+<p>Proporciona validación automática de entrada</p>
+</li>
+<li>
+<p>Gestiona el protocolo MCP completo</p>
+</li>
+</ul>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_características_principales">Características Principales</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 75%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Característica</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Decoradores intuitivos</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>@mcp.tool</code>, <code>@mcp.resource</code>, <code>@mcp.prompt</code> para registrar componentes</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Tipado automático</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">JSON Schema generado desde anotaciones de tipo Python</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Múltiples transportes</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">STDIO (por defecto), HTTP Streamable, SSE (legacy)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Cliente integrado</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Cliente programático para testing y desarrollo</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Inyección de dependencias</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Acceso a Context, HTTP requests, tokens personalizados</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Middlewares</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Interceptación de mensajes para logging, rate limiting, etc.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Autenticación</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">OAuth 2.0 y Bearer Token support para HTTP</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Lifetime hooks</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Setup y teardown cuando el servidor inicia/termina</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_comparación_fastmcp_vs_sdk_oficial">Comparación: FastMCP vs SDK Oficial</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Aspecto</th>
+<th class="tableblock halign-left valign-top">SDK Oficial</th>
+<th class="tableblock halign-left valign-top">FastMCP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Líneas de código</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">~50+</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">~10</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Generación de Schema</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Manual</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Automática</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Validación de entrada</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Manual</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Automática (Pydantic)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Documentación</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Mínima</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Integrada (docstrings)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Testing</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Complejo</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Cliente integrado</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Middlewares</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">No</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sí</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">HTTP Support</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Manual</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Integrado</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_instalación_y_configuración">Instalación y Configuración</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_requisitos">Requisitos</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Python 3.10 o superior</p>
+</li>
+<li>
+<p>pip o uv (gestor de paquetes moderno)</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_instalación_con_pip">Instalación con pip</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">pip install fastmcp</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_instalación_con_uv_recomendado">Instalación con uv (Recomendado)</h3>
+<div class="paragraph">
+<p>uv es un gestor de paquetes moderno y extremadamente rápido:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Instalar uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Crear proyecto
+uv init my-mcp-server
+cd my-mcp-server
+
+# Añadir FastMCP
+uv add fastmcp</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_verificar_instalación">Verificar Instalación</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Verificar versión
+uv run python -c "import fastmcp; print(fastmcp.__version__)"
+
+# O con el CLI de FastMCP
+fastmcp version</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_estructura_de_proyecto_recomendada">Estructura de Proyecto Recomendada</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">my-mcp-server/
+├── src/
+│   └── my_server/
+│       ├── __init__.py
+│       ├── server.py          # Servidor principal
+│       ├── tools/
+│       │   ├── __init__.py
+│       │   └── data_tools.py  # Tools relacionados con datos
+│       ├── resources/
+│       │   ├── __init__.py
+│       │   └── config.py      # Resources de configuración
+│       └── prompts/
+│           ├── __init__.py
+│           └── analysis.py    # Prompts de análisis
+├── tests/
+│   └── test_server.py
+├── pyproject.toml
+└── README.md</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_configuración_con_pyproject_toml">Configuración con pyproject.toml</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-toml hljs" data-lang="toml">[project]
+name = "my-mcp-server"
+version = "0.1.0"
+description = "My FastMCP Server"
+requires-python = "&gt;=3.10"
+dependencies = [
+    "fastmcp&gt;=2.0.0",
+]
+
+[project.scripts]
+my-server = "my_server.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_el_servidor_fastmcp">El Servidor FastMCP</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_crear_un_servidor_básico">Crear un Servidor Básico</h3>
+<div class="paragraph">
+<p>El componente central de cualquier aplicación FastMCP es la clase <code>FastMCP</code>. Un servidor mínimo solo necesita un nombre:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+
+# Crear servidor con nombre
+mcp = FastMCP("MyServer")
+
+# Ejecutar servidor
+if __name__ == "__main__":
+    mcp.run()</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>El nombre del servidor es importante: aparece en los clientes MCP y ayuda a los usuarios a identificar qué servidor están usando.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_instrucciones_del_servidor">Instrucciones del Servidor</h3>
+<div class="paragraph">
+<p>Las instrucciones ayudan a los clientes (y los LLMs detrás de ellos) a entender qué hace tu servidor y cómo usarlo efectivamente:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+
+mcp = FastMCP(
+    "DataAnalysis",
+    instructions="""
+    Provides tools for analyzing numerical datasets.
+
+    Start with get_summary() for an overview of your data.
+    Use analyze_trends() to identify patterns.
+    Use export_results() to save your analysis.
+
+    Supported formats: CSV, JSON, Excel.
+    """,
+)</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Las instrucciones se muestran a los usuarios en clientes como Claude Desktop. Incluye:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Qué hace el servidor</p>
+</li>
+<li>
+<p>Qué herramientas empezar</p>
+</li>
+<li>
+<p>Ejemplos de uso</p>
+</li>
+<li>
+<p>Limitaciones conocidas</p>
+</li>
+</ul>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_parámetros_de_configuración_del_servidor">Parámetros de Configuración del Servidor</h3>
+<div class="paragraph">
+<p>La clase <code>FastMCP</code> acepta numerosos parámetros para personalizar el comportamiento:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+
+mcp = FastMCP(
+    # === Identidad ===
+    name="MyServer",                          # Nombre del servidor
+    instructions="Use this server to...",      # Instrucciones para clientes
+    version="1.0.0",                           # Versión del servidor
+    website_url="https://example.com/server",  # URL con más información
+
+    # === Comportamiento ===
+    on_duplicate="warn",           # "warn", "error", "replace", "ignore"
+    strict_input_validation=False, # Validación estricta de inputs
+    mask_error_details=False,      # Ocultar detalles de errores internos
+
+    # === Autenticación ===
+    auth=my_auth_provider,         # Proveedor OAuth o TokenVerifier
+
+    # === Middlewares ===
+    middleware=[logging_middleware], # Lista de middlewares
+
+    # === Providers ===
+    providers=[database_provider],   # Proveedores dinámicos
+
+    # === Lifecycle ===
+    lifespan=my_lifespan,           # Setup/teardown del servidor
+)</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_los_tres_componentes_mcp">Los Tres Componentes MCP</h3>
+<div class="paragraph">
+<p>FastMCP expone tres tipos de componentes a los clientes:</p>
+</div>
+<div class="sect3">
+<h4 id="_tools_herramientas">Tools (Herramientas)</h4>
+<div class="paragraph">
+<p>Funciones que los clientes pueden invocar para realizar acciones:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">@mcp.tool
+def multiply(a: float, b: float) -&gt; float:
+    """Multiplies two numbers together."""
+    return a * b</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_resources_recursos">Resources (Recursos)</h4>
+<div class="paragraph">
+<p>Fuentes de datos que los clientes pueden leer:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">@mcp.resource("data://config")
+def get_config() -&gt; dict:
+    """Server configuration."""
+    return {"theme": "dark", "version": "1.0"}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_prompts_plantillas">Prompts (Plantillas)</h4>
+<div class="paragraph">
+<p>Plantillas de mensajes reutilizables para interacciones con LLMs:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">@mcp.prompt
+def analyze_data(data_points: list[float]) -&gt; str:
+    """Analyze numerical data."""
+    formatted = ", ".join(str(p) for p in data_points)
+    return f"Please analyze these data points: {formatted}"</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ejecutar_el_servidor">Ejecutar el Servidor</h3>
+<div class="paragraph">
+<p>FastMCP soporta varios transportes:</p>
+</div>
+<div class="sect3">
+<h4 id="_stdio_por_defecto">STDIO (Por Defecto)</h4>
+<div class="paragraph">
+<p>Ideal para integraciones locales y CLI tools:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">if __name__ == "__main__":
+    mcp.run()  # Usa STDIO por defecto</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_http_streamable">HTTP Streamable</h4>
+<div class="paragraph">
+<p>Para servicios web y APIs:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">if __name__ == "__main__":
+    mcp.run(transport="http", host="127.0.0.1", port=8000)</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_sse_legacy">SSE (Legacy)</h4>
+<div class="paragraph">
+<p>Transporte legacy para compatibilidad:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">if __name__ == "__main__":
+    mcp.run(transport="sse", host="127.0.0.1", port=8000)</code></pre>
+</div>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>SSE está deprecado en favor de Streamable HTTP. Úsalo solo para compatibilidad con clientes legacy.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_usando_el_cli_de_fastmcp">Usando el CLI de FastMCP</h3>
+<div class="paragraph">
+<p>FastMCP incluye un CLI para ejecutar servidores sin modificar código:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Ejecutar servidor con STDIO
+fastmcp run my_server.py
+
+# Ejecutar con HTTP
+fastmcp run my_server.py --transport http --port 8000
+
+# Ejecutar función específica
+fastmcp run my_module:create_server --transport http
+
+# Desarrollo con recarga automática
+fastmcp dev my_server.py</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_tools_herramientas_2">Tools (Herramientas)</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_concepto_de_tools">Concepto de Tools</h3>
+<div class="paragraph">
+<p>Los Tools son funciones que los clientes MCP pueden invocar. Son el componente más utilizado en MCP y permiten que los asistentes de IA realicen acciones: consultar APIs, manipular archivos, hacer cálculos, etc.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Los Tools son <strong>funciones invocables</strong> — el cliente puede ejecutarlas con argumentos y recibir resultados estructurados. A diferencia de los Resources (que son datos pasivos), los Tools realizan trabajo activo.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_crear_un_tool_básico">Crear un Tool Básico</h3>
+<div class="paragraph">
+<p>La forma más simple de crear un Tool es con el decorador <code>@mcp.tool</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+
+mcp = FastMCP("MathServer")
+
+@mcp.tool
+def add(a: int, b: int) -&gt; int:
+    """Add two numbers together.
+
+    Args:
+        a: First number to add
+        b: Second number to add
+
+    Returns:
+        The sum of a and b
+    """
+    return a + b</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>El docstring es importante: FastMCP lo usa para generar la descripción del Tool. Los clientes muestran esta descripción a los usuarios.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_inferencia_de_tipos_automática">Inferencia de Tipos Automática</h3>
+<div class="paragraph">
+<p>FastMCP genera automáticamente el JSON Schema desde las anotaciones de tipo:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+from typing import Literal
+from pydantic import BaseModel, Field
+
+mcp = FastMCP("AdvancedTools")
+
+# Tipos básicos
+@mcp.tool
+def process_text(
+    text: str,                    # Tipo string
+    count: int,                   # Tipo entero
+    ratio: float,                 # Tipo flotante
+    enabled: bool,                # Tipo booleano
+    items: list[str],             # Lista de strings
+    mapping: dict[str, int],      # Diccionario string -&gt; int
+) -&gt; str:
+    """Process text with various parameters."""
+    return f"Processed: {text}"
+
+# Enums y Literales
+@mcp.tool
+def sort_data(
+    data: list[int],
+    order: Literal["asc", "desc"] = "asc",  # Enum limitado
+) -&gt; list[int]:
+    """Sort a list of integers."""
+    return sorted(data, reverse=(order == "desc"))
+
+# Pydantic Models
+class UserFilter(BaseModel):
+    """Filter criteria for user search."""
+    name: str = Field(description="User name to search")
+    age_min: int | None = Field(default=None, description="Minimum age")
+    age_max: int | None = Field(default=None, description="Maximum age")
+    active: bool = Field(default=True, description="Only active users")
+
+@mcp.tool
+def search_users(filter: UserFilter) -&gt; list[dict]:
+    """Search users with advanced filtering."""
+    # Filter es automáticamente validado por Pydantic
+    return [{"name": filter.name, "active": filter.active}]</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_parámetros_de_tool">Parámetros de Tool</h3>
+<div class="paragraph">
+<p>El decorador <code>@mcp.tool</code> acepta parámetros para personalizar el comportamiento:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+
+mcp = FastMCP("ToolsServer")
+
+@mcp.tool(
+    name="calculate_sum",           # Nombre personalizado
+    description="Calculate sum",    # Descripción personalizada
+    tags={"math", "utility"},        # Tags para filtrado
+    enabled=True,                   # Habilitar/deshabilitar
+)
+def add_numbers(a: int, b: int) -&gt; int:
+    """Add two numbers."""
+    return a + b
+
+# Tool deshabilitado
+@mcp.tool(enabled=False)
+def internal_tool() -&gt; str:
+    """Internal tool, not exposed."""
+    return "Not accessible"</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_tools_asíncronos">Tools Asíncronos</h3>
+<div class="paragraph">
+<p>Para operaciones de I/O (consultas a BD, llamadas HTTP), usa funciones async:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">import aiohttp
+from fastmcp import FastMCP
+
+mcp = FastMCP("AsyncTools")
+
+@mcp.tool
+async def fetch_url(url: str) -&gt; str:
+    """Fetch content from a URL.
+
+    Args:
+        url: The URL to fetch
+
+    Returns:
+        The response text
+    """
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            return await response.text()
+
+@mcp.tool
+async def query_database(query: str) -&gt; list[dict]:
+    """Query the database."""
+    # Simulación de consulta async
+    await asyncio.sleep(0.1)
+    return [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_validación_de_entrada">Validación de Entrada</h3>
+<div class="paragraph">
+<p>FastMCP valida automáticamente los inputs usando Pydantic. Hay dos modos:</p>
+</div>
+<div class="sect3">
+<h4 id="_modo_flexible_por_defecto">Modo Flexible (Por Defecto)</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+
+mcp = FastMCP("Server", strict_input_validation=False)  # Default
+
+@mcp.tool
+def greet(name: str, count: int) -&gt; str:
+    return f"Hello {name}, count: {count}"
+
+# El cliente envía strings (común en JSON):
+# {"name": "Alice", "count": "10"}
+# FastMCP convierte automáticamente: "10" -&gt; 10
+# Resultado: "Hello Alice, count: 10"</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_modo_estricto">Modo Estricto</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+
+mcp = FastMCP("Server", strict_input_validation=True)
+
+@mcp.tool
+def greet(name: str, count: int) -&gt; str:
+    return f"Hello {name}, count: {count}"
+
+# El cliente envía:
+# {"name": "Alice", "count": "10"}
+# Error! "10" no es int, el schema requiere int exacto
+# El cliente recibe: "Invalid params: count must be integer"</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_retorno_de_tool">Retorno de Tool</h3>
+<div class="paragraph">
+<p>Los Tools pueden retornar diferentes tipos:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+from fastmcp.utilities.types import Image
+from mcp.types import EmbeddedResource
+import json
+
+mcp = FastMCP("ReturnTypes")
+
+# Retorno simple (string)
+@mcp.tool
+def get_text() -&gt; str:
+    """Return simple text."""
+    return "Hello, world!"
+
+# Retorno de diccionario (JSON automático)
+@mcp.tool
+def get_data() -&gt; dict:
+    """Return structured data."""
+    return {"status": "ok", "count": 42}
+
+# Retorno de lista
+@mcp.tool
+def get_items() -&gt; list[str]:
+    """Return list of items."""
+    return ["item1", "item2", "item3"]
+
+# Retorno de imagen
+@mcp.tool
+def get_image() -&gt; Image:
+    """Return an image."""
+    # Crear imagen desde bytes
+    image_bytes = b"..."  # PNG o JPEG bytes
+    return Image(data=image_bytes, format="png")
+
+# Retorno de contenido embebido
+@mcp.tool
+def get_resource() -&gt; EmbeddedResource:
+    """Return embedded resource."""
+    return EmbeddedResource(
+        type="resource",
+        resource={
+            "uri": "file:///data.json",
+            "mimeType": "application/json",
+            "text": json.dumps({"key": "value"})
+        }
+    )</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ejemplo_completo_servidor_de_tools">Ejemplo Completo: Servidor de Tools</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+from pydantic import BaseModel, Field
+from typing import Literal
+import asyncio
+import json
+
+mcp = FastMCP(
+    "ToolServer",
+    instructions="""
+    A collection of useful tools for data processing.
+
+    Available tools:
+    - format_json: Format JSON strings
+    - validate_email: Validate email addresses
+    - generate_password: Generate secure passwords
+    - calculate_hash: Calculate file hashes
+    """,
+)
+
+# === Modelos Pydantic ===
+
+class EmailValidation(BaseModel):
+    """Email validation result."""
+    email: str
+    is_valid: bool
+    domain: str | None
+    suggestions: list[str] = []
+
+class PasswordOptions(BaseModel):
+    """Password generation options."""
+    length: int = Field(default=16, ge=8, le=64, description="Password length")
+    include_uppercase: bool = Field(default=True, description="Include A-Z")
+    include_lowercase: bool = Field(default=True, description="Include a-z")
+    include_numbers: bool = Field(default=True, description="Include 0-9")
+    include_symbols: bool = Field(default=False, description="Include !@#$%")
+
+# === Tools ===
+
+@mcp.tool
+def format_json(json_string: str, indent: int = 2) -&gt; str:
+    """Format a JSON string with proper indentation.
+
+    Args:
+        json_string: The JSON string to format
+        indent: Number of spaces for indentation (default: 2)
+
+    Returns:
+        Formatted JSON string
+
+    Raises:
+        ValueError: If input is not valid JSON
+    """
+    try:
+        data = json.loads(json_string)
+        return json.dumps(data, indent=indent, ensure_ascii=False)
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid JSON: {e}")
+
+@mcp.tool
+def validate_email(email: str) -&gt; EmailValidation:
+    """Validate an email address.
+
+    Args:
+        email: The email address to validate
+
+    Returns:
+        Validation result with suggestions if invalid
+    """
+    import re
+
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    is_valid = bool(re.match(pattern, email))
+
+    result = EmailValidation(
+        email=email,
+        is_valid=is_valid,
+        domain=email.split('@')[1] if '@' in email else None
+    )
+
+    if not is_valid and '@' in email:
+        # Sugerir dominios comunes
+        common_domains = ['gmail.com', 'outlook.com', 'yahoo.com']
+        local_part = email.split('@')[0]
+        result.suggestions = [f"{local_part}@{d}" for d in common_domains]
+
+    return result
+
+@mcp.tool
+def generate_password(options: PasswordOptions) -&gt; str:
+    """Generate a secure random password.
+
+    Args:
+        options: Password generation options
+
+    Returns:
+        Generated password
+    """
+    import secrets
+    import string
+
+    chars = ""
+    if options.include_uppercase:
+        chars += string.ascii_uppercase
+    if options.include_lowercase:
+        chars += string.ascii_lowercase
+    if options.include_numbers:
+        chars += string.digits
+    if options.include_symbols:
+        chars += "!@#$%^&amp;*()_+-=[]{}|;:,.&lt;&gt;?"
+
+    if not chars:
+        chars = string.ascii_letters + string.digits
+
+    return ''.join(secrets.choice(chars) for _ in range(options.length))
+
+@mcp.tool(tags={"utility", "hash"})
+def calculate_hash(text: str, algorithm: Literal["md5", "sha1", "sha256"] = "sha256") -&gt; str:
+    """Calculate hash of text.
+
+    Args:
+        text: Text to hash
+        algorithm: Hash algorithm (md5, sha1, sha256)
+
+    Returns:
+        Hexadecimal hash string
+    """
+    import hashlib
+
+    hash_func = getattr(hashlib, algorithm)
+    return hash_func(text.encode()).hexdigest()
+
+@mcp.tool
+async def fetch_json(url: str, timeout: float = 10.0) -&gt; dict:
+    """Fetch JSON data from a URL.
+
+    Args:
+        url: The URL to fetch
+        timeout: Request timeout in seconds
+
+    Returns:
+        Parsed JSON data
+    """
+    import aiohttp
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, timeout=aiohttp.ClientTimeout(total=timeout)) as response:
+            response.raise_for_status()
+            return await response.json()
+
+# === Ejecutar ===
+
+if __name__ == "__main__":
+    mcp.run()</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_testing_de_tools">Testing de Tools</h3>
+<div class="paragraph">
+<p>FastMCP incluye un cliente para testing:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">import asyncio
+from fastmcp import FastMCP, Client
+
+# Crear servidor
+mcp = FastMCP("TestServer")
+
+@mcp.tool
+def add(a: int, b: int) -&gt; int:
+    """Add two numbers."""
+    return a + b
+
+# Test con cliente
+async def test_tool():
+    client = Client(mcp)
+
+    async with client:
+        # Listar tools
+        tools = await client.list_tools()
+        print(f"Available tools: {[t.name for t in tools]}")
+
+        # Llamar tool
+        result = await client.call_tool("add", {"a": 5, "b": 3})
+        print(f"Result: {result.data}")  # 8
+
+asyncio.run(test_tool())</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_resources_recursos_2">Resources (Recursos)</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_concepto_de_resources">Concepto de Resources</h3>
+<div class="paragraph">
+<p>Los Resources son fuentes de datos pasivas que los clientes pueden leer. A diferencia de los Tools (que realizan acciones), los Resources simplemente exponen información: archivos, configuraciones, datos de bases de datos, etc.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Los Resources son <strong>datos de solo lectura</strong> — el cliente los consulta pero no los modifica. Para operaciones de escritura, usa Tools.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_crear_resources_estáticos">Crear Resources Estáticos</h3>
+<div class="paragraph">
+<p>La forma más simple es exponer datos constantes:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+
+mcp = FastMCP("ResourceServer")
+
+# Resource estático con URI fija
+@mcp.resource("config://app")
+def get_app_config() -&gt; dict:
+    """Application configuration."""
+    return {
+        "version": "1.0.0",
+        "debug": False,
+        "max_connections": 100
+    }
+
+# Resource con tipo string
+@mcp.resource("data://readme")
+def get_readme() -&gt; str:
+    """Server README."""
+    return """
+    # My MCP Server
+
+    This server provides tools for data processing.
+    """</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_uri_de_resources">URI de Resources</h3>
+<div class="paragraph">
+<p>Cada Resource tiene una URI única que lo identifica:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python"># URIs válidas para Resources
+@mcp.resource("file:///path/to/data.json")     # Archivo local
+@mcp.resource("config://app")                  # URI scheme personalizado
+@mcp.resource("data://users/active")           # Datos con namespace
+@mcp.resource("memory://cache")                # Recurso en memoria</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Usa URIs descriptivas que indiquen el tipo de datos. Los prefijos comunes son:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>file://</code> - Archivos del sistema</p>
+</li>
+<li>
+<p><code>config://</code> - Configuraciones</p>
+</li>
+<li>
+<p><code>data://</code> - Datos de la aplicación</p>
+</li>
+<li>
+<p><code>memory://</code> - Datos en memoria</p>
+</li>
+</ul>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_resource_templates">Resource Templates</h3>
+<div class="paragraph">
+<p>Los Templates permiten crear Resources dinámicos con parámetros en la URI:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+
+mcp = FastMCP("UserServer")
+
+# Template con parámetro
+@mcp.resource("users://{user_id}/profile")
+def get_user_profile(user_id: str) -&gt; dict:
+    """Get user profile by ID.
+
+    Args:
+        user_id: The unique user identifier
+    """
+    # Simulación de búsqueda en base de datos
+    users = {
+        "1": {"id": "1", "name": "Alice", "email": "alice@example.com"},
+        "2": {"id": "2", "name": "Bob", "email": "bob@example.com"},
+    }
+    return users.get(user_id, {"error": "User not found"})
+
+# Template con múltiples parámetros
+@mcp.resource("files://{project}/{filename}")
+def get_project_file(project: str, filename: str) -&gt; str:
+    """Get file content from a project."""
+    import os
+    path = os.path.join("projects", project, filename)
+    with open(path, "r") as f:
+        return f.read()</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Los clientes usan los Templates para descubrir qué URIs están disponibles. Cuando un cliente llama a <code>users://123/profile</code>, FastMCP extrae el <code>user_id</code> y llama a la función con ese valor.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_resources_con_tipos_complejos">Resources con Tipos Complejos</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+from pydantic import BaseModel
+from typing import Optional
+
+mcp = FastMCP("ComplexResources")
+
+class User(BaseModel):
+    """User model."""
+    id: str
+    name: str
+    email: str
+    active: bool = True
+
+class ServerStatus(BaseModel):
+    """Server status model."""
+    status: str
+    uptime_seconds: int
+    active_connections: int
+    memory_usage_mb: float
+
+# Resource que retorna un modelo Pydantic
+@mcp.resource("server://status")
+def get_server_status() -&gt; ServerStatus:
+    """Get current server status."""
+    return ServerStatus(
+        status="running",
+        uptime_seconds=3600,
+        active_connections=42,
+        memory_usage_mb=128.5
+    )
+
+# Resource que retorna lista
+@mcp.resource("users://active")
+def get_active_users() -&gt; list[User]:
+    """Get all active users."""
+    return [
+        User(id="1", name="Alice", email="alice@example.com"),
+        User(id="2", name="Bob", email="bob@example.com"),
+    ]</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_resources_binarios">Resources Binarios</h3>
+<div class="paragraph">
+<p>Para datos binarios (imágenes, PDFs, etc.), retorna bytes:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+from fastmcp.utilities.types import Image
+
+mcp = FastMCP("BinaryResources")
+
+@mcp.resource("image://logo")
+def get_logo() -&gt; Image:
+    """Get server logo image."""
+    with open("logo.png", "rb") as f:
+        image_bytes = f.read()
+
+    return Image(data=image_bytes, format="png")
+
+@mcp.resource("file://{filename}")
+def get_binary_file(filename: str) -&gt; bytes:
+    """Get binary file content."""
+    with open(filename, "rb") as f:
+        return f.read()</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_acceso_a_resources_desde_el_cliente">Acceso a Resources desde el Cliente</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">import asyncio
+from fastmcp import FastMCP, Client
+
+mcp = FastMCP("ResourceDemo")
+
+@mcp.resource("data://config")
+def get_config() -&gt; dict:
+    return {"version": "1.0", "debug": False}
+
+@mcp.resource("users://{id}/profile")
+def get_user(user_id: str) -&gt; dict:
+    return {"id": user_id, "name": "Alice"}
+
+async def main():
+    client = Client(mcp)
+
+    async with client:
+        # Listar todos los resources
+        resources = await client.list_resources()
+        for resource in resources:
+            print(f"Resource: {resource.uri}")
+
+        # Leer un resource estático
+        config = await client.read_resource("data://config")
+        print(f"Config: {config[0].text}")
+
+        # Leer un resource con template
+        user = await client.read_resource("users://123/profile")
+        print(f"User: {user[0].text}")
+
+asyncio.run(main())</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_resources_dinámicos_con_providers">Resources Dinámicos con Providers</h3>
+<div class="paragraph">
+<p>Para resources que cambian dinámicamente (BD, APIs externas), usa Providers:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+from fastmcp.server.providers import ResourceProvider
+
+class DatabaseResourceProvider(ResourceProvider):
+    """Provider que expone tablas de BD como resources."""
+
+    def __init__(self, db_connection):
+        self.db = db_connection
+
+    async def list_resources(self):
+        """Listar todas las tablas como resources."""
+        tables = await self.db.fetch_all("SHOW TABLES")
+        return [
+            {"uri": f"db://{table}", "name": table}
+            for table in tables
+        ]
+
+    async def read_resource(self, uri: str):
+        """Leer contenido de una tabla."""
+        table_name = uri.replace("db://", "")
+        data = await self.db.fetch_all(f"SELECT * FROM {table_name}")
+        return data
+
+# Usar el provider
+mcp = FastMCP("DatabaseServer")
+mcp.add_provider(DatabaseResourceProvider(my_db_connection))</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ejemplo_completo_servidor_de_resources">Ejemplo Completo: Servidor de Resources</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+from pydantic import BaseModel
+from typing import Optional
+import json
+import os
+
+mcp = FastMCP(
+    "ResourceServer",
+    instructions="""
+    A server exposing various resources.
+
+    Static resources:
+    - config://app: Application configuration
+    - config://version: Version information
+
+    Dynamic resources:
+    - users://{user_id}: User profile by ID
+    - files://{project}/{filename}: Project file content
+    """,
+)
+
+# === Modelos ===
+
+class AppConfig(BaseModel):
+    """Application configuration."""
+    version: str
+    debug: bool
+    database_url: str
+    max_connections: int
+
+class User(BaseModel):
+    """User model."""
+    id: str
+    name: str
+    email: str
+    role: str
+    active: bool
+
+# === Datos simulados ===
+
+USERS_DB = {
+    "1": User(id="1", name="Alice", email="alice@example.com", role="admin", active=True),
+    "2": User(id="2", name="Bob", email="bob@example.com", role="user", active=True),
+    "3": User(id="3", name="Charlie", email="charlie@example.com", role="user", active=False),
+}
+
+PROJECTS_DIR = "projects"
+
+# === Resources estáticos ===
+
+@mcp.resource("config://app")
+def get_app_config() -&gt; AppConfig:
+    """Get application configuration."""
+    return AppConfig(
+        version="1.0.0",
+        debug=False,
+        database_url="postgresql://localhost/mydb",
+        max_connections=100
+    )
+
+@mcp.resource("config://version")
+def get_version() -&gt; dict:
+    """Get version information."""
+    return {
+        "version": "1.0.0",
+        "build": "2024-01-15",
+        "python_version": "3.11"
+    }
+
+@mcp.resource("info://server")
+def get_server_info() -&gt; dict:
+    """Get server information."""
+    return {
+        "name": "ResourceServer",
+        "resources_count": 10,
+        "tools_count": 0,
+        "prompts_count": 0
+    }
+
+# === Resources con templates ===
+
+@mcp.resource("users://{user_id}")
+def get_user_by_id(user_id: str) -&gt; Optional[User]:
+    """Get user by ID.
+
+    Args:
+        user_id: The unique user identifier
+    """
+    return USERS_DB.get(user_id)
+
+@mcp.resource("users://{user_id}/settings")
+def get_user_settings(user_id: str) -&gt; dict:
+    """Get user settings.
+
+    Args:
+        user_id: The unique user identifier
+    """
+    user = USERS_DB.get(user_id)
+    if not user:
+        return {"error": "User not found"}
+
+    return {
+        "theme": "dark",
+        "language": "en",
+        "notifications": True
+    }
+
+@mcp.resource("files://{project}/{filename}")
+def get_project_file(project: str, filename: str) -&gt; str:
+    """Get file content from a project.
+
+    Args:
+        project: Project name
+        filename: File name within project
+    """
+    file_path = os.path.join(PROJECTS_DIR, project, filename)
+
+    if not os.path.exists(file_path):
+        return f"File not found: {project}/{filename}"
+
+    with open(file_path, "r") as f:
+        return f.read()
+
+# === Resources con listas ===
+
+@mcp.resource("users://active")
+def get_active_users() -&gt; list[User]:
+    """Get all active users."""
+    return [u for u in USERS_DB.values() if u.active]
+
+@mcp.resource("users://all")
+def get_all_users() -&gt; list[dict]:
+    """Get all users (as dictionaries)."""
+    return [u.model_dump() for u in USERS_DB.values()]
+
+# === Ejecutar ===
+
+if __name__ == "__main__":
+    mcp.run()</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_prompts">Prompts</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_concepto_de_prompts">Concepto de Prompts</h3>
+<div class="paragraph">
+<p>Los Prompts son plantillas de mensajes reutilizables que guían las interacciones con LLMs. Permiten encapsular patrones de conversación y hacerlos disponibles para los clientes.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Los Prompts son <strong>plantillas de mensajes</strong> — se renderizan con argumentos y producen mensajes estructurados que el LLM puede usar como contexto o instrucciones.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_crear_prompts_básicos">Crear Prompts Básicos</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+
+mcp = FastMCP("PromptServer")
+
+# Prompt simple que retorna string
+@mcp.prompt
+def analyze_data(data: str) -&gt; str:
+    """Analyze provided data.
+
+    Args:
+        data: The data to analyze
+    """
+    return f"Please analyze the following data:\n\n{data}"
+
+# Prompt con múltiples argumentos
+@mcp.prompt
+def code_review(code: str, language: str = "python") -&gt; str:
+    """Review code for improvements.
+
+    Args:
+        code: The code to review
+        language: Programming language (default: python)
+    """
+    return f"""Please review this {language} code and suggest improvements:
+
+```{language}
+{code}
+```
+
+Focus on:
+1. Code quality
+2. Performance
+3. Security
+4. Best practices
+"""</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_prompts_estructurados">Prompts Estructurados</h3>
+<div class="paragraph">
+<p>Para prompts más complejos, retorna una lista de mensajes:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+from fastmcp.server.prompts import UserMessage, AssistantMessage, SystemMessage
+
+mcp = FastMCP("StructuredPrompts")
+
+@mcp.prompt
+def data_analysis_session(dataset_name: str) -&gt; list:
+    """Start a data analysis session.
+
+    Args:
+        dataset_name: Name of the dataset to analyze
+    """
+    return [
+        SystemMessage("You are a data analyst assistant."),
+        UserMessage(f"I want to analyze the dataset: {dataset_name}"),
+        AssistantMessage("I'll help you analyze that dataset. What specific aspects would you like to explore?"),
+    ]</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_prompts_con_argumentos_opcionales">Prompts con Argumentos Opcionales</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+
+mcp = FastMCP("PromptDemo")
+
+@mcp.prompt
+def generate_documentation(
+    code: str,
+    style: str = "google",  # google, numpy, sphinx
+    include_examples: bool = True,
+    language: str = "python"
+) -&gt; str:
+    """Generate documentation for code.
+
+    Args:
+        code: The code to document
+        style: Documentation style (google, numpy, sphinx)
+        include_examples: Whether to include usage examples
+        language: Programming language
+    """
+    prompt = f"""Generate {style}-style documentation for this {language} code:
+
+```
+{code}
+```
+
+Requirements:
+- Use {style} docstring format
+- Document all parameters
+- Document return values
+- Include type information"""
+
+    if include_examples:
+        prompt += "\n- Include usage examples"
+
+    return prompt
+
+@mcp.prompt
+def explain_error(
+    error_message: str,
+    code_context: str | None = None,
+    language: str = "python"
+) -&gt; str:
+    """Explain an error message.
+
+    Args:
+        error_message: The error message to explain
+        code_context: Surrounding code (optional)
+        language: Programming language
+    """
+    prompt = f"""Explain this {language} error message:
+
+{error_message}
+"""
+
+    if code_context:
+        prompt += f"""
+
+Code context:
+```
+{code_context}
+```
+"""
+
+    prompt += """
+
+Provide:
+1. What caused the error
+2. How to fix it
+3. Best practices to avoid it
+"""
+
+    return prompt</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_prompts_dinámicos">Prompts Dinámicos</h3>
+<div class="paragraph">
+<p>Los prompts pueden generar contenido dinámicamente:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+from datetime import datetime
+import json
+
+mcp = FastMCP("DynamicPrompts")
+
+@mcp.prompt
+def analyze_with_context(data: str, analysis_type: str = "general") -&gt; str:
+    """Analyze data with current context.
+
+    Args:
+        data: Data to analyze
+        analysis_type: Type of analysis (general, statistical, security)
+    """
+    context = {
+        "timestamp": datetime.now().isoformat(),
+        "analysis_type": analysis_type,
+        "data_length": len(data)
+    }
+
+    return f"""Analyze the following data (type: {analysis_type}):
+
+{data}
+
+Context:
+{json.dumps(context, indent=2)}
+
+Provide a detailed analysis focusing on {analysis_type} aspects.
+"""
+
+@mcp.prompt
+def generate_tests(
+    code: str,
+    framework: str = "pytest",
+    coverage_level: str = "high"
+) -&gt; str:
+    """Generate tests for code.
+
+    Args:
+        code: Code to test
+        framework: Testing framework
+        coverage_level: Coverage target (low, medium, high)
+    """
+    coverage_map = {
+        "low": "50%",
+        "medium": "80%",
+        "high": "95%"
+    }
+
+    return f"""Generate {framework} tests for this code:
+
+```
+{code}
+```
+
+Requirements:
+- Use {framework} framework
+- Target {coverage_map[coverage_level]} coverage
+- Include edge cases
+- Test both success and failure paths
+"""</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_acceso_a_prompts_desde_el_cliente">Acceso a Prompts desde el Cliente</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">import asyncio
+from fastmcp import FastMCP, Client
+
+mcp = FastMCP("PromptClientDemo")
+
+@mcp.prompt
+def analyze_data(data: str) -&gt; str:
+    return f"Analyze: {data}"
+
+async def main():
+    client = Client(mcp)
+
+    async with client:
+        # Listar prompts disponibles
+        prompts = await client.list_prompts()
+        print(f"Available prompts: {[p.name for p in prompts]}")
+
+        # Obtener un prompt con argumentos
+        result = await client.get_prompt(
+            "analyze_data",
+            {"data": "sales figures for Q1"}
+        )
+
+        # Los mensajes están en result.messages
+        for message in result.messages:
+            print(f"Role: {message.role}")
+            print(f"Content: {message.content}")
+
+asyncio.run(main())</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ejemplo_completo_servidor_de_prompts">Ejemplo Completo: Servidor de Prompts</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+from fastmcp.server.prompts import UserMessage, AssistantMessage, SystemMessage
+
+mcp = FastMCP(
+    "PromptServer",
+    instructions="""
+    A collection of useful prompts for LLM interactions.
+
+    Available prompts:
+    - code_review: Review code for improvements
+    - generate_docs: Generate documentation
+    - explain_error: Explain error messages
+    - analyze_data: Analyze datasets
+    - create_test: Generate tests
+    """,
+)
+
+# === Prompts de código ===
+
+@mcp.prompt
+def code_review(
+    code: str,
+    language: str = "python",
+    focus_areas: list[str] | None = None
+) -&gt; str:
+    """Review code and suggest improvements.
+
+    Args:
+        code: The code to review
+        language: Programming language
+        focus_areas: Areas to focus on (optional)
+    """
+    areas = focus_areas or ["quality", "performance", "security", "best_practices"]
+
+    return f"""Review this {language} code:
+
+```{language}
+{code}
+```
+
+Focus areas: {', '.join(areas)}
+
+For each focus area, provide:
+1. Current state analysis
+2. Specific recommendations
+3. Code examples if applicable
+
+Format your response as:
+## {Area Name}
+### Current State
+### Recommendations
+### Example Code
+"""
+
+@mcp.prompt
+def generate_docs(
+    code: str,
+    doc_style: str = "google",
+    include_type_hints: bool = True,
+    include_examples: bool = True
+) -&gt; str:
+    """Generate documentation for code.
+
+    Args:
+        code: Code to document
+        doc_style: Documentation style (google, numpy, sphinx)
+        include_type_hints: Include type annotations
+        include_examples: Include usage examples
+    """
+    return f"""Generate {doc_style}-style documentation for:
+
+```
+{code}
+```
+
+Requirements:
+- Use {doc_style} docstring format
+- Document all parameters and return values
+{"- Include type hints in docstrings" if include_type_hints else ""}
+{"- Include usage examples" if include_examples else ""}
+
+Output only the documented code.
+"""
+
+# === Prompts de análisis ===
+
+@mcp.prompt
+def analyze_data(
+    data: str,
+    analysis_type: str = "general",
+    output_format: str = "markdown"
+) -&gt; str:
+    """Analyze data and provide insights.
+
+    Args:
+        data: Data to analyze (CSV, JSON, or text)
+        analysis_type: Type of analysis (general, statistical, trend)
+        output_format: Output format (markdown, json, text)
+    """
+    return f"""Perform a {analysis_type} analysis on:
+
+{data}
+
+Provide:
+1. Summary statistics (if applicable)
+2. Key patterns or trends
+3. Anomalies or outliers
+4. Recommendations
+
+Output format: {output_format}
+"""
+
+# === Prompts de debugging ===
+
+@mcp.prompt
+def debug_session(
+    error_message: str,
+    code: str | None = None,
+    steps_already_tried: list[str] | None = None
+) -&gt; list:
+    """Start a debugging session.
+
+    Args:
+        error_message: The error message encountered
+        code: Relevant code (optional)
+        steps_already_tried: Debugging steps already attempted
+    """
+    messages = [
+        SystemMessage("You are an expert debugging assistant. Help the user diagnose and fix their issue."),
+        UserMessage(f"I encountered this error:\n\n{error_message}")
+    ]
+
+    if code:
+        messages.append(UserMessage(f"Here's the relevant code:\n\n```\n{code}\n```"))
+
+    if steps_already_tried:
+        steps = "\n".join(f"- {s}" for s in steps_already_tried)
+        messages.append(UserMessage(f"I've already tried:\n{steps}"))
+
+    messages.append(AssistantMessage("I'll help you debug this. Let me analyze the error and suggest solutions."))
+
+    return messages
+
+# === Prompts de testing ===
+
+@mcp.prompt
+def create_test_plan(
+    feature_description: str,
+    test_types: list[str] | None = None,
+    priority: str = "medium"
+) -&gt; str:
+    """Create a test plan for a feature.
+
+    Args:
+        feature_description: Description of the feature
+        test_types: Types of tests (unit, integration, e2e)
+        priority: Priority level (low, medium, high)
+    """
+    types = test_types or ["unit", "integration"]
+
+    return f"""Create a {priority} priority test plan for:
+
+{feature_description}
+
+Test types to include: {', '.join(types)}
+
+For each test type, specify:
+1. Test cases
+2. Expected inputs and outputs
+3. Edge cases
+4. Error scenarios
+"""</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_context">Context</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_qué_es_el_context">¿Qué es el Context?</h3>
+<div class="paragraph">
+<p>El objeto <code>Context</code> proporciona acceso a las capacidades de MCP desde dentro de tus funciones. Permite:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Logging</strong>: Enviar mensajes de debug, info, warning, error al cliente</p>
+</li>
+<li>
+<p><strong>Progress Reporting</strong>: Reportar progreso de operaciones largas</p>
+</li>
+<li>
+<p><strong>Resource Access</strong>: Acceder a resources registrados en el servidor</p>
+</li>
+<li>
+<p><strong>LLM Sampling</strong>: Solicitar al LLM del cliente que genere texto</p>
+</li>
+<li>
+<p><strong>User Elicitation</strong>: Pedir input al usuario durante la ejecución</p>
+</li>
+<li>
+<p><strong>Session State</strong>: Guardar datos entre requests</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_acceder_al_context">Acceder al Context</h3>
+<div class="sect3">
+<h4 id="_método_recomendado_dependency_injection">Método Recomendado (Dependency Injection)</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+from fastmcp.dependencies import CurrentContext
+from fastmcp.server.context import Context
+
+mcp = FastMCP("ContextDemo")
+
+@mcp.tool
+async def process_file(file_uri: str, ctx: Context = CurrentContext()) -&gt; str:
+    """Process a file using context for logging."""
+    await ctx.info(f"Processing {file_uri}")
+    return "File processed"</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>El parámetro <code>ctx</code> se inyecta automáticamente y no aparece en el schema del tool. Los clientes nunca lo ven.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_método_legacy_type_hint">Método Legacy (Type Hint)</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP, Context
+
+mcp = FastMCP("ContextDemo")
+
+@mcp.tool
+async def process_file(file_uri: str, ctx: Context) -&gt; str:
+    """Process a file using context for logging."""
+    # Context se inyecta automáticamente por el type hint
+    await ctx.info(f"Processing {file_uri}")
+    return "File processed"</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_logging">Logging</h3>
+<div class="paragraph">
+<p>Envía mensajes de log al cliente MCP:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP, Context
+from fastmcp.dependencies import CurrentContext
+
+mcp = FastMCP("LoggingDemo")
+
+@mcp.tool
+async def analyze_data(data: list[int], ctx: Context = CurrentContext()) -&gt; dict:
+    """Analyze data with logging."""
+
+    await ctx.debug("Starting analysis")  # Solo visible si el cliente lo permite
+    await ctx.info(f"Analyzing {len(data)} data points")
+
+    if len(data) &gt; 10000:
+        await ctx.warning("Large dataset, processing may take time")
+
+    try:
+        result = {
+            "count": len(data),
+            "sum": sum(data),
+            "mean": sum(data) / len(data) if data else 0
+        }
+        await ctx.info("Analysis complete")
+        return result
+    except Exception as e:
+        await ctx.error(f"Analysis failed: {e}")
+        raise</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_progress_reporting">Progress Reporting</h3>
+<div class="paragraph">
+<p>Reporta progreso para operaciones largas:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP, Context
+from fastmcp.dependencies import CurrentContext
+import asyncio
+
+mcp = FastMCP("ProgressDemo")
+
+@mcp.tool
+async def process_large_file(
+    file_path: str,
+    ctx: Context = CurrentContext()
+) -&gt; str:
+    """Process a large file with progress updates."""
+
+    total_lines = 1000  # Ejemplo
+
+    for i in range(total_lines):
+        # Procesar línea
+        await asyncio.sleep(0.01)  # Simular trabajo
+
+        # Reportar progreso cada 100 líneas
+        if i % 100 == 0:
+            await ctx.report_progress(
+                progress=i,
+                total=total_lines,
+                message=f"Processing line {i}/{total_lines}"
+            )
+
+    await ctx.report_progress(progress=total_lines, total=total_lines)
+    return f"Processed {total_lines} lines"</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_resource_access_desde_tools">Resource Access desde Tools</h3>
+<div class="paragraph">
+<p>Accede a resources registrados en el servidor:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP, Context
+from fastmcp.dependencies import CurrentContext
+
+mcp = FastMCP("ResourceAccessDemo")
+
+@mcp.resource("data://config")
+def get_config() -&gt; dict:
+    return {"api_key": "secret", "endpoint": "https://api.example.com"}
+
+@mcp.tool
+async def use_config(ctx: Context = CurrentContext()) -&gt; str:
+    """Use config resource in a tool."""
+
+    # Listar resources disponibles
+    resources = await ctx.list_resources()
+    print(f"Available: {[r.uri for r in resources]}")
+
+    # Leer un resource
+    config_content = await ctx.read_resource("data://config")
+    config = config_content[0].content  # Obtener contenido
+
+    # Usar el config
+    return f"Using endpoint: {config['endpoint']}"</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_session_state">Session State</h3>
+<div class="paragraph">
+<p>Guarda datos que persisten entre requests en la misma sesión:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP, Context
+from fastmcp.dependencies import CurrentContext
+
+mcp = FastMCP("StatefulDemo")
+
+@mcp.tool
+async def set_preference(
+    key: str,
+    value: str,
+    ctx: Context = CurrentContext()
+) -&gt; str:
+    """Set a user preference for this session."""
+    await ctx.set_state(f"pref_{key}", value)
+    return f"Preference {key} set to {value}"
+
+@mcp.tool
+async def get_preference(
+    key: str,
+    ctx: Context = CurrentContext()
+) -&gt; str | None:
+    """Get a user preference from this session."""
+    value = await ctx.get_state(f"pref_{key}")
+    return value
+
+@mcp.tool
+async def increment_counter(ctx: Context = CurrentContext()) -&gt; int:
+    """Increment a counter that persists across tool calls."""
+    count = await ctx.get_state("counter") or 0
+    count += 1
+    await ctx.set_state("counter", count)
+    return count</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>El session state es aislado por cliente — cada cliente tiene su propio state. Los valores expiran después de 1 día por defecto.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_llm_sampling">LLM Sampling</h3>
+<div class="paragraph">
+<p>Solicita al LLM del cliente que genere texto:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP, Context
+from fastmcp.dependencies import CurrentContext
+
+mcp = FastMCP("SamplingDemo")
+
+@mcp.tool
+async def summarize_with_ai(
+    text: str,
+    ctx: Context = CurrentContext()
+) -&gt; str:
+    """Summarize text using the client's LLM."""
+
+    # Solicitar al LLM del cliente
+    response = await ctx.sample(
+        f"Summarize this text in 3 sentences:\n\n{text}",
+        temperature=0.7,
+        max_tokens=200
+    )
+
+    return response.text</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_user_elicitation">User Elicitation</h3>
+<div class="paragraph">
+<p>Pide input al usuario durante la ejecución:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP, Context
+from fastmcp.dependencies import CurrentContext
+from pydantic import BaseModel
+
+mcp = FastMCP("ElicitationDemo")
+
+class UserInfo(BaseModel):
+    name: str
+    email: str
+    age: int
+
+@mcp.tool
+async def collect_user_info(ctx: Context = CurrentContext()) -&gt; dict:
+    """Collect user information interactively."""
+
+    # Pedir input estructurado
+    result = await ctx.elicit(
+        "Please provide your information:",
+        response_type=UserInfo
+    )
+
+    if result.action == "accept":
+        user = result.data
+        return {
+            "status": "collected",
+            "name": user.name,
+            "email": user.email,
+            "age": user.age
+        }
+    else:
+        return {"status": "cancelled"}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ejemplo_completo_uso_de_context">Ejemplo Completo: Uso de Context</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP, Context
+from fastmcp.dependencies import CurrentContext
+from pydantic import BaseModel
+import asyncio
+
+mcp = FastMCP(
+    "ContextServer",
+    instructions="A server demonstrating all context capabilities.",
+)
+
+# === Modelos ===
+
+class AnalysisResult(BaseModel):
+    """Result of data analysis."""
+    count: int
+    sum: float
+    mean: float
+    min: float
+    max: float
+
+# === Resources ===
+
+@mcp.resource("config://limits")
+def get_limits() -&gt; dict:
+    """Configuration limits."""
+    return {"max_items": 10000, "timeout_seconds": 30}
+
+# === Tools con Context ===
+
+@mcp.tool
+async def analyze_with_logging(
+    data: list[float],
+    ctx: Context = CurrentContext()
+) -&gt; AnalysisResult:
+    """Analyze numerical data with detailed logging.
+
+    Args:
+        data: List of numbers to analyze
+
+    Returns:
+        Analysis results including count, sum, mean, min, max
+    """
+    await ctx.debug(f"Starting analysis of {len(data)} items")
+    await ctx.info("Validating data...")
+
+    if not data:
+        await ctx.warning("Empty data list provided")
+        return AnalysisResult(count=0, sum=0, mean=0, min=0, max=0)
+
+    # Validación
+    limits_content = await ctx.read_resource("config://limits")
+    limits = limits_content[0].content
+
+    if len(data) &gt; limits["max_items"]:
+        await ctx.warning(f"Data exceeds limit of {limits['max_items']}")
+        data = data[:limits["max_items"]]
+
+    await ctx.info("Calculating statistics...")
+
+    result = AnalysisResult(
+        count=len(data),
+        sum=sum(data),
+        mean=sum(data) / len(data),
+        min=min(data),
+        max=max(data)
+    )
+
+    await ctx.info(f"Analysis complete: mean={result.mean:.2f}")
+    return result
+
+@mcp.tool
+async def process_with_progress(
+    items: list[str],
+    ctx: Context = CurrentContext()
+) -&gt; dict:
+    """Process items with progress reporting.
+
+    Args:
+        items: List of items to process
+
+    Returns:
+        Processing summary
+    """
+    total = len(items)
+    processed = 0
+    errors = 0
+
+    await ctx.info(f"Starting to process {total} items")
+
+    for i, item in enumerate(items):
+        try:
+            # Simular procesamiento
+            await asyncio.sleep(0.05)
+            processed += 1
+
+            # Reportar progreso
+            await ctx.report_progress(
+                progress=i + 1,
+                total=total,
+                message=f"Processed: {item[:30]}..."
+            )
+        except Exception as e:
+            await ctx.error(f"Error processing {item}: {e}")
+            errors += 1
+
+    await ctx.info(f"Completed: {processed} processed, {errors} errors")
+
+    return {
+        "total": total,
+        "processed": processed,
+        "errors": errors
+    }
+
+@mcp.tool
+async def session_workflow(ctx: Context = CurrentContext()) -&gt; dict:
+    """Demonstrate session state.
+
+    Returns:
+        Session state information
+    """
+    # Obtener contador actual
+    count = await ctx.get_state("workflow_count") or 0
+    count += 1
+    await ctx.set_state("workflow_count", count)
+
+    # Guardar último acceso
+    from datetime import datetime
+    await ctx.set_state("last_access", datetime.now().isoformat())
+
+    return {
+        "workflow_count": count,
+        "session_id": ctx.session_id,
+        "request_id": ctx.request_id
+    }
+
+@mcp.tool
+async def ask_user_for_input(
+    prompt: str,
+    ctx: Context = CurrentContext()
+) -&gt; dict:
+    """Ask user for input during execution.
+
+    Args:
+        prompt: Question to ask the user
+
+    Returns:
+        User's response
+    """
+    result = await ctx.elicit(prompt, response_type=str)
+
+    if result.action == "accept":
+        return {
+            "status": "accepted",
+            "response": result.data
+        }
+    elif result.action == "cancel":
+        return {
+            "status": "cancelled",
+            "response": None
+        }
+    else:
+        return {
+            "status": "rejected",
+            "response": None
+        }
+
+# === Ejecutar ===
+
+if __name__ == "__main__":
+    mcp.run()</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_cliente_fastmcp">Cliente FastMCP</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_concepto_de_cliente">Concepto de Cliente</h3>
+<div class="paragraph">
+<p>El cliente FastMCP (<code>fastmcp.Client</code>) proporciona una interfaz programática para interactuar con servidores MCP. Es ideal para:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Testing</strong>: Probar servidores durante desarrollo</p>
+</li>
+<li>
+<p><strong>Integración</strong>: Conectar múltiples servidores</p>
+</li>
+<li>
+<p><strong>Automatización</strong>: Scripts que usan tools MCP</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_crear_un_cliente">Crear un Cliente</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">import asyncio
+from fastmcp import Client, FastMCP
+
+# === Servidor de ejemplo ===
+server = FastMCP("TestServer")
+
+@server.tool
+def greet(name: str) -&gt; str:
+    """Greet a user."""
+    return f"Hello, {name}!"
+
+# === Cliente ===
+async def main():
+    # Cliente con servidor en memoria
+    client = Client(server)
+
+    async with client:
+        # Ping para verificar conexión
+        await client.ping()
+
+        # Listar componentes
+        tools = await client.list_tools()
+        print(f"Tools: {[t.name for t in tools]}")
+
+        # Llamar tool
+        result = await client.call_tool("greet", {"name": "World"})
+        print(f"Result: {result.data}")  # "Hello, World!"
+
+asyncio.run(main())</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_tipos_de_transporte">Tipos de Transporte</h3>
+<div class="paragraph">
+<p>El cliente soporta múltiples transportes:</p>
+</div>
+<div class="sect3">
+<h4 id="_in_memory_testing">In-Memory (Testing)</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import Client, FastMCP
+
+server = FastMCP("TestServer")
+client = Client(server)  # Conecta directamente en memoria</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Ideal para tests unitarios. No hay subprocess ni network overhead.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_stdio_subprocess">STDIO (Subprocess)</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import Client
+
+# Conectar a un servidor Python
+client = Client("my_server.py")
+
+# Con variables de entorno
+client = Client("my_server.py", env={"API_KEY": "secret"})
+
+# Con un comando específico
+client = Client(
+    command="python",
+    args=["my_server.py", "--debug"],
+    env={"DEBUG": "1"}
+)</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_http_web_service">HTTP (Web Service)</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import Client
+
+# HTTP Streamable (recomendado)
+client = Client("https://api.example.com/mcp")
+
+# Con headers de autenticación
+client = Client(
+    "https://api.example.com/mcp",
+    headers={"Authorization": "Bearer token123"}
+)</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ciclo_de_vida_de_conexión">Ciclo de Vida de Conexión</h3>
+<div class="paragraph">
+<p>El cliente usa context managers para gestionar conexiones:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import Client, FastMCP
+
+mcp = FastMCP("MyServer")
+
+@mcp.tool
+def greet(name: str) -&gt; str:
+    return f"Hello, {name}!"
+
+async def main():
+    client = Client(mcp)
+
+    # Opción 1: Context manager automático
+    async with client:
+        # Conexión establecida automáticamente
+        # Handshake MCP completado
+        result = await client.call_tool("greet", {"name": "Alice"})
+
+    # Opción 2: Inicialización manual
+    client = Client(mcp, auto_initialize=False)
+    async with client:
+        # Conexión establecida, pero no inicializada
+        result = await client.initialize()  # Inicializar manualmente
+        tools = await client.list_tools()</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_operaciones_del_cliente">Operaciones del Cliente</h3>
+<div class="sect3">
+<h4 id="_tools">Tools</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">async with client:
+    # Listar tools
+    tools = await client.list_tools()
+    for tool in tools:
+        print(f"{tool.name}: {tool.description}")
+
+    # Llamar tool
+    result = await client.call_tool("add", {"a": 5, "b": 3})
+    print(f"Result: {result.data}")
+
+    # Manejar errores
+    try:
+        result = await client.call_tool("divide", {"a": 10, "b": 0})
+    except Exception as e:
+        print(f"Error: {e}")</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_resources">Resources</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">async with client:
+    # Listar resources
+    resources = await client.list_resources()
+    for resource in resources:
+        print(f"{resource.uri}: {resource.name}")
+
+    # Leer resource
+    content = await client.read_resource("config://app")
+    print(f"Content: {content[0].text}")
+
+    # Leer resource con template
+    user = await client.read_resource("users://123/profile")
+    print(f"User: {user[0].text}")</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_prompts_2">Prompts</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">async with client:
+    # Listar prompts
+    prompts = await client.list_prompts()
+    for prompt in prompts:
+        print(f"{prompt.name}: {prompt.description}")
+
+    # Obtener prompt con argumentos
+    result = await client.get_prompt(
+        "analyze_data",
+        {"data": "1, 2, 3, 4, 5"}
+    )
+
+    for message in result.messages:
+        print(f"{message.role}: {message.content}")</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_callback_handlers">Callback Handlers</h3>
+<div class="paragraph">
+<p>El cliente puede manejar callbacks del servidor:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import Client
+from fastmcp.client.logging import LogMessage
+
+async def log_handler(message: LogMessage):
+    print(f"[{message.level}] {message.data}")
+
+async def progress_handler(progress: float, total: float | None, message: str | None):
+    print(f"Progress: {progress}/{total} - {message}")
+
+async def sampling_handler(messages, params, context):
+    # Integrar con tu LLM
+    return "Generated response"
+
+client = Client(
+    "my_server.py",
+    log_handler=log_handler,
+    progress_handler=progress_handler,
+    sampling_handler=sampling_handler
+)</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_testing_con_cliente">Testing con Cliente</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">import pytest
+from fastmcp import Client, FastMCP
+
+# Servidor bajo test
+mcp = FastMCP("TestServer")
+
+@mcp.tool
+def add(a: int, b: int) -&gt; int:
+    """Add two numbers."""
+    return a + b
+
+@mcp.tool
+def divide(a: float, b: float) -&gt; float:
+    """Divide two numbers."""
+    if b == 0:
+        raise ValueError("Cannot divide by zero")
+    return a / b
+
+# Tests
+@pytest.mark.asyncio
+async def test_add():
+    client = Client(mcp)
+    async with client:
+        result = await client.call_tool("add", {"a": 5, "b": 3})
+        assert result.data == 8
+
+@pytest.mark.asyncio
+async def test_divide():
+    client = Client(mcp)
+    async with client:
+        result = await client.call_tool("divide", {"a": 10, "b": 2})
+        assert result.data == 5.0
+
+@pytest.mark.asyncio
+async def test_divide_by_zero():
+    client = Client(mcp)
+    async with client:
+        with pytest.raises(Exception):
+            await client.call_tool("divide", {"a": 10, "b": 0})</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ejemplo_completo_cliente_avanzado">Ejemplo Completo: Cliente Avanzado</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">import asyncio
+from fastmcp import Client, FastMCP
+from fastmcp.client.logging import LogMessage
+
+# === Servidor de ejemplo ===
+mcp = FastMCP("AdvancedServer")
+
+@mcp.tool
+async def long_operation(duration: int) -&gt; str:
+    """Long operation with progress."""
+    import asyncio
+    for i in range(10):
+        await asyncio.sleep(duration / 10)
+    return "Done"
+
+@mcp.resource("data://config")
+def get_config() -&gt; dict:
+    return {"version": "1.0"}
+
+@mcp.prompt
+def analyze(data: str) -&gt; str:
+    return f"Analyze: {data}"
+
+# === Handlers ===
+
+async def log_handler(message: LogMessage):
+    print(f"[LOG {message.level}] {message.data}")
+
+async def progress_handler(progress: float, total: float | None, message: str | None):
+    percent = (progress / total * 100) if total else progress
+    print(f"[PROGRESS] {percent:.1f}% - {message}")
+
+async def sampling_handler(messages, params, context):
+    # Simular respuesta de LLM
+    return "This is a simulated LLM response"
+
+# === Cliente ===
+
+async def main():
+    client = Client(
+        mcp,
+        log_handler=log_handler,
+        progress_handler=progress_handler,
+        sampling_handler=sampling_handler,
+        timeout=30.0
+    )
+
+    async with client:
+        # Información del servidor
+        print(f"Server: {client.initialize_result.serverInfo.name}")
+        print(f"Instructions: {client.initialize_result.instructions}")
+
+        # Listar componentes
+        tools = await client.list_tools()
+        resources = await client.list_resources()
+        prompts = await client.list_prompts()
+
+        print(f"\nTools: {[t.name for t in tools]}")
+        print(f"Resources: {[r.uri for r in resources]}")
+        print(f"Prompts: {[p.name for p in prompts]}")
+
+        # Usar tool
+        result = await client.call_tool("long_operation", {"duration": 2})
+        print(f"\nResult: {result.data}")
+
+        # Leer resource
+        config = await client.read_resource("data://config")
+        print(f"Config: {config[0].text}")
+
+        # Obtener prompt
+        prompt_result = await client.get_prompt("analyze", {"data": "test"})
+        print(f"Prompt: {prompt_result.messages[0].content}")
+
+asyncio.run(main())</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_middlewares">Middlewares</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_concepto_de_middleware">Concepto de Middleware</h3>
+<div class="paragraph">
+<p>Los middlewares interceptan cada mensaje MCP que fluye por el servidor — requests, responses, y notifications en ambas direcciones. Son perfectos para:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Logging</strong>: Registrar todas las operaciones</p>
+</li>
+<li>
+<p><strong>Rate Limiting</strong>: Limitar frecuencia de requests</p>
+</li>
+<li>
+<p><strong>Authentication</strong>: Verificar permisos</p>
+</li>
+<li>
+<p><strong>Metrics</strong>: Recolectar estadísticas</p>
+</li>
+<li>
+<p><strong>Error Handling</strong>: Manejar errores globalmente</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_middleware_básico">Middleware Básico</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+from fastmcp.server.middleware import Middleware
+
+class LoggingMiddleware(Middleware):
+    """Middleware que registra todas las operaciones."""
+
+    async def on_request(self, request, context):
+        """Se ejecuta antes de procesar cada request."""
+        print(f"[REQUEST] {request.method} - {request.params}")
+        return request  # Retornar el request para continuar
+
+    async def on_response(self, response, context):
+        """Se ejecuta después de procesar cada request."""
+        print(f"[RESPONSE] {response}")
+        return response  # Retornar la respuesta
+
+mcp = FastMCP("MyServer", middleware=[LoggingMiddleware()])</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_middleware_de_logging_completo">Middleware de Logging Completo</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">import time
+import json
+from fastmcp import FastMCP
+from fastmcp.server.middleware import Middleware
+
+class RequestLoggingMiddleware(Middleware):
+    """Registra requests y responses con timing."""
+
+    async def on_request(self, request, context):
+        # Guardar timestamp
+        context.start_time = time.time()
+
+        # Log del request
+        print(f"&gt;&gt;&gt; {request.method}")
+        if request.params:
+            # Ocultar datos sensibles
+            safe_params = self._sanitize_params(request.params)
+            print(f"    Params: {json.dumps(safe_params)}")
+
+        return request
+
+    async def on_response(self, response, context):
+        # Calcular duración
+        duration = time.time() - context.start_time
+        print(f"&lt;&lt;&lt; Response in {duration:.3f}s")
+
+        return response
+
+    def _sanitize_params(self, params):
+        """Ocultar parámetros sensibles."""
+        sensitive = {"password", "token", "secret", "api_key"}
+        result = {}
+        for key, value in params.items():
+            if key.lower() in sensitive:
+                result[key] = "***REDACTED***"
+            else:
+                result[key] = value
+        return result
+
+# Usar el middleware
+mcp = FastMCP("LoggedServer", middleware=[RequestLoggingMiddleware()])
+
+@mcp.tool
+def login(username: str, password: str) -&gt; str:
+    """Login with credentials."""
+    return f"Logged in as {username}"
+
+if __name__ == "__main__":
+    mcp.run()</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_middleware_de_rate_limiting">Middleware de Rate Limiting</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">import time
+from collections import defaultdict
+from fastmcp import FastMCP
+from fastmcp.server.middleware import Middleware
+from fastmcp.exceptions import ToolError
+
+class RateLimitMiddleware(Middleware):
+    """Limita la frecuencia de requests por cliente."""
+
+    def __init__(self, max_requests: int = 100, window_seconds: int = 60):
+        self.max_requests = max_requests
+        self.window_seconds = window_seconds
+        self.requests = defaultdict(list)
+
+    async def on_request(self, request, context):
+        # Obtener identificador del cliente
+        client_id = context.client_id or "anonymous"
+
+        # Limpiar requests antiguos
+        now = time.time()
+        self.requests[client_id] = [
+            t for t in self.requests[client_id]
+            if t &gt; now - self.window_seconds
+        ]
+
+        # Verificar límite
+        if len(self.requests[client_id]) &gt;= self.max_requests:
+            raise ToolError(f"Rate limit exceeded: {self.max_requests} requests per {self.window_seconds}s")
+
+        # Registrar request
+        self.requests[client_id].append(now)
+
+        return request
+
+mcp = FastMCP(
+    "RateLimitedServer",
+    middleware=[RateLimitMiddleware(max_requests=10, window_seconds=60)]
+)
+
+@mcp.tool
+def process_data(data: str) -&gt; str:
+    """Process data."""
+    return f"Processed: {data}"</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_middleware_de_autenticación">Middleware de Autenticación</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+from fastmcp.server.middleware import Middleware
+from fastmcp.exceptions import ToolError
+
+class AuthMiddleware(Middleware):
+    """Verifica autenticación para tools protegidos."""
+
+    def __init__(self, protected_tools: set[str] | None = None):
+        self.protected_tools = protected_tools or set()
+
+    async def on_request(self, request, context):
+        # Solo verificar tools
+        if request.method == "tools/call":
+            tool_name = request.params.get("name")
+
+            if tool_name in self.protected_tools:
+                # Verificar token desde HTTP headers
+                token = context.get_http_headers().get("Authorization")
+
+                if not token or not self._validate_token(token):
+                    raise ToolError("Unauthorized: valid token required")
+
+        return request
+
+    def _validate_token(self, token: str) -&gt; bool:
+        """Validar token (ejemplo simplificado)."""
+        # En producción, validar contra BD o servicio de auth
+        return token.startswith("Bearer valid-token")
+
+mcp = FastMCP(
+    "AuthServer",
+    middleware=[AuthMiddleware(protected_tools={"admin_tool", "delete_user"})]
+)
+
+@mcp.tool
+def public_tool() -&gt; str:
+    """Public tool - no auth required."""
+    return "Public result"
+
+@mcp.tool
+def admin_tool() -&gt; str:
+    """Admin tool - requires authentication."""
+    return "Admin result"</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_middleware_de_métricas">Middleware de Métricas</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">import time
+from collections import defaultdict
+from fastmcp import FastMCP
+from fastmcp.server.middleware import Middleware
+
+class MetricsMiddleware(Middleware):
+    """Recolecta métricas de uso."""
+
+    def __init__(self):
+        self.metrics = defaultdict(lambda: {
+            "count": 0,
+            "total_time": 0,
+            "errors": 0,
+            "min_time": float("inf"),
+            "max_time": 0
+        })
+
+    async def on_request(self, request, context):
+        context.start_time = time.time()
+        return request
+
+    async def on_response(self, response, context):
+        # Calcular duración
+        duration = time.time() - context.start_time
+
+        # Obtener nombre del tool
+        if hasattr(context, "tool_name"):
+            tool_name = context.tool_name
+        else:
+            tool_name = "unknown"
+
+        # Actualizar métricas
+        metric = self.metrics[tool_name]
+        metric["count"] += 1
+        metric["total_time"] += duration
+        metric["min_time"] = min(metric["min_time"], duration)
+        metric["max_time"] = max(metric["max_time"], duration)
+
+        return response
+
+    def get_metrics(self) -&gt; dict:
+        """Obtener métricas agregadas."""
+        return {
+            name: {
+                "count": data["count"],
+                "avg_time": data["total_time"] / data["count"] if data["count"] else 0,
+                "min_time": data["min_time"] if data["min_time"] != float("inf") else 0,
+                "max_time": data["max_time"],
+                "errors": data["errors"]
+            }
+            for name, data in self.metrics.items()
+        }
+
+# Usar el middleware
+metrics = MetricsMiddleware()
+mcp = FastMCP("MetricsServer", middleware=[metrics])
+
+@mcp.tool
+def slow_operation() -&gt; str:
+    import time
+    time.sleep(1)
+    return "Done"
+
+@mcp.tool
+def fast_operation() -&gt; str:
+    return "Done"</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_múltiples_middlewares">Múltiples Middlewares</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+
+mcp = FastMCP(
+    "MultiMiddlewareServer",
+    middleware=[
+        LoggingMiddleware(),
+        RateLimitMiddleware(max_requests=100),
+        AuthMiddleware(protected_tools={"admin"}),
+        MetricsMiddleware(),
+    ]
+)</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Los middlewares se ejecutan en orden: request fluye del primero al último, response fluye del último al primero.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_autenticación_y_seguridad">Autenticación y Seguridad</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_autenticación_http">Autenticación HTTP</h3>
+<div class="paragraph">
+<p>Para servidores HTTP, FastMCP soporta autenticación OAuth 2.0 y Bearer Token:</p>
+</div>
+<div class="sect3">
+<h4 id="_bearer_token">Bearer Token</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+from fastmcp.server.auth import BearerAuthProvider
+
+# Provider simple con tokens hardcodeados
+auth = BearerAuthProvider(
+    tokens=["secret-token-1", "secret-token-2"]
+)
+
+mcp = FastMCP(
+    "SecureServer",
+    auth=auth
+)
+
+@mcp.tool
+def protected_data() -&gt; str:
+    """Returns protected data."""
+    return "Secret information"
+
+if __name__ == "__main__":
+    mcp.run(transport="http")</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_oauth_2_0">OAuth 2.0</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+from fastmcp.server.auth import OAuthProvider
+
+# Configurar OAuth
+auth = OAuthProvider(
+    issuer="https://auth.example.com",
+    client_id="my-mcp-server",
+    client_secret="client-secret",
+    authorization_endpoint="https://auth.example.com/authorize",
+    token_endpoint="https://auth.example.com/token",
+    jwks_uri="https://auth.example.com/.well-known/jwks.json"
+)
+
+mcp = FastMCP("OAuthServer", auth=auth)
+
+if __name__ == "__main__":
+    mcp.run(transport="http")</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_acceder_a_información_de_autenticación">Acceder a Información de Autenticación</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP, Context
+from fastmcp.dependencies import CurrentContext
+
+mcp = FastMCP("AuthInfoServer")
+
+@mcp.tool
+async def who_am_i(ctx: Context = CurrentContext()) -&gt; dict:
+    """Get information about the authenticated user."""
+
+    # Obtener HTTP request
+    from fastmcp.server.dependencies import get_http_request
+    request = get_http_request()
+
+    # Obtener headers
+    headers = request.headers
+    auth_header = headers.get("Authorization", "Not provided")
+
+    return {
+        "client_id": ctx.client_id,
+        "request_id": ctx.request_id,
+        "has_auth": "Authorization" in headers
+    }</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ocultar_detalles_de_error">Ocultar Detalles de Error</h3>
+<div class="paragraph">
+<p>Para producción, oculta detalles de errores internos:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+
+mcp = FastMCP(
+    "ProductionServer",
+    mask_error_details=True  # Reemplaza detalles con mensaje genérico
+)
+
+@mcp.tool
+def might_fail(data: str) -&gt; str:
+    """Tool que puede fallar."""
+    # Si ocurre un error, el cliente ve:
+    # "Internal server error" en lugar de
+    # "KeyError: 'missing_key' at line 42 in ..."
+    ...</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_lifetime_hooks">Lifetime Hooks</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_concepto_de_lifespan">Concepto de Lifespan</h3>
+<div class="paragraph">
+<p>Los lifetime hooks permiten ejecutar código cuando el servidor inicia o termina. Son útiles para:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Inicializar conexiones a bases de datos</p>
+</li>
+<li>
+<p>Cargar configuraciones</p>
+</li>
+<li>
+<p>Establecer pools de conexiones</p>
+</li>
+<li>
+<p>Limpiar recursos al terminar</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_lifespan_básico">Lifespan Básico</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from contextlib import asynccontextmanager
+from fastmcp import FastMCP
+
+@asynccontextmanager
+async def app_lifespan(app):
+    # Setup: Se ejecuta al iniciar el servidor
+    print("Server starting...")
+
+    # Inicializar recursos
+    app.db_connection = await connect_to_database()
+    app.cache = await create_cache()
+
+    # Guardar en el state del servidor
+    yield {
+        "db": app.db_connection,
+        "cache": app.cache
+    }
+
+    # Teardown: Se ejecuta al terminar el servidor
+    print("Server shutting down...")
+    await app.db_connection.close()
+    await app.cache.clear()
+
+mcp = FastMCP("LifespanServer", lifespan=app_lifespan)</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_acceder_a_recursos_del_lifespan">Acceder a Recursos del Lifespan</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from contextlib import asynccontextmanager
+from fastmcp import FastMCP, Context
+from fastmcp.dependencies import CurrentContext
+
+# Simular conexión a BD
+class Database:
+    async def query(self, sql: str):
+        return [{"id": 1, "name": "Alice"}]
+
+db = None
+
+@asynccontextmanager
+async def app_lifespan(app):
+    global db
+    print("Connecting to database...")
+    db = Database()
+    yield {"db": db}
+    print("Closing database connection...")
+
+mcp = FastMCP("DatabaseServer", lifespan=app_lifespan)
+
+@mcp.tool
+async def get_users(ctx: Context = CurrentContext()) -&gt; list:
+    """Get all users from database."""
+    # Acceder a la BD global
+    return await db.query("SELECT * FROM users")</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_lifespan_con_context_state">Lifespan con Context State</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from contextlib import asynccontextmanager
+from fastmcp import FastMCP, Context
+from fastmcp.dependencies import CurrentContext
+
+class AppState:
+    """Estado compartido del servidor."""
+    def __init__(self):
+        self.db = None
+        self.cache = None
+
+state = AppState()
+
+@asynccontextmanager
+async def app_lifespan(app):
+    # Setup
+    from my_database import Database
+    from my_cache import Cache
+
+    state.db = await Database.connect("postgresql://localhost/mydb")
+    state.cache = Cache(max_size=1000)
+
+    # Poblar cache inicial
+    await state.cache.set("initialized_at", "2024-01-01")
+
+    yield {"db": state.db, "cache": state.cache}
+
+    # Teardown
+    await state.db.disconnect()
+    await state.cache.clear()
+
+mcp = FastMCP("StatefulServer", lifespan=app_lifespan)
+
+@mcp.tool
+async def query_db(sql: str, ctx: Context = CurrentContext()) -&gt; list:
+    """Query the database."""
+    return await state.db.query(sql)
+
+@mcp.tool
+async def get_cache(key: str, ctx: Context = CurrentContext()) -&gt; str | None:
+    """Get value from cache."""
+    return await state.cache.get(key)
+
+@mcp.tool
+async def set_cache(key: str, value: str, ctx: Context = CurrentContext()) -&gt; None:
+    """Set value in cache."""
+    await state.cache.set(key, value)</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_despliegue_y_transportes">Despliegue y Transportes</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_transportes_disponibles">Transportes Disponibles</h3>
+<div class="paragraph">
+<p>FastMCP soporta tres transportes principales:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 40%;">
+<col style="width: 40%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Transporte</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+<th class="tableblock halign-left valign-top">Uso</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>STDIO</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Comunicación via stdin/stdout</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CLI tools, Claude Desktop, desarrollo local</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>HTTP</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Streamable HTTP (recomendado)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Servicios web, APIs, producción</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>SSE</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Server-Sent Events (legacy)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Compatibilidad con clientes antiguos</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_stdio_por_defecto_2">STDIO (Por Defecto)</h3>
+<div class="paragraph">
+<p>El transporte STDIO es el más simple y el predeterminado:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+
+mcp = FastMCP("StdioServer")
+
+@mcp.tool
+def greet(name: str) -&gt; str:
+    return f"Hello, {name}!"
+
+if __name__ == "__main__":
+    mcp.run()  # STDIO por defecto</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Configuración en Claude Desktop:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "mcpServers": {
+    "my-server": {
+      "command": "python",
+      "args": ["/path/to/my_server.py"]
+    }
+  }
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_http_streamable_2">HTTP Streamable</h3>
+<div class="paragraph">
+<p>Para servicios web:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+
+mcp = FastMCP("HttpServer")
+
+@mcp.tool
+def greet(name: str) -&gt; str:
+    return f"Hello, {name}!"
+
+if __name__ == "__main__":
+    mcp.run(
+        transport="http",
+        host="127.0.0.1",
+        port=8000
+    )</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Con autenticación:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+from fastmcp.server.auth import BearerAuthProvider
+
+auth = BearerAuthProvider(tokens=["my-secret-token"])
+
+mcp = FastMCP(
+    "SecureHttpServer",
+    auth=auth
+)
+
+if __name__ == "__main__":
+    mcp.run(
+        transport="http",
+        host="0.0.0.0",
+        port=8000
+    )</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_rutas_personalizadas_http">Rutas Personalizadas (HTTP)</h3>
+<div class="paragraph">
+<p>Añade endpoints HTTP personalizados:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import FastMCP
+from starlette.requests import Request
+from starlette.responses import JSONResponse, PlainTextResponse
+
+mcp = FastMCP("CustomRoutesServer")
+
+@mcp.tool
+def greet(name: str) -&gt; str:
+    return f"Hello, {name}!"
+
+# Health check endpoint
+@mcp.custom_route("/health", methods=["GET"])
+async def health_check(request: Request) -&gt; PlainTextResponse:
+    return PlainTextResponse("OK")
+
+# Status endpoint
+@mcp.custom_route("/status", methods=["GET"])
+async def status(request: Request) -&gt; JSONResponse:
+    return JSONResponse({
+        "status": "running",
+        "tools_count": len(mcp._tools),
+        "resources_count": len(mcp._resources)
+    })
+
+# Webhook endpoint
+@mcp.custom_route("/webhook", methods=["POST"])
+async def handle_webhook(request: Request) -&gt; JSONResponse:
+    data = await request.json()
+    # Procesar webhook
+    return JSONResponse({"received": True})
+
+if __name__ == "__main__":
+    mcp.run(transport="http", port=8000)</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_integración_con_fastapi">Integración con FastAPI</h3>
+<div class="paragraph">
+<p>Monta FastMCP en una aplicación FastAPI existente:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastapi import FastAPI
+from fastmcp import FastMCP
+
+# Aplicación FastAPI existente
+app = FastAPI()
+
+@app.get("/")
+async def root():
+    return {"message": "Main API"}
+
+# Servidor MCP
+mcp = FastMCP("McpServer")
+
+@mcp.tool
+def greet(name: str) -&gt; str:
+    return f"Hello, {name}!"
+
+# Montar MCP en /mcp
+from fastmcp.server.http import start_streamable_http
+
+@app.on_event("startup")
+async def startup():
+    # El MCP se monta como sub-aplicación
+    mcp_app = mcp.get_http_app()
+    app.mount("/mcp", mcp_app)
+
+# O alternativamente, ejecutar directamente
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_docker">Docker</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-dockerfile hljs" data-lang="dockerfile"># Dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Instalar dependencias
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar código
+COPY . .
+
+# Ejecutar servidor
+CMD ["python", "server.py"]</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Construir imagen
+docker build -t my-mcp-server .
+
+# Ejecutar contenedor
+docker run -p 8000:8000 my-mcp-server
+
+# O con STDIO
+docker run -i my-mcp-server</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_cli_de_fastmcp">CLI de FastMCP</h3>
+<div class="paragraph">
+<p>El CLI permite ejecutar servidores sin modificar código:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Ejecutar servidor STDIO
+fastmcp run my_server.py
+
+# Ejecutar con HTTP
+fastmcp run my_server.py --transport http --port 8000
+
+# Ejecutar con SSE
+fastmcp run my_server.py --transport sse --port 8000
+
+# Desarrollo con recarga automática
+fastmcp dev my_server.py
+
+# Ejecutar función específica
+fastmcp run my_module:create_server
+
+# Mostrar información del servidor
+fastmcp inspect my_server.py</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ejemplo_completo_servidor_de_producción">Ejemplo Completo: Servidor de Producción</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>El siguiente ejemplo integra todos los conceptos en un servidor de producción completo:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">"""
+Complete FastMCP Server Example
+A production-ready server demonstrating all features.
+"""
+import asyncio
+import json
+import time
+from contextlib import asynccontextmanager
+from datetime import datetime
+from typing import Literal
+
+from fastmcp import FastMCP, Context
+from fastmcp.dependencies import CurrentContext
+from fastmcp.server.middleware import Middleware
+from fastmcp.server.auth import BearerAuthProvider
+from pydantic import BaseModel, Field
+
+# === Modelos ===
+
+class User(BaseModel):
+    """User model."""
+    id: str
+    name: str
+    email: str
+    role: Literal["admin", "user"] = "user"
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+class AnalysisResult(BaseModel):
+    """Analysis result model."""
+    count: int
+    sum: float
+    mean: float
+    min: float
+    max: float
+
+class ErrorResponse(BaseModel):
+    """Error response model."""
+    error: str
+    code: str
+    details: dict | None = None
+
+# === Estado Global ===
+
+class AppState:
+    """Application state."""
+    def __init__(self):
+        self.users: dict[str, User] = {}
+        self.cache: dict[str, str] = {}
+        self.request_count: int = 0
+
+state = AppState()
+
+# === Lifespan ===
+
+@asynccontextmanager
+async def app_lifespan(app):
+    """Setup and teardown for the server."""
+    print("🚀 Server starting...")
+
+    # Inicializar datos
+    state.users["1"] = User(
+        id="1",
+        name="Alice",
+        email="alice@example.com",
+        role="admin"
+    )
+    state.users["2"] = User(
+        id="2",
+        name="Bob",
+        email="bob@example.com",
+        role="user"
+    )
+
+    print(f"✅ Initialized with {len(state.users)} users")
+
+    yield {"state": state}
+
+    print("🛑 Server shutting down...")
+    state.users.clear()
+    state.cache.clear()
+    print("✅ Cleanup complete")
+
+# === Middlewares ===
+
+class LoggingMiddleware(Middleware):
+    """Log all requests and responses."""
+
+    async def on_request(self, request, context):
+        context.start_time = time.time()
+        print(f"📥 [{datetime.now().isoformat()}] {request.method}")
+        return request
+
+    async def on_response(self, response, context):
+        duration = time.time() - context.start_time
+        print(f"📤 [{datetime.now().isoformat()}] Response ({duration:.3f}s)")
+        return response
+
+class MetricsMiddleware(Middleware):
+    """Collect usage metrics."""
+
+    async def on_response(self, response, context):
+        state.request_count += 1
+        return response
+
+# === Autenticación ===
+
+auth = BearerAuthProvider(
+    tokens=["admin-token-123", "user-token-456"]
+)
+
+# === Servidor ===
+
+mcp = FastMCP(
+    "ProductionServer",
+    instructions="""
+    A production-ready MCP server.
+
+    Features:
+    - User management (CRUD)
+    - Data analysis
+    - Caching
+    - Session state
+
+    Authentication required for some operations.
+    """,
+    version="1.0.0",
+    auth=auth,
+    middleware=[LoggingMiddleware(), MetricsMiddleware()],
+    lifespan=app_lifespan,
+    mask_error_details=True,
+)
+
+# === Resources ===
+
+@mcp.resource("server://info")
+def get_server_info() -&gt; dict:
+    """Get server information."""
+    return {
+        "name": "ProductionServer",
+        "version": "1.0.0",
+        "users_count": len(state.users),
+        "request_count": state.request_count
+    }
+
+@mcp.resource("users://{user_id}")
+def get_user_by_id(user_id: str) -&gt; User | None:
+    """Get user by ID."""
+    return state.users.get(user_id)
+
+@mcp.resource("users://all")
+def get_all_users() -&gt; list[dict]:
+    """Get all users."""
+    return [u.model_dump() for u in state.users.values()]
+
+# === Tools ===
+
+# --- User Management ---
+
+@mcp.tool(tags={"users", "read"})
+async def list_users(ctx: Context = CurrentContext()) -&gt; list[dict]:
+    """List all users.
+
+    Returns:
+        List of all users
+    """
+    await ctx.info(f"Listing {len(state.users)} users")
+    return [u.model_dump() for u in state.users.values()]
+
+@mcp.tool(tags={"users", "read"})
+async def get_user(user_id: str, ctx: Context = CurrentContext()) -&gt; dict:
+    """Get a user by ID.
+
+    Args:
+        user_id: The unique user identifier
+
+    Returns:
+        User data or error
+    """
+    user = state.users.get(user_id)
+    if not user:
+        await ctx.warning(f"User not found: {user_id}")
+        return {"error": "User not found", "code": "NOT_FOUND"}
+
+    await ctx.debug(f"Retrieved user: {user.name}")
+    return user.model_dump()
+
+@mcp.tool(tags={"users", "write"})
+async def create_user(
+    name: str,
+    email: str,
+    role: Literal["admin", "user"] = "user",
+    ctx: Context = CurrentContext()
+) -&gt; dict:
+    """Create a new user.
+
+    Args:
+        name: User's name
+        email: User's email
+        role: User's role (admin or user)
+
+    Returns:
+        Created user
+    """
+    user_id = str(len(state.users) + 1)
+    user = User(id=user_id, name=name, email=email, role=role)
+    state.users[user_id] = user
+
+    await ctx.info(f"Created user: {user.name} (ID: {user_id})")
+    return user.model_dump()
+
+@mcp.tool(tags={"users", "write"})
+async def delete_user(user_id: str, ctx: Context = CurrentContext()) -&gt; dict:
+    """Delete a user.
+
+    Args:
+        user_id: The unique user identifier
+
+    Returns:
+        Deletion result
+    """
+    if user_id not in state.users:
+        await ctx.warning(f"Attempted to delete non-existent user: {user_id}")
+        return {"error": "User not found", "code": "NOT_FOUND"}
+
+    user = state.users.pop(user_id)
+    await ctx.info(f"Deleted user: {user.name}")
+    return {"success": True, "deleted_user": user.model_dump()}
+
+# --- Data Analysis ---
+
+@mcp.tool(tags={"analysis"})
+async def analyze_data(
+    data: list[float],
+    ctx: Context = CurrentContext()
+) -&gt; AnalysisResult:
+    """Analyze numerical data.
+
+    Args:
+        data: List of numbers to analyze
+
+    Returns:
+        Analysis results
+    """
+    await ctx.info(f"Analyzing {len(data)} data points")
+
+    if not data:
+        await ctx.warning("Empty data list")
+        return AnalysisResult(count=0, sum=0, mean=0, min=0, max=0)
+
+    # Report progress
+    await ctx.report_progress(progress=0, total=len(data), message="Starting analysis")
+
+    result = AnalysisResult(
+        count=len(data),
+        sum=sum(data),
+        mean=sum(data) / len(data),
+        min=min(data),
+        max=max(data)
+    )
+
+    await ctx.report_progress(progress=len(data), total=len(data), message="Analysis complete")
+    await ctx.info(f"Analysis result: mean={result.mean:.2f}")
+
+    return result
+
+@mcp.tool(tags={"analysis"})
+async def process_with_progress(
+    items: list[str],
+    ctx: Context = CurrentContext()
+) -&gt; dict:
+    """Process items with progress reporting.
+
+    Args:
+        items: List of items to process
+
+    Returns:
+        Processing summary
+    """
+    total = len(items)
+    await ctx.info(f"Processing {total} items")
+
+    processed = 0
+    for i, item in enumerate(items):
+        # Simular procesamiento
+        await asyncio.sleep(0.1)
+        processed += 1
+
+        # Reportar progreso cada 10%
+        if i % max(1, total // 10) == 0:
+            await ctx.report_progress(
+                progress=i + 1,
+                total=total,
+                message=f"Processing item {i + 1}/{total}"
+            )
+
+    await ctx.info(f"Completed processing {processed} items")
+    return {"processed": processed, "total": total}
+
+# --- Caching ---
+
+@mcp.tool(tags={"cache"})
+async def cache_get(key: str, ctx: Context = CurrentContext()) -&gt; dict:
+    """Get value from cache.
+
+    Args:
+        key: Cache key
+
+    Returns:
+        Cached value or None
+    """
+    value = state.cache.get(key)
+    await ctx.debug(f"Cache get: {key} = {value}")
+    return {"key": key, "value": value, "found": key in state.cache}
+
+@mcp.tool(tags={"cache"})
+async def cache_set(key: str, value: str, ctx: Context = CurrentContext()) -&gt; dict:
+    """Set value in cache.
+
+    Args:
+        key: Cache key
+        value: Value to cache
+
+    Returns:
+        Operation result
+    """
+    state.cache[key] = value
+    await ctx.debug(f"Cache set: {key} = {value}")
+    return {"success": True, "key": key}
+
+# --- Session State ---
+
+@mcp.tool(tags={"session"})
+async def set_session_value(
+    key: str,
+    value: str,
+    ctx: Context = CurrentContext()
+) -&gt; dict:
+    """Set a value in session state.
+
+    Args:
+        key: State key
+        value: State value
+
+    Returns:
+        Operation result
+    """
+    await ctx.set_state(key, value)
+    await ctx.info(f"Session state set: {key}")
+    return {"success": True, "key": key}
+
+@mcp.tool(tags={"session"})
+async def get_session_value(key: str, ctx: Context = CurrentContext()) -&gt; dict:
+    """Get a value from session state.
+
+    Args:
+        key: State key
+
+    Returns:
+        Stored value or None
+    """
+    value = await ctx.get_state(key)
+    return {"key": key, "value": value}
+
+# === Prompts ===
+
+@mcp.prompt
+def analyze_user_data(user_id: str) -&gt; str:
+    """Generate a prompt for analyzing user data.
+
+    Args:
+        user_id: User ID to analyze
+    """
+    return f"""Analyze the data for user {user_id}.
+
+Focus on:
+1. User activity patterns
+2. Engagement metrics
+3. Potential improvements
+
+Provide actionable insights.
+"""
+
+@mcp.prompt
+def generate_report(data_type: str = "users") -&gt; str:
+    """Generate a report prompt.
+
+    Args:
+        data_type: Type of data to report on
+    """
+    return f"""Generate a comprehensive report on {data_type}.
+
+Include:
+1. Executive summary
+2. Key metrics
+3. Trends and patterns
+4. Recommendations
+
+Format the report in markdown.
+"""
+
+# === HTTP Routes ===
+
+@mcp.custom_route("/health", methods=["GET"])
+async def health_check(request):
+    """Health check endpoint."""
+    from starlette.responses import JSONResponse
+    return JSONResponse({
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
+        "users_count": len(state.users),
+        "request_count": state.request_count
+    })
+
+# === Main ===
+
+if __name__ == "__main__":
+    import sys
+
+    # Parse arguments
+    transport = "stdio"
+    port = 8000
+
+    if "--http" in sys.argv:
+        transport = "http"
+    if "--port" in sys.argv:
+        idx = sys.argv.index("--port")
+        port = int(sys.argv[idx + 1])
+
+    print(f"Starting server with transport: {transport}")
+
+    if transport == "http":
+        mcp.run(transport="http", host="0.0.0.0", port=port)
+    else:
+        mcp.run()</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_mejores_prácticas">Mejores Prácticas</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_organización_del_código">Organización del Código</h3>
+<div class="paragraph">
+<p>Estructura tu proyecto para escalabilidad:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">src/my_server/
+├── __init__.py
+├── server.py          # Servidor principal
+├── tools/
+│   ├── __init__.py
+│   ├── users.py       # Tools de usuarios
+│   └── data.py        # Tools de datos
+├── resources/
+│   ├── __init__.py
+│   └── config.py      # Resources de configuración
+├── prompts/
+│   ├── __init__.py
+│   └── analysis.py   # Prompts de análisis
+└── middleware/
+    ├── __init__.py
+    └── logging.py     # Middleware de logging</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_tips_y_consejos">Tips y Consejos</h3>
+<div class="sect3">
+<h4 id="_usa_type_hints_siempre">Usa Type Hints Siempre</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python"># ✅ Correcto
+@mcp.tool
+def process_data(
+    items: list[dict[str, int]],
+    threshold: float = 0.5,
+    mode: Literal["fast", "thorough"] = "fast"
+) -&gt; dict[str, float]:
+    """Process data with clear types."""
+    ...
+
+# ❌ Incorrecto
+@mcp.tool
+def process_data(items, threshold=0.5, mode="fast"):
+    """Process data."""
+    ...</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_documenta_con_docstrings">Documenta con Docstrings</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python"># ✅ Correcto
+@mcp.tool
+def analyze_dataset(
+    data: list[float],
+    outlier_method: Literal["iqr", "zscore"] = "iqr",
+    threshold: float = 1.5
+) -&gt; AnalysisResult:
+    """Analyze a numerical dataset.
+
+    Performs statistical analysis including outlier detection.
+
+    Args:
+        data: List of numerical values to analyze
+        outlier_method: Method for outlier detection
+            - iqr: Interquartile range method
+            - zscore: Z-score based method
+        threshold: Threshold for outlier detection
+            - For IQR: multiplier (default 1.5)
+            - For Z-score: standard deviations (default 1.5)
+
+    Returns:
+        AnalysisResult with statistics and detected outliers
+
+    Raises:
+        ValueError: If data is empty or threshold is invalid
+
+    Example:
+        &gt;&gt;&gt; result = analyze_dataset([1, 2, 3, 100], threshold=1.5)
+        &gt;&gt;&gt; result.outliers
+        [100]
+    """
+    ...</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_maneja_errores_apropiadamente">Maneja Errores Apropiadamente</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp.exceptions import ToolError
+
+@mcp.tool
+def divide(a: float, b: float) -&gt; float:
+    """Divide two numbers."""
+    if b == 0:
+        raise ToolError(
+            "Division by zero is not allowed",
+            error_code="DIVISION_BY_ZERO"
+        )
+    return a / b</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_usa_context_para_logging">Usa Context para Logging</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from fastmcp import Context
+from fastmcp.dependencies import CurrentContext
+
+@mcp.tool
+async def long_operation(ctx: Context = CurrentContext()) -&gt; str:
+    """Perform a long operation."""
+    await ctx.info("Starting operation")
+
+    # Procesar...
+
+    await ctx.debug("Processing step 1")
+
+    if warning_condition:
+        await ctx.warning("Potential issue detected")
+
+    await ctx.info("Operation complete")
+    return "Done"</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_testing_adecuado">Testing Adecuado</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">import pytest
+from fastmcp import Client, FastMCP
+
+# Servidor bajo test
+mcp = FastMCP("TestServer")
+
+@mcp.tool
+def add(a: int, b: int) -&gt; int:
+    """Add two numbers."""
+    return a + b
+
+# Fixtures
+@pytest.fixture
+def client():
+    return Client(mcp)
+
+# Tests
+@pytest.mark.asyncio
+async def test_add(client):
+    async with client:
+        result = await client.call_tool("add", {"a": 2, "b": 3})
+        assert result.data == 5
+
+@pytest.mark.asyncio
+async def test_add_negative(client):
+    async with client:
+        result = await client.call_tool("add", {"a": -1, "b": 1})
+        assert result.data == 0</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_referencia_rápida">Referencia Rápida</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_decoradores">Decoradores</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 75%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Decorador</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>@mcp.tool</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Registrar un tool</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>@mcp.resource("uri")</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Registrar un resource con URI</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>@mcp.prompt</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Registrar un prompt</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>@mcp.custom_route("/path", methods=["GET"])</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Añadir ruta HTTP personalizada</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_context_methods">Context Methods</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 75%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Método</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>await ctx.debug(msg)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Log debug message</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>await ctx.info(msg)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Log info message</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>await ctx.warning(msg)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Log warning message</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>await ctx.error(msg)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Log error message</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>await ctx.report_progress(progress, total, message)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Reportar progreso</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>await ctx.list_resources()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Listar resources</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>await ctx.read_resource(uri)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Leer resource</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>await ctx.list_prompts()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Listar prompts</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>await ctx.get_prompt(name, args)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Obtener prompt</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>await ctx.sample(prompt, **kwargs)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Solicitar sampling al LLM</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>await ctx.elicit(prompt, response_type)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Pedir input al usuario</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>await ctx.set_state(key, value)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Guardar en session state</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>await ctx.get_state(key)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Leer de session state</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_cliente_methods">Cliente Methods</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 75%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Método</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>await client.ping()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Verificar conexión</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>await client.list_tools()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Listar tools</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>await client.call_tool(name, args)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Llamar tool</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>await client.list_resources()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Listar resources</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>await client.read_resource(uri)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Leer resource</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>await client.list_prompts()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Listar prompts</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>await client.get_prompt(name, args)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Obtener prompt</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_ejecutar_servidor">Ejecutar Servidor</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 75%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Comando</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>mcp.run()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Ejecutar con STDIO</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>mcp.run(transport="http")</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Ejecutar con HTTP</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>mcp.run(transport="sse")</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Ejecutar con SSE</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>fastmcp run server.py</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Ejecutar con CLI</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>fastmcp dev server.py</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Desarrollo con reload</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusión">Conclusión</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>FastMCP simplifica drásticamente la creación de servidores MCP. Con decoradores intuitivos, tipado automático, y un cliente integrado para testing, puedes pasar menos tiempo en boilerplate y más tiempo en funcionalidad.</p>
+</div>
+<div class="sect2">
+<h3 id="_próximos_pasos">Próximos Pasos</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Practica</strong>: Crea un servidor simple con 2-3 tools</p>
+</li>
+<li>
+<p><strong>Testing</strong>: Usa el cliente integrado para probar</p>
+</li>
+<li>
+<p><strong>Despliega</strong>: Configura Claude Desktop o usa HTTP</p>
+</li>
+<li>
+<p><strong>Itera</strong>: Añade resources, prompts, y middlewares</p>
+</li>
+<li>
+<p><strong>Producción</strong>: Añade autenticación y logging</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_recursos">Recursos</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Documentación oficial: <a href="https://gofastmcp.com" class="bare">https://gofastmcp.com</a></p>
+</li>
+<li>
+<p>Repositorio GitHub: <a href="https://github.com/PrefectHQ/fastmcp" class="bare">https://github.com/PrefectHQ/fastmcp</a></p>
+</li>
+<li>
+<p>Ejemplos: <a href="https://github.com/PrefectHQ/fastmcp/tree/main/examples" class="bare">https://github.com/PrefectHQ/fastmcp/tree/main/examples</a></p>
+</li>
+<li>
+<p>MCP Spec: <a href="https://modelcontextprotocol.io" class="bare">https://modelcontextprotocol.io</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>¡Feliz coding! 🚀</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2026-04-19 22:06:13 +0200
+</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
+</body>
+</html>

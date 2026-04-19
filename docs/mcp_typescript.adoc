@@ -1,0 +1,2681 @@
+= MCP TypeScript SDK - Guía Completa
+:author: Bot-Bunnny
+:version: 1.0
+:toc: left
+:toclevels: 4
+:source-highlighter: highlightjs
+
+== Introducción
+
+El Model Context Protocol (MCP) es un protocolo que permite a las aplicaciones proporcionar contexto a los LLMs de forma estandarizada. Este documento cubre el SDK oficial de TypeScript para crear servidores y clientes MCP.
+
+=== Requisitos Previos
+
+* Node.js 18+ o Bun
+* Conocimientos básicos de TypeScript
+* Familiaridad con async/await
+
+=== Instalación
+
+[source,bash]
+----
+# Para servidores
+npm install @modelcontextprotocol/server @modelcontextprotocol/node zod
+
+# Para clientes
+npm install @modelcontextprotocol/client
+
+# Para integración Express
+npm install @modelcontextprotocol/express
+
+# Todo junto
+npm install @modelcontextprotocol/server @modelcontextprotocol/node @modelcontextprotocol/client @modelcontextprotocol/express zod
+----
+
+=== Imports necesarios
+
+[source,typescript]
+----
+import { randomUUID } from 'node:crypto';
+
+import { createMcpExpressApp } from '@modelcontextprotocol/express';
+import { NodeStreamableHTTPServerTransport } from '@modelcontextprotocol/node';
+import type { CallToolResult, ResourceLink } from '@modelcontextprotocol/server';
+import { 
+  completable, 
+  McpServer, 
+  ResourceTemplate, 
+  StdioServerTransport 
+} from '@modelcontextprotocol/server';
+import * as z from 'zod/v4';
+----
+
+== Parte 1: Servidor MCP Básico
+
+=== Servidor mínimo con stdio
+
+El transporte stdio es el más simple y se usa principalmente con Claude Desktop.
+
+[source,typescript]
+----
+// server-basic.ts
+import { McpServer } from '@modelcontextprotocol/server';
+
+// Crear el servidor
+const server = new McpServer({
+  name: 'demo-server',
+  version: '1.0.0'
+});
+
+// Registrar tool simple
+server.registerTool(
+  'hello',
+  {
+    title: 'Hello',
+    description: 'Saluda a una persona por su nombre',
+    inputSchema: z.object({
+      name: z.string().describe('El nombre de la persona')
+    })
+  },
+  async ({ name }) => {
+    return {
+      content: [{
+        type: 'text',
+        text: `¡Hola, ${name}! Bienvenido al servidor MCP.`
+      }]
+    };
+  }
+);
+
+// Registrar tool con validación
+server.registerTool(
+  'add',
+  {
+    title: 'Add Numbers',
+    description: 'Suma dos números enteros',
+    inputSchema: z.object({
+      a: z.number().int().describe('Primer número'),
+      b: z.number().int().describe('Segundo número')
+    })
+  },
+  async ({ a, b }) => {
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify({ result: a + b })
+      }],
+      structuredContent: { result: a + b }
+    };
+  }
+);
+
+// Ejecutar servidor
+async function main() {
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+}
+
+main().catch(console.error);
+----
+
+=== Configurar package.json
+
+[source,json]
+----
+{
+  "name": "mcp-server-demo",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "npx tsx server-basic.ts",
+    "dev": "npx tsx watch server-basic.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "^1.0.0",
+    "zod": "^3.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
+----
+
+=== Ejecutar el servidor
+
+[source,bash]
+----
+# Ejecutar directamente
+npm run start
+
+# Modo desarrollo con recarga automática
+npm run dev
+
+# Ejecutar con MCP Inspector
+npx @modelcontextprotocol/inspector npx tsx server-basic.ts
+----
+
+=== Configurar en Claude Desktop
+
+[source,json]
+----
+// claude_desktop_config.json
+{
+  "mcpServers": {
+    "demo": {
+      "command": "npx",
+      "args": ["tsx", "/ruta/absoluta/a/server-basic.ts"]
+    }
+  }
+}
+----
+
+== Parte 2: Tools Avanzadas
+
+=== Tool con validación completa usando Zod
+
+[source,typescript]
+----
+// server-tools-advanced.ts
+import { McpServer } from '@modelcontextprotocol/server';
+import type { CallToolResult } from '@modelcontextprotocol/server';
+import * as z from 'zod/v4';
+
+const server = new McpServer({
+  name: 'tools-advanced',
+  version: '1.0.0'
+});
+
+// Schemas con validación avanzada
+const UserRoleSchema = z.enum(['user', 'admin', 'moderator']);
+
+const UserCreateSchema = z.object({
+  username: z.string()
+    .min(3, 'Username debe tener al menos 3 caracteres')
+    .max(20, 'Username no puede tener más de 20 caracteres')
+    .regex(/^[a-zA-Z0-9_]+$/, 'Solo letras, números y guión bajo'),
+  email: z.string().email('Email inválido'),
+  age: z.number()
+    .int()
+    .min(18, 'Debe ser mayor de edad')
+    .max(120, 'Edad no válida'),
+  role: UserRoleSchema.default('user'),
+  bio: z.string().max(500).optional()
+});
+
+// Output schema
+const UserResponseSchema = z.object({
+  id: z.string(),
+  username: z.string(),
+  email: z.string(),
+  age: z.number(),
+  role: z.string(),
+  created_at: z.string()
+});
+
+// Almacenamiento en memoria
+const usersDb = new Map<string, z.infer<typeof UserResponseSchema>>();
+
+// Registrar tool
+server.registerTool(
+  'create_user',
+  {
+    title: 'Create User',
+    description: 'Crea un nuevo usuario en el sistema',
+    inputSchema: z.object({
+      user: UserCreateSchema
+    }),
+    outputSchema: UserResponseSchema,
+    annotations: {
+      openWorldHint: false
+    }
+  },
+  async ({ user }): Promise<CallToolResult> => {
+    // Verificar username único
+    for (const existingUser of usersDb.values()) {
+      if (existingUser.username === user.username.toLowerCase()) {
+        return {
+          content: [{
+            type: 'text',
+            text: `Error: El username '${user.username}' ya está en uso`
+          }],
+          isError: true
+        };
+      }
+    }
+
+    // Crear usuario
+    const userId = randomUUID().slice(0, 8);
+    const now = new Date().toISOString();
+    
+    const newUser = {
+      id: userId,
+      username: user.username.toLowerCase(),
+      email: user.email,
+      age: user.age,
+      role: user.role,
+      created_at: now
+    };
+
+    usersDb.set(userId, newUser);
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(newUser, null, 2)
+      }],
+      structuredContent: newUser
+    };
+  }
+);
+
+// Tool para obtener usuario
+server.registerTool(
+  'get_user',
+  {
+    title: 'Get User',
+    description: 'Obtiene un usuario por su ID',
+    inputSchema: z.object({
+      user_id: z.string().describe('ID del usuario')
+    }),
+    outputSchema: UserResponseSchema
+  },
+  async ({ user_id }): Promise<CallToolResult> => {
+    const user = usersDb.get(user_id);
+    
+    if (!user) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Error: Usuario '${user_id}' no encontrado`
+        }],
+        isError: true
+      };
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(user, null, 2)
+      }],
+      structuredContent: user
+    };
+  }
+);
+
+// Tool para listar usuarios con filtros
+server.registerTool(
+  'list_users',
+  {
+    title: 'List Users',
+    description: 'Lista usuarios con filtros opcionales',
+    inputSchema: z.object({
+      role: UserRoleSchema.optional(),
+      min_age: z.number().int().min(0).optional(),
+      limit: z.number().int().min(1).max(100).default(10)
+    })
+  },
+  async ({ role, min_age, limit }): Promise<CallToolResult> => {
+    let results = Array.from(usersDb.values());
+
+    if (role) {
+      results = results.filter(u => u.role === role);
+    }
+
+    if (min_age !== undefined) {
+      results = results.filter(u => u.age >= min_age);
+    }
+
+    results = results.slice(0, limit);
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(results, null, 2)
+      }],
+      structuredContent: { users: results, count: results.length }
+    };
+  }
+);
+
+// Tool destructiva
+server.registerTool(
+  'delete_user',
+  {
+    title: 'Delete User',
+    description: 'Elimina un usuario del sistema',
+    inputSchema: z.object({
+      user_id: z.string()
+    }),
+    annotations: {
+      destructiveHint: true,
+      idempotentHint: true
+    }
+  },
+  async ({ user_id }): Promise<CallToolResult> => {
+    const user = usersDb.get(user_id);
+    
+    if (!user) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Error: Usuario '${user_id}' no encontrado`
+        }],
+        isError: true
+      };
+    }
+
+    usersDb.delete(user_id);
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify({ deleted: true, user }, null, 2)
+      }]
+    };
+  }
+);
+
+async function main() {
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+}
+
+main().catch(console.error);
+----
+
+=== Tool con progreso y logging
+
+[source,typescript]
+----
+// server-progress.ts
+import { McpServer } from '@modelcontextprotocol/server';
+import type { CallToolResult } from '@modelcontextprotocol/server';
+import * as z from 'zod/v4';
+
+const server = new McpServer(
+  { name: 'progress-server', version: '1.0.0' },
+  { capabilities: { logging: {} } }
+);
+
+server.registerTool(
+  'process_files',
+  {
+    title: 'Process Files',
+    description: 'Procesa múltiples archivos con reporte de progreso',
+    inputSchema: z.object({
+      files: z.array(z.string()).describe('Lista de archivos a procesar'),
+      delay: z.number().default(500).describe('Delay entre archivos (ms)')
+    })
+  },
+  async ({ files, delay }, ctx): Promise<CallToolResult> => {
+    const progressToken = ctx.mcpReq._meta?.progressToken;
+    
+    await ctx.mcpReq.log('info', `Iniciando procesamiento de ${files.length} archivos`);
+    
+    const processed: string[] = [];
+    const errors: string[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const filename = files[i];
+
+      // Reportar progreso
+      if (progressToken !== undefined) {
+        await ctx.mcpReq.notify({
+          method: 'notifications/progress',
+          params: {
+            progressToken,
+            progress: i + 1,
+            total: files.length,
+            message: `Procesando archivo ${i + 1}/${files.length}: ${filename}`
+          }
+        });
+      }
+
+      await ctx.mcpReq.log('debug', `Iniciando: ${filename}`);
+
+      // Simular procesamiento
+      await new Promise(resolve => setTimeout(resolve, delay));
+
+      // Simular error
+      if (filename.endsWith('.error')) {
+        await ctx.mcpReq.log('warning', `Error en archivo: ${filename}`);
+        errors.push(filename);
+      } else {
+        await ctx.mcpReq.log('debug', `Completado: ${filename}`);
+        processed.push(filename);
+      }
+    }
+
+    await ctx.mcpReq.log(
+      'info',
+      `Procesamiento completado: ${processed.length} exitosos, ${errors.length} errores`
+    );
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify({
+          total: files.length,
+          processed,
+          errors,
+          success_rate: processed.length / files.length
+        }, null, 2)
+      }]
+    };
+  }
+);
+
+server.registerTool(
+  'long_calculation',
+  {
+    title: 'Long Calculation',
+    description: 'Realiza un cálculo largo con actualizaciones',
+    inputSchema: z.object({
+      n: z.number().int().positive(),
+      steps: z.number().int().min(1).max(100).default(10)
+    })
+  },
+  async ({ n, steps }, ctx): Promise<CallToolResult> => {
+    const progressToken = ctx.mcpReq._meta?.progressToken;
+    const startTime = Date.now();
+    
+    await ctx.mcpReq.log('info', `Iniciando cálculo con n=${n}, steps=${steps}`);
+
+    let result = 0;
+
+    for (let i = 0; i < steps; i++) {
+      result += n ** 2;
+
+      if (progressToken !== undefined) {
+        await ctx.mcpReq.notify({
+          method: 'notifications/progress',
+          params: {
+            progressToken,
+            progress: i + 1,
+            total: steps,
+            message: `Paso ${i + 1}/${steps} completado`
+          }
+        });
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+
+    const elapsed = Date.now() - startTime;
+    await ctx.mcpReq.log('info', `Cálculo completado en ${elapsed}ms`);
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify({
+          input: n,
+          steps,
+          result,
+          elapsed_ms: elapsed
+        }, null, 2)
+      }]
+    };
+  }
+);
+
+async function main() {
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+}
+
+main().catch(console.error);
+----
+
+== Parte 3: Resources
+
+=== Resources estáticos y dinámicos
+
+[source,typescript]
+----
+// server-resources.ts
+import { McpServer, ResourceTemplate } from '@modelcontextprotocol/server';
+import * as z from 'zod/v4';
+
+const server = new McpServer({
+  name: 'resources-server',
+  version: '1.0.0'
+});
+
+// ============== Resources Estáticos ==============
+
+server.registerResource(
+  'app-config',
+  'config://app',
+  {
+    title: 'App Configuration',
+    description: 'Configuración de la aplicación',
+    mimeType: 'application/json'
+  },
+  async (uri) => {
+    const config = {
+      app_name: 'Mi App MCP',
+      version: '1.0.0',
+      debug: false,
+      features: {
+        authentication: true,
+        rate_limiting: true,
+        caching: true
+      },
+      limits: {
+        max_users: 1000,
+        max_requests_per_minute: 100
+      }
+    };
+
+    return {
+      contents: [{
+        uri: uri.href,
+        mimeType: 'application/json',
+        text: JSON.stringify(config, null, 2)
+      }]
+    };
+  }
+);
+
+server.registerResource(
+  'db-config',
+  'config://database',
+  {
+    title: 'Database Configuration',
+    description: 'Configuración de base de datos',
+    mimeType: 'application/json'
+  },
+  async (uri) => {
+    const config = {
+      host: 'localhost',
+      port: 5432,
+      database: 'mcp_demo',
+      pool_size: 10,
+      timeout: 30
+    };
+
+    return {
+      contents: [{
+        uri: uri.href,
+        mimeType: 'application/json',
+        text: JSON.stringify(config, null, 2)
+      }]
+    };
+  }
+);
+
+// ============== Resources Dinámicos ==============
+
+// Base de datos de productos
+const productsDb = new Map([
+  ['prod-001', { id: 'prod-001', name: 'Laptop', price: 999.99, stock: 50 }],
+  ['prod-002', { id: 'prod-002', name: 'Mouse', price: 29.99, stock: 200 }],
+  ['prod-003', { id: 'prod-003', name: 'Keyboard', price: 79.99, stock: 150 }]
+]);
+
+server.registerResource(
+  'product',
+  new ResourceTemplate('product://{product_id}', {
+    list: async () => ({
+      resources: Array.from(productsDb.values()).map(p => ({
+        uri: `product://${p.id}`,
+        name: p.name,
+        mimeType: 'application/json'
+      }))
+    })
+  }),
+  {
+    title: 'Product',
+    description: 'Información de un producto específico',
+    mimeType: 'application/json'
+  },
+  async (uri, { product_id }) => {
+    const product = productsDb.get(product_id);
+
+    if (!product) {
+      return {
+        contents: [{
+          uri: uri.href,
+          mimeType: 'application/json',
+          text: JSON.stringify({
+            error: 'NOT_FOUND',
+            message: `Producto '${product_id}' no encontrado`
+          })
+        }]
+      };
+    }
+
+    return {
+      contents: [{
+        uri: uri.href,
+        mimeType: 'application/json',
+        text: JSON.stringify(product, null, 2)
+      }]
+    };
+  }
+);
+
+// Resource con múltiples parámetros
+server.registerResource(
+  'report',
+  new ResourceTemplate('report://{type}/{year}/{month}'),
+  {
+    title: 'Monthly Report',
+    description: 'Reportes mensuales por tipo y período',
+    mimeType: 'application/json'
+  },
+  async (uri, { type, year, month }) => {
+    const report = {
+      type,
+      period: `${year}-${month}`,
+      generated_at: new Date().toISOString(),
+      data: {
+        total: 1500,
+        breakdown: {
+          week_1: 350,
+          week_2: 400,
+          week_3: 375,
+          week_4: 375
+        }
+      }
+    };
+
+    return {
+      contents: [{
+        uri: uri.href,
+        mimeType: 'application/json',
+        text: JSON.stringify(report, null, 2)
+      }]
+    };
+  }
+);
+
+// Resource de perfil de usuario
+server.registerResource(
+  'user-profile',
+  new ResourceTemplate('user://{user_id}/profile'),
+  {
+    title: 'User Profile',
+    description: 'Perfil de usuario',
+    mimeType: 'application/json'
+  },
+  async (uri, { user_id }) => {
+    const profile = {
+      user_id,
+      username: `user_${user_id}`,
+      email: `user_${user_id}@example.com`,
+      created_at: '2024-01-15T10:30:00Z',
+      stats: {
+        logins: 42,
+        last_login: new Date().toISOString()
+      }
+    };
+
+    return {
+      contents: [{
+        uri: uri.href,
+        mimeType: 'application/json',
+        text: JSON.stringify(profile, null, 2)
+      }]
+    };
+  }
+);
+
+async function main() {
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+}
+
+main().catch(console.error);
+----
+
+== Parte 4: Prompts
+
+=== Prompts con argumentos y completions
+
+[source,typescript]
+----
+// server-prompts.ts
+import { McpServer } from '@modelcontextprotocol/server';
+import { completable } from '@modelcontextprotocol/server';
+import * as z from 'zod/v4';
+
+const server = new McpServer({
+  name: 'prompts-server',
+  version: '1.0.0'
+});
+
+// ============== Prompt Simple ==============
+
+server.registerPrompt(
+  'greet',
+  {
+    title: 'Greeting',
+    description: 'Genera un saludo personalizado',
+    argsSchema: z.object({
+      name: z.string().describe('Nombre de la persona')
+    })
+  },
+  ({ name }) => ({
+    messages: [{
+      role: 'user' as const,
+      content: {
+        type: 'text' as const,
+        text: `¡Hola ${name}! ¿En qué puedo ayudarte hoy?`
+      }
+    }]
+  })
+);
+
+// ============== Prompt con múltiples mensajes ==============
+
+server.registerPrompt(
+  'code_review',
+  {
+    title: 'Code Review',
+    description: 'Prepara una revisión de código estructurada',
+    argsSchema: z.object({
+      code: z.string().describe('Código a revisar'),
+      language: completable(
+        z.string().default('typescript').describe('Lenguaje de programación'),
+        (value) => ['typescript', 'javascript', 'python', 'rust', 'go']
+          .filter(lang => lang.startsWith(value.toLowerCase()))
+      )
+    })
+  },
+  ({ code, language }) => ({
+    messages: [
+      {
+        role: 'system' as const,
+        content: {
+          type: 'text' as const,
+          text: `Eres un experto en ${language}. Tu tarea es revisar código buscando bugs, problemas de rendimiento y mejoras de estilo.`
+        }
+      },
+      {
+        role: 'user' as const,
+        content: {
+          type: 'text' as const,
+          text: `Por favor revisa el siguiente código ${language}:\n\n\`\`\`${language}\n${code}\n\`\`\``
+        }
+      }
+    ]
+  })
+);
+
+// ============== Prompt con análisis específico ==============
+
+const AnalysisTypeSchema = z.enum(['descriptive', 'predictive', 'diagnostic']);
+const OutputFormatSchema = z.enum(['markdown', 'json', 'table']);
+
+server.registerPrompt(
+  'analyze_data',
+  {
+    title: 'Data Analysis',
+    description: 'Genera un prompt para análisis de datos',
+    argsSchema: z.object({
+      data_description: z.string().describe('Descripción de los datos'),
+      analysis_type: AnalysisTypeSchema.default('descriptive'),
+      output_format: OutputFormatSchema.default('markdown')
+    })
+  },
+  ({ data_description, analysis_type, output_format }) => {
+    const analysisPrompts: Record<string, string> = {
+      descriptive: 'Describe las características principales de los datos',
+      predictive: 'Identifica patrones y haz predicciones',
+      diagnostic: 'Identifica causas y correlaciones'
+    };
+
+    const formatInstructions: Record<string, string> = {
+      markdown: 'Usa formato markdown con secciones claramente definidas',
+      json: 'Devuelve los resultados en formato JSON estructurado',
+      table: 'Presenta los resultados en formato tabular'
+    };
+
+    return {
+      messages: [{
+        role: 'user' as const,
+        content: {
+          type: 'text' as const,
+          text: `# Análisis de Datos
+
+## Datos
+${data_description}
+
+## Tipo de Análisis
+${analysisPrompts[analysis_type]}
+
+## Formato de Salida
+${formatInstructions[output_format]}
+
+## Instrucciones
+1. Identifica las variables principales
+2. Busca patrones y anomalías
+3. Proporciona insights accionables
+4. Incluye recomendaciones`
+        }
+      }]
+    };
+  }
+);
+
+// ============== Prompt con roles ==============
+
+server.registerPrompt(
+  'role_play',
+  {
+    title: 'Role Play',
+    description: 'Configura un prompt para role-play',
+    argsSchema: z.object({
+      role: completable(
+        z.string().describe('El rol a interpretar'),
+        (value) => ['software engineer', 'product manager', 'data scientist', 'devops engineer']
+          .filter(r => r.startsWith(value.toLowerCase()))
+      ),
+      task: z.string().describe('La tarea a realizar'),
+      context: z.string().optional().describe('Contexto adicional')
+    })
+  },
+  ({ role, task, context }) => {
+    const messages = [
+      {
+        role: 'system' as const,
+        content: {
+          type: 'text' as const,
+          text: `Eres un ${role} experto. Tienes años de experiencia y proporcionas consejos prácticos y accionables. Tu tono es profesional pero accesible.`
+        }
+      }
+    ];
+
+    if (context) {
+      messages.push({
+        role: 'user' as const,
+        content: {
+          type: 'text' as const,
+          text: `Contexto:\n${context}\n\nTarea: ${task}`
+        }
+      });
+    } else {
+      messages.push({
+        role: 'user' as const,
+        content: {
+          type: 'text' as const,
+          text: `Tarea: ${task}`
+        }
+      });
+    }
+
+    return { messages };
+  }
+);
+
+async function main() {
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+}
+
+main().catch(console.error);
+----
+
+== Parte 5: Servidor HTTP con Express
+
+=== Servidor HTTP completo
+
+[source,typescript]
+----
+// server-http.ts
+import { randomUUID } from 'node:crypto';
+import { createMcpExpressApp } from '@modelcontextprotocol/express';
+import { McpServer, ResourceTemplate, completable } from '@modelcontextprotocol/server';
+import type { CallToolResult } from '@modelcontextprotocol/server';
+import * as z from 'zod/v4';
+
+// Crear servidor MCP
+const server = new McpServer(
+  { name: 'http-server', version: '1.0.0' },
+  {
+    instructions: 'Servidor MCP con transporte HTTP para gestión de tareas'
+  }
+);
+
+// ============== Modelos ==============
+
+const TaskSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string(),
+  status: z.enum(['pending', 'in_progress', 'completed']),
+  priority: z.enum(['low', 'medium', 'high']),
+  created_at: z.string(),
+  updated_at: z.string()
+});
+
+const TaskCreateSchema = z.object({
+  title: z.string().min(1).max(200),
+  description: z.string().default(''),
+  priority: z.enum(['low', 'medium', 'high']).default('medium')
+});
+
+const TaskUpdateSchema = z.object({
+  title: z.string().min(1).max(200).optional(),
+  description: z.string().optional(),
+  status: z.enum(['pending', 'in_progress', 'completed']).optional(),
+  priority: z.enum(['low', 'medium', 'high']).optional()
+});
+
+type Task = z.infer<typeof TaskSchema>;
+
+// ============== Almacenamiento ==============
+
+const tasksDb = new Map<string, Task>();
+
+// ============== Tools ==============
+
+server.registerTool(
+  'create_task',
+  {
+    title: 'Create Task',
+    description: 'Crea una nueva tarea',
+    inputSchema: TaskCreateSchema,
+    outputSchema: TaskSchema
+  },
+  async (data): Promise<CallToolResult> => {
+    const id = randomUUID().slice(0, 8);
+    const now = new Date().toISOString();
+
+    const task: Task = {
+      id,
+      title: data.title,
+      description: data.description,
+      status: 'pending',
+      priority: data.priority,
+      created_at: now,
+      updated_at: now
+    };
+
+    tasksDb.set(id, task);
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(task, null, 2)
+      }],
+      structuredContent: task
+    };
+  }
+);
+
+server.registerTool(
+  'get_task',
+  {
+    title: 'Get Task',
+    description: 'Obtiene una tarea por ID',
+    inputSchema: z.object({ task_id: z.string() })
+  },
+  async ({ task_id }): Promise<CallToolResult> => {
+    const task = tasksDb.get(task_id);
+
+    if (!task) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Error: Tarea '${task_id}' no encontrada`
+        }],
+        isError: true
+      };
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(task, null, 2)
+      }],
+      structuredContent: task
+    };
+  }
+);
+
+server.registerTool(
+  'list_tasks',
+  {
+    title: 'List Tasks',
+    description: 'Lista tareas con filtros',
+    inputSchema: z.object({
+      status: z.enum(['pending', 'in_progress', 'completed']).optional(),
+      priority: z.enum(['low', 'medium', 'high']).optional(),
+      limit: z.number().int().min(1).max(100).default(20)
+    })
+  },
+  async ({ status, priority, limit }): Promise<CallToolResult> => {
+    let results = Array.from(tasksDb.values());
+
+    if (status) {
+      results = results.filter(t => t.status === status);
+    }
+
+    if (priority) {
+      results = results.filter(t => t.priority === priority);
+    }
+
+    results = results.slice(0, limit);
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(results, null, 2)
+      }],
+      structuredContent: { tasks: results, count: results.length }
+    };
+  }
+);
+
+server.registerTool(
+  'update_task',
+  {
+    title: 'Update Task',
+    description: 'Actualiza una tarea existente',
+    inputSchema: z.object({
+      task_id: z.string(),
+      updates: TaskUpdateSchema
+    })
+  },
+  async ({ task_id, updates }): Promise<CallToolResult> => {
+    const task = tasksDb.get(task_id);
+
+    if (!task) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Error: Tarea '${task_id}' no encontrada`
+        }],
+        isError: true
+      };
+    }
+
+    // Aplicar actualizaciones
+    Object.assign(task, updates);
+    task.updated_at = new Date().toISOString();
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(task, null, 2)
+      }],
+      structuredContent: task
+    };
+  }
+);
+
+server.registerTool(
+  'delete_task',
+  {
+    title: 'Delete Task',
+    description: 'Elimina una tarea',
+    inputSchema: z.object({ task_id: z.string() }),
+    annotations: { destructiveHint: true, idempotentHint: true }
+  },
+  async ({ task_id }): Promise<CallToolResult> => {
+    const task = tasksDb.get(task_id);
+
+    if (!task) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Error: Tarea '${task_id}' no encontrada`
+        }],
+        isError: true
+      };
+    }
+
+    tasksDb.delete(task_id);
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify({ deleted: true, task_id, title: task.title }, null, 2)
+      }]
+    };
+  }
+);
+
+// ============== Resources ==============
+
+server.registerResource(
+  'task-stats',
+  'tasks://stats',
+  {
+    title: 'Task Statistics',
+    description: 'Estadísticas de tareas',
+    mimeType: 'application/json'
+  },
+  async (uri) => {
+    const tasks = Array.from(tasksDb.values());
+    
+    const stats = {
+      total: tasks.length,
+      by_status: {
+        pending: tasks.filter(t => t.status === 'pending').length,
+        in_progress: tasks.filter(t => t.status === 'in_progress').length,
+        completed: tasks.filter(t => t.status === 'completed').length
+      },
+      by_priority: {
+        low: tasks.filter(t => t.priority === 'low').length,
+        medium: tasks.filter(t => t.priority === 'medium').length,
+        high: tasks.filter(t => t.priority === 'high').length
+      },
+      recent: tasks
+        .sort((a, b) => b.created_at.localeCompare(a.created_at))
+        .slice(0, 5)
+        .map(t => ({ id: t.id, title: t.title }))
+    };
+
+    return {
+      contents: [{
+        uri: uri.href,
+        mimeType: 'application/json',
+        text: JSON.stringify(stats, null, 2)
+      }]
+    };
+  }
+);
+
+server.registerResource(
+  'task',
+  new ResourceTemplate('tasks://{task_id}', {
+    list: async () => ({
+      resources: Array.from(tasksDb.values()).map(t => ({
+        uri: `tasks://${t.id}`,
+        name: t.title,
+        mimeType: 'application/json'
+      }))
+    })
+  }),
+  {
+    title: 'Task',
+    description: 'Información de una tarea',
+    mimeType: 'application/json'
+  },
+  async (uri, { task_id }) => {
+    const task = tasksDb.get(task_id);
+
+    if (!task) {
+      return {
+        contents: [{
+          uri: uri.href,
+          mimeType: 'application/json',
+          text: JSON.stringify({ error: 'NOT_FOUND' })
+        }]
+      };
+    }
+
+    return {
+      contents: [{
+        uri: uri.href,
+        mimeType: 'application/json',
+        text: JSON.stringify(task, null, 2)
+      }]
+    };
+  }
+);
+
+// ============== Prompts ==============
+
+server.registerPrompt(
+  'task_summary',
+  {
+    title: 'Task Summary',
+    description: 'Genera un resumen de tareas',
+    argsSchema: z.object({
+      status: completable(
+        z.string().optional().describe('Estado a filtrar'),
+        (v) => ['pending', 'in_progress', 'completed'].filter(s => s.startsWith(v))
+      )
+    })
+  },
+  ({ status }) => ({
+    messages: [{
+      role: 'user' as const,
+      content: {
+        type: 'text' as const,
+        text: `Genera un resumen de las tareas${status ? ` con estado ${status}` : ''}.`
+      }
+    }]
+  })
+);
+
+// ============== Iniciar Servidor ==============
+
+const app = createMcpExpressApp({ port: 3000 });
+app.mcp.mount(server);
+
+app.listen(3000, () => {
+  console.log('🚀 MCP Server running on http://localhost:3000');
+});
+----
+
+== Parte 6: Cliente MCP en TypeScript
+
+=== Cliente básico con stdio
+
+[source,typescript]
+----
+// client-stdio.ts
+import { Client, StdioClientTransport } from '@modelcontextprotocol/client';
+
+async function main() {
+  // Crear cliente
+  const client = new Client({
+    name: 'demo-client',
+    version: '1.0.0'
+  });
+
+  // Configurar transporte
+  const transport = new StdioClientTransport({
+    command: 'npx',
+    args: ['tsx', 'server-basic.ts']
+  });
+
+  // Conectar
+  await client.connect(transport);
+  console.log('✓ Conectado al servidor');
+
+  // Listar tools
+  const tools = await client.listTools();
+  console.log('\n📋 Tools disponibles:');
+  for (const tool of tools.tools) {
+    console.log(`  - ${tool.name}: ${tool.description}`);
+  }
+
+  // Llamar a una tool
+  console.log('\n🔧 Ejecutando hello...');
+  const helloResult = await client.callTool({
+    name: 'hello',
+    arguments: { name: 'Daniel' }
+  });
+  console.log('Resultado:', helloResult.content);
+
+  // Otra llamada
+  console.log('\n🔧 Ejecutando add...');
+  const addResult = await client.callTool({
+    name: 'add',
+    arguments: { a: 5, b: 3 }
+  });
+  console.log('Resultado:', addResult.content);
+
+  // Cerrar conexión
+  await client.close();
+}
+
+main().catch(console.error);
+----
+
+=== Cliente HTTP completo
+
+[source,typescript]
+----
+// client-http.ts
+import { Client, StreamableHTTPClientTransport } from '@modelcontextprotocol/client';
+
+async function main() {
+  const client = new Client({
+    name: 'http-client',
+    version: '1.0.0'
+  });
+
+  const transport = new StreamableHTTPClientTransport(
+    new URL('http://localhost:3000/mcp')
+  );
+
+  await client.connect(transport);
+  console.log('✓ Conectado al servidor HTTP');
+
+  // Obtener instrucciones
+  const instructions = client.getInstructions();
+  if (instructions) {
+    console.log('\n📖 Instrucciones:', instructions);
+  }
+
+  // Listar tools
+  const tools = await client.listTools();
+  console.log(`\n📋 ${tools.tools.length} tools disponibles`);
+
+  // Crear una tarea
+  console.log('\n➕ Creando tarea...');
+  const createResult = await client.callTool({
+    name: 'create_task',
+    arguments: {
+      title: 'Aprender MCP',
+      description: 'Estudiar el protocolo MCP a fondo',
+      priority: 'high'
+    }
+  });
+
+  if (createResult.structuredContent) {
+    console.log('Creada:', createResult.structuredContent);
+  }
+
+  // Listar tareas
+  console.log('\n📋 Listando tareas...');
+  const listResult = await client.callTool({
+    name: 'list_tasks',
+    arguments: {}
+  });
+  console.log(listResult.content[0]);
+
+  // Listar resources
+  console.log('\n📁 Resources:');
+  const resources = await client.listResources();
+  for (const r of resources.resources) {
+    console.log(`  - ${r.uri}: ${r.name}`);
+  }
+
+  // Leer resource
+  console.log('\n📊 Estadísticas:');
+  const stats = await client.readResource({ uri: 'tasks://stats' });
+  console.log(stats.contents[0]);
+
+  // Cerrar
+  await client.close();
+}
+
+main().catch(console.error);
+----
+
+=== Cliente con manejo de progreso
+
+[source,typescript]
+----
+// client-progress.ts
+import { Client, StdioClientTransport } from '@modelcontextprotocol/client';
+
+async function main() {
+  const client = new Client({
+    name: 'progress-client',
+    version: '1.0.0'
+  });
+
+  const transport = new StdioClientTransport({
+    command: 'npx',
+    args: ['tsx', 'server-progress.ts']
+  });
+
+  await client.connect(transport);
+
+  // Configurar handler de logs
+  client.setNotificationHandler('notifications/message', (notification) => {
+    const { level, data } = notification.params;
+    console.log(`[${level.toUpperCase()}] ${data}`);
+  });
+
+  // Llamar tool con progreso
+  console.log('🔄 Procesando archivos...\n');
+  
+  const result = await client.callTool(
+    {
+      name: 'process_files',
+      arguments: {
+        files: ['doc1.txt', 'doc2.txt', 'test.error', 'doc3.txt'],
+        delay: 300
+      }
+    },
+    {
+      onprogress: ({ progress, total, message }) => {
+        const percent = Math.round(progress * 100);
+        console.log(`Progress: ${percent}% - ${message || ''}`);
+      },
+      resetTimeoutOnProgress: true,
+      maxTotalTimeout: 60000
+    }
+  );
+
+  console.log('\n✅ Resultado final:', result.content[0]);
+
+  await client.close();
+}
+
+main().catch(console.error);
+----
+
+=== Cliente interactivo
+
+[source,typescript]
+----
+// client-interactive.ts
+import * as readline from 'readline';
+import { Client, StreamableHTTPClientTransport } from '@modelcontextprotocol/client';
+import type { Tool, Resource } from '@modelcontextprotocol/client';
+
+class MCPInteractiveClient {
+  private client: Client;
+  private rl: readline.Interface;
+
+  constructor() {
+    this.client = new Client({ name: 'interactive-client', version: '1.0.0' });
+    this.rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+  }
+
+  async connect(url: string) {
+    const transport = new StreamableHTTPClientTransport(new URL(url));
+    await this.client.connect(transport);
+    console.log('✓ Conectado al servidor');
+
+    const instructions = this.client.getInstructions();
+    if (instructions) {
+      console.log(`\n📖 ${instructions}\n`);
+    }
+  }
+
+  async disconnect() {
+    await this.client.close();
+    this.rl.close();
+  }
+
+  private async prompt(question: string): Promise<string> {
+    return new Promise((resolve) => {
+      this.rl.question(question, resolve);
+    });
+  }
+
+  async listTools() {
+    const result = await this.client.listTools();
+    console.log('\n📋 Tools disponibles:');
+    for (const tool of result.tools) {
+      console.log(`  • ${tool.name}`);
+      console.log(`    ${tool.description}`);
+    }
+    return result.tools;
+  }
+
+  async listResources() {
+    const result = await this.client.listResources();
+    console.log('\n📁 Resources:');
+    for (const resource of result.resources) {
+      console.log(`  • ${resource.uri}: ${resource.name}`);
+    }
+    return result.resources;
+  }
+
+  async callTool(name: string, args: Record<string, unknown>) {
+    console.log(`\n🔧 Ejecutando: ${name}`);
+    console.log(`   Argumentos:`, args);
+
+    const result = await this.client.callTool({ name, arguments: args });
+
+    if (result.isError) {
+      console.log(`   ❌ Error:`, result.content[0]);
+    } else {
+      console.log(`   ✓ Resultado:`, result.content[0]);
+    }
+
+    return result;
+  }
+
+  async readResource(uri: string) {
+    console.log(`\n📖 Leyendo: ${uri}`);
+    const result = await this.client.readResource({ uri });
+    console.log(`   Contenido:`, result.contents[0]);
+    return result;
+  }
+
+  async runREPL() {
+    console.log('\n' + '='.repeat(50));
+    console.log('MCP Client REPL');
+    console.log('Comandos: tools, resources, call <name> <json>, read <uri>, quit');
+    console.log('='.repeat(50));
+
+    while (true) {
+      const cmd = await this.prompt('\n> ');
+
+      if (!cmd.trim()) continue;
+
+      const parts = cmd.trim().split(/\s+/);
+      const command = parts[0];
+
+      try {
+        switch (command) {
+          case 'quit':
+          case 'exit':
+            return;
+
+          case 'tools':
+            await this.listTools();
+            break;
+
+          case 'resources':
+            await this.listResources();
+            break;
+
+          case 'call': {
+            const toolName = parts[1];
+            const argsJson = parts.slice(2).join(' ') || '{}';
+            const args = JSON.parse(argsJson);
+            await this.callTool(toolName, args);
+            break;
+          }
+
+          case 'read': {
+            const uri = parts[1];
+            await this.readResource(uri);
+            break;
+          }
+
+          default:
+            console.log(`Comando desconocido: ${command}`);
+        }
+      } catch (error) {
+        console.log('Error:', error);
+      }
+    }
+  }
+}
+
+async function main() {
+  const client = new MCPInteractiveClient();
+
+  try {
+    await client.connect('http://localhost:3000/mcp');
+    await client.runREPL();
+  } finally {
+    await client.disconnect();
+  }
+
+  console.log('\n¡Hasta pronto!');
+}
+
+main().catch(console.error);
+----
+
+=== Cliente con autenticación
+
+[source,typescript]
+----
+// client-auth.ts
+import { 
+  Client, 
+  StreamableHTTPClientTransport,
+  ClientCredentialsProvider,
+  PrivateKeyJwtProvider
+} from '@modelcontextprotocol/client';
+import type { AuthProvider } from '@modelcontextprotocol/client';
+
+// ============== Bearer Token Simple ==============
+
+async function connectWithBearerToken() {
+  const authProvider: AuthProvider = {
+    token: async () => process.env.API_KEY || 'my-api-key'
+  };
+
+  const client = new Client({ name: 'bearer-client', version: '1.0.0' });
+  const transport = new StreamableHTTPClientTransport(
+    new URL('http://localhost:3000/mcp'),
+    { authProvider }
+  );
+
+  await client.connect(transport);
+  console.log('✓ Conectado con Bearer token');
+  return client;
+}
+
+// ============== Client Credentials ==============
+
+async function connectWithClientCredentials() {
+  const authProvider = new ClientCredentialsProvider({
+    clientId: 'my-service',
+    clientSecret: 'my-secret',
+    tokenEndpoint: 'https://auth.example.com/oauth/token'
+  });
+
+  const client = new Client({ name: 'cc-client', version: '1.0.0' });
+  const transport = new StreamableHTTPClientTransport(
+    new URL('http://localhost:3000/mcp'),
+    { authProvider }
+  );
+
+  await client.connect(transport);
+  console.log('✓ Conectado con Client Credentials');
+  return client;
+}
+
+// ============== Private Key JWT ==============
+
+async function connectWithPrivateKeyJwt() {
+  const privateKey = `-----BEGIN RSA PRIVATE KEY-----
+...
+-----END RSA PRIVATE KEY-----`;
+
+  const authProvider = new PrivateKeyJwtProvider({
+    clientId: 'my-service',
+    privateKey,
+    algorithm: 'RS256',
+    tokenEndpoint: 'https://auth.example.com/oauth/token'
+  });
+
+  const client = new Client({ name: 'jwt-client', version: '1.0.0' });
+  const transport = new StreamableHTTPClientTransport(
+    new URL('http://localhost:3000/mcp'),
+    { authProvider }
+  );
+
+  await client.connect(transport);
+  console.log('✓ Conectado con Private Key JWT');
+  return client;
+}
+
+// Uso
+async function main() {
+  const client = await connectWithBearerToken();
+  
+  // Usar el cliente...
+  const tools = await client.listTools();
+  console.log('Tools:', tools.tools.length);
+  
+  await client.close();
+}
+
+main().catch(console.error);
+----
+
+=== Cliente con capabilities completas
+
+[source,typescript]
+----
+// client-full-capabilities.ts
+import { Client, StreamableHTTPClientTransport } from '@modelcontextprotocol/client';
+
+async function main() {
+  // Crear cliente con todas las capabilities
+  const client = new Client(
+    { name: 'full-client', version: '1.0.0' },
+    {
+      capabilities: {
+        sampling: {},           // Puede generar texto
+        elicitation: { form: {} }, // Puede pedir input
+        roots: {}               // Puede exponer directorios
+      }
+    }
+  );
+
+  // Handler para sampling
+  client.setRequestHandler('sampling/createMessage', async (request) => {
+    console.log('📩 Solicitud de sampling:', request.params.messages.at(-1));
+    
+    // En producción, llamar a tu LLM aquí
+    return {
+      model: 'my-model',
+      role: 'assistant' as const,
+      content: {
+        type: 'text' as const,
+        text: 'Respuesta simulada del modelo'
+      }
+    };
+  });
+
+  // Handler para elicitation
+  client.setRequestHandler('elicitation/create', async (request) => {
+    console.log('📝 Solicitud de input:', request.params.message);
+
+    if (request.params.mode === 'form') {
+      // Mostrar formulario al usuario
+      console.log('Schema:', request.params.requestedSchema);
+      
+      // En producción, mostrar UI y obtener respuesta
+      return { action: 'accept' as const, content: { confirm: true } };
+    }
+
+    return { action: 'decline' as const };
+  });
+
+  // Handler para roots
+  client.setRequestHandler('roots/list', async () => ({
+    roots: [
+      { uri: 'file:///home/user/projects/my-app', name: 'My App' },
+      { uri: 'file:///home/user/data', name: 'Data' }
+    ]
+  }));
+
+  // Conectar
+  const transport = new StreamableHTTPClientTransport(
+    new URL('http://localhost:3000/mcp')
+  );
+  await client.connect(transport);
+  
+  console.log('✓ Cliente conectado con todas las capabilities');
+
+  // Mantener corriendo
+  await new Promise(resolve => setTimeout(resolve, 60000));
+  
+  await client.close();
+}
+
+main().catch(console.error);
+----
+
+== Parte 7: Testing
+
+=== Tests unitarios para servidor MCP
+
+[source,typescript]
+----
+// server.test.ts
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { Client, StdioClientTransport } from '@modelcontextprotocol/client';
+
+describe('MCP Server Tests', () => {
+  let client: Client;
+
+  beforeAll(async () => {
+    client = new Client({ name: 'test-client', version: '1.0.0' });
+    
+    const transport = new StdioClientTransport({
+      command: 'npx',
+      args: ['tsx', 'server-tools-advanced.ts']
+    });
+
+    await client.connect(transport);
+  });
+
+  afterAll(async () => {
+    await client.close();
+  });
+
+  describe('User Tools', () => {
+    it('should create a user', async () => {
+      const result = await client.callTool({
+        name: 'create_user',
+        arguments: {
+          user: {
+            username: 'testuser',
+            email: 'test@example.com',
+            age: 25
+          }
+        }
+      });
+
+      expect(result.isError).toBe(false);
+      
+      const user = result.structuredContent as Record<string, unknown>;
+      expect(user.username).toBe('testuser');
+      expect(user.email).toBe('test@example.com');
+      expect(user.age).toBe(25);
+    });
+
+    it('should reject invalid email', async () => {
+      const result = await client.callTool({
+        name: 'create_user',
+        arguments: {
+          user: {
+            username: 'testuser2',
+            email: 'invalid-email',
+            age: 25
+          }
+        }
+      });
+
+      expect(result.isError).toBe(true);
+    });
+
+    it('should reject underage user', async () => {
+      const result = await client.callTool({
+        name: 'create_user',
+        arguments: {
+          user: {
+            username: 'testuser3',
+            email: 'test@example.com',
+            age: 15
+          }
+        }
+      });
+
+      expect(result.isError).toBe(true);
+    });
+
+    it('should list users', async () => {
+      // Crear usuario primero
+      await client.callTool({
+        name: 'create_user',
+        arguments: {
+          user: {
+            username: 'listtest',
+            email: 'list@example.com',
+            age: 30
+          }
+        }
+      });
+
+      // Listar
+      const result = await client.callTool({
+        name: 'list_users',
+        arguments: {}
+      });
+
+      expect(result.isError).toBe(false);
+      
+      const data = result.structuredContent as Record<string, unknown>;
+      expect(Array.isArray(data.users)).toBe(true);
+      expect(data.users.length).toBeGreaterThan(0);
+    });
+
+    it('should get user by id', async () => {
+      // Crear usuario
+      const createResult = await client.callTool({
+        name: 'create_user',
+        arguments: {
+          user: {
+            username: 'gettest',
+            email: 'get@example.com',
+            age: 28
+          }
+        }
+      });
+
+      const user = createResult.structuredContent as Record<string, unknown>;
+      
+      // Obtener por ID
+      const result = await client.callTool({
+        name: 'get_user',
+        arguments: { user_id: user.id }
+      });
+
+      expect(result.isError).toBe(false);
+    });
+
+    it('should delete user', async () => {
+      // Crear usuario
+      const createResult = await client.callTool({
+        name: 'create_user',
+        arguments: {
+          user: {
+            username: 'deletetest',
+            email: 'delete@example.com',
+            age: 22
+          }
+        }
+      });
+
+      const user = createResult.structuredContent as Record<string, unknown>;
+
+      // Eliminar
+      const deleteResult = await client.callTool({
+        name: 'delete_user',
+        arguments: { user_id: user.id }
+      });
+
+      expect(deleteResult.isError).toBe(false);
+
+      // Verificar que no existe
+      const getResult = await client.callTool({
+        name: 'get_user',
+        arguments: { user_id: user.id }
+      });
+
+      expect(getResult.isError).toBe(true);
+    });
+  });
+});
+
+// Configuración de Vitest
+// vitest.config.ts
+/*
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    testTimeout: 30000,
+    hookTimeout: 30000
+  }
+});
+*/
+
+// Ejecutar tests:
+// npx vitest run server.test.ts
+----
+
+== Parte 8: Proyecto Completo
+
+=== Servidor de gestión de biblioteca
+
+[source,typescript]
+----
+// library-server.ts
+import { randomUUID } from 'node:crypto';
+import { createMcpExpressApp } from '@modelcontextprotocol/express';
+import { McpServer, ResourceTemplate, completable } from '@modelcontextprotocol/server';
+import type { CallToolResult } from '@modelcontextprotocol/server';
+import * as z from 'zod/v4';
+
+// ============== Servidor ==============
+
+const server = new McpServer(
+  { name: 'library-server', version: '1.0.0' },
+  {
+    instructions: `
+      Servidor de gestión de biblioteca.
+      
+      Flujo recomendado:
+      1. Usa list_books para ver el catálogo
+      2. Usa search_books para encontrar libros específicos
+      3. Usa borrow_book para prestar un libro
+      4. Usa return_book para devolverlo
+      
+      Los recursos están disponibles bajo library://
+    `
+  }
+);
+
+// ============== Modelos ==============
+
+const BookSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  author: z.string(),
+  isbn: z.string(),
+  year: z.number(),
+  genre: z.string(),
+  available: z.boolean(),
+  borrowed_by: z.string().nullable(),
+  borrowed_at: z.string().nullable()
+});
+
+const MemberSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+  phone: z.string().nullable(),
+  borrowed_books: z.array(z.string()),
+  created_at: z.string()
+});
+
+const BookCreateSchema = z.object({
+  title: z.string().min(1).max(200),
+  author: z.string().min(1).max(100),
+  isbn: z.string().regex(/^\d{10}|\d{13}$/),
+  year: z.number().int().min(1450).max(2100),
+  genre: z.string()
+});
+
+const MemberCreateSchema = z.object({
+  name: z.string().min(2).max(100),
+  email: z.string().email(),
+  phone: z.string().optional()
+});
+
+type Book = z.infer<typeof BookSchema>;
+type Member = z.infer<typeof MemberSchema>;
+
+// ============== Base de datos ==============
+
+const booksDb = new Map<string, Book>([
+  ['book-001', {
+    id: 'book-001', title: 'El Quijote', author: 'Cervantes',
+    isbn: '9788420412140', year: 1605, genre: 'Novela',
+    available: true, borrowed_by: null, borrowed_at: null
+  }],
+  ['book-002', {
+    id: 'book-002', title: 'Cien años de soledad', author: 'García Márquez',
+    isbn: '9780307350403', year: 1967, genre: 'Novela',
+    available: true, borrowed_by: null, borrowed_at: null
+  }],
+  ['book-003', {
+    id: 'book-003', title: '1984', author: 'George Orwell',
+    isbn: '9780451524935', year: 1949, genre: 'Distopía',
+    available: true, borrowed_by: null, borrowed_at: null
+  }]
+]);
+
+const membersDb = new Map<string, Member>();
+
+// ============== TOOLS: Libros ==============
+
+server.registerTool(
+  'create_book',
+  {
+    title: 'Create Book',
+    description: 'Añade un nuevo libro a la biblioteca',
+    inputSchema: BookCreateSchema
+  },
+  async (data): Promise<CallToolResult> => {
+    const id = `book-${randomUUID().slice(0, 6)}`;
+    
+    const book: Book = {
+      id,
+      ...data,
+      available: true,
+      borrowed_by: null,
+      borrowed_at: null
+    };
+
+    booksDb.set(id, book);
+    return { content: [{ type: 'text', text: JSON.stringify(book, null, 2) }] };
+  }
+);
+
+server.registerTool(
+  'get_book',
+  {
+    title: 'Get Book',
+    description: 'Obtiene información de un libro',
+    inputSchema: z.object({ book_id: z.string() })
+  },
+  async ({ book_id }): Promise<CallToolResult> => {
+    const book = booksDb.get(book_id);
+    
+    if (!book) {
+      return {
+        content: [{ type: 'text', text: `Libro '${book_id}' no encontrado` }],
+        isError: true
+      };
+    }
+
+    return { content: [{ type: 'text', text: JSON.stringify(book, null, 2) }] };
+  }
+);
+
+server.registerTool(
+  'list_books',
+  {
+    title: 'List Books',
+    description: 'Lista libros con filtros',
+    inputSchema: z.object({
+      genre: z.string().optional(),
+      available_only: z.boolean().default(false),
+      limit: z.number().int().min(1).max(100).default(20)
+    })
+  },
+  async ({ genre, available_only, limit }): Promise<CallToolResult> => {
+    let results = Array.from(booksDb.values());
+
+    if (genre) {
+      results = results.filter(b => b.genre.toLowerCase() === genre.toLowerCase());
+    }
+
+    if (available_only) {
+      results = results.filter(b => b.available);
+    }
+
+    results = results.slice(0, limit);
+
+    return {
+      content: [{ type: 'text', text: JSON.stringify(results, null, 2) }],
+      structuredContent: { books: results, count: results.length }
+    };
+  }
+);
+
+server.registerTool(
+  'search_books',
+  {
+    title: 'Search Books',
+    description: 'Busca libros por título o autor',
+    inputSchema: z.object({ query: z.string() })
+  },
+  async ({ query }): Promise<CallToolResult> => {
+    const queryLower = query.toLowerCase();
+    
+    const results = Array.from(booksDb.values()).filter(
+      b => b.title.toLowerCase().includes(queryLower) ||
+           b.author.toLowerCase().includes(queryLower)
+    );
+
+    return {
+      content: [{ type: 'text', text: JSON.stringify(results, null, 2) }]
+    };
+  }
+);
+
+server.registerTool(
+  'delete_book',
+  {
+    title: 'Delete Book',
+    description: 'Elimina un libro',
+    inputSchema: z.object({ book_id: z.string() }),
+    annotations: { destructiveHint: true }
+  },
+  async ({ book_id }): Promise<CallToolResult> => {
+    const book = booksDb.get(book_id);
+    
+    if (!book) {
+      return {
+        content: [{ type: 'text', text: `Libro '${book_id}' no encontrado` }],
+        isError: true
+      };
+    }
+
+    booksDb.delete(book_id);
+    return {
+      content: [{ type: 'text', text: JSON.stringify({ deleted: true, book }, null, 2) }]
+    };
+  }
+);
+
+// ============== TOOLS: Miembros ==============
+
+server.registerTool(
+  'create_member',
+  {
+    title: 'Create Member',
+    description: 'Registra un nuevo miembro',
+    inputSchema: MemberCreateSchema
+  },
+  async (data): Promise<CallToolResult> => {
+    const id = `member-${randomUUID().slice(0, 6)}`;
+    
+    const member: Member = {
+      id,
+      ...data,
+      phone: data.phone ?? null,
+      borrowed_books: [],
+      created_at: new Date().toISOString()
+    };
+
+    membersDb.set(id, member);
+    return { content: [{ type: 'text', text: JSON.stringify(member, null, 2) }] };
+  }
+);
+
+server.registerTool(
+  'get_member',
+  {
+    title: 'Get Member',
+    description: 'Obtiene información de un miembro',
+    inputSchema: z.object({ member_id: z.string() })
+  },
+  async ({ member_id }): Promise<CallToolResult> => {
+    const member = membersDb.get(member_id);
+    
+    if (!member) {
+      return {
+        content: [{ type: 'text', text: `Miembro '${member_id}' no encontrado` }],
+        isError: true
+      };
+    }
+
+    // Incluir detalles de libros prestados
+    const borrowedDetails = member.borrowed_books
+      .map(id => booksDb.get(id))
+      .filter(Boolean)
+      .map(b => ({ id: b!.id, title: b!.title }));
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify({ ...member, borrowed_books_details: borrowedDetails }, null, 2)
+      }]
+    };
+  }
+);
+
+server.registerTool(
+  'list_members',
+  {
+    title: 'List Members',
+    description: 'Lista todos los miembros',
+    inputSchema: z.object({ limit: z.number().int().default(20) })
+  },
+  async ({ limit }): Promise<CallToolResult> => {
+    const results = Array.from(membersDb.values()).slice(0, limit);
+    return { content: [{ type: 'text', text: JSON.stringify(results, null, 2) }] };
+  }
+);
+
+// ============== TOOLS: Préstamos ==============
+
+server.registerTool(
+  'borrow_book',
+  {
+    title: 'Borrow Book',
+    description: 'Presta un libro a un miembro',
+    inputSchema: z.object({
+      book_id: z.string(),
+      member_id: z.string()
+    })
+  },
+  async ({ book_id, member_id }): Promise<CallToolResult> => {
+    const book = booksDb.get(book_id);
+    const member = membersDb.get(member_id);
+
+    if (!book) {
+      return {
+        content: [{ type: 'text', text: `Libro '${book_id}' no encontrado` }],
+        isError: true
+      };
+    }
+
+    if (!member) {
+      return {
+        content: [{ type: 'text', text: `Miembro '${member_id}' no encontrado` }],
+        isError: true
+      };
+    }
+
+    if (!book.available) {
+      return {
+        content: [{ type: 'text', text: `El libro '${book.title}' no está disponible` }],
+        isError: true
+      };
+    }
+
+    if (member.borrowed_books.length >= 5) {
+      return {
+        content: [{ type: 'text', text: 'El miembro ya tiene el máximo de libros (5)' }],
+        isError: true
+      };
+    }
+
+    // Realizar préstamo
+    book.available = false;
+    book.borrowed_by = member_id;
+    book.borrowed_at = new Date().toISOString();
+    member.borrowed_books.push(book_id);
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify({
+          success: true,
+          book: { id: book.id, title: book.title },
+          member: member.name,
+          borrowed_at: book.borrowed_at
+        }, null, 2)
+      }]
+    };
+  }
+);
+
+server.registerTool(
+  'return_book',
+  {
+    title: 'Return Book',
+    description: 'Devuelve un libro prestado',
+    inputSchema: z.object({ book_id: z.string() })
+  },
+  async ({ book_id }): Promise<CallToolResult> => {
+    const book = booksDb.get(book_id);
+
+    if (!book) {
+      return {
+        content: [{ type: 'text', text: `Libro '${book_id}' no encontrado` }],
+        isError: true
+      };
+    }
+
+    if (book.available) {
+      return {
+        content: [{ type: 'text', text: 'Este libro no está prestado' }],
+        isError: true
+      };
+    }
+
+    const memberId = book.borrowed_by;
+
+    if (memberId) {
+      const member = membersDb.get(memberId);
+      if (member) {
+        member.borrowed_books = member.borrowed_books.filter(id => id !== book_id);
+      }
+    }
+
+    book.available = true;
+    book.borrowed_by = null;
+    book.borrowed_at = null;
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify({
+          success: true,
+          book: { id: book.id, title: book.title },
+          returned_by: memberId
+        }, null, 2)
+      }]
+    };
+  }
+);
+
+// ============== RESOURCES ==============
+
+server.registerResource(
+  'library-stats',
+  'library://stats',
+  {
+    title: 'Library Statistics',
+    description: 'Estadísticas de la biblioteca',
+    mimeType: 'application/json'
+  },
+  async (uri) => {
+    const books = Array.from(booksDb.values());
+    
+    const genres: Record<string, number> = {};
+    for (const book of books) {
+      genres[book.genre] = (genres[book.genre] || 0) + 1;
+    }
+
+    const stats = {
+      total_books: books.length,
+      available_books: books.filter(b => b.available).length,
+      borrowed_books: books.filter(b => !b.available).length,
+      total_members: membersDb.size,
+      genres
+    };
+
+    return {
+      contents: [{
+        uri: uri.href,
+        mimeType: 'application/json',
+        text: JSON.stringify(stats, null, 2)
+      }]
+    };
+  }
+);
+
+server.registerResource(
+  'book-resource',
+  new ResourceTemplate('library://books/{book_id}', {
+    list: async () => ({
+      resources: Array.from(booksDb.values()).map(b => ({
+        uri: `library://books/${b.id}`,
+        name: b.title,
+        mimeType: 'application/json'
+      }))
+    })
+  }),
+  {
+    title: 'Book',
+    description: 'Información de un libro',
+    mimeType: 'application/json'
+  },
+  async (uri, { book_id }) => {
+    const book = booksDb.get(book_id);
+    return {
+      contents: [{
+        uri: uri.href,
+        mimeType: 'application/json',
+        text: JSON.stringify(book ?? { error: 'NOT_FOUND' }, null, 2)
+      }]
+    };
+  }
+);
+
+server.registerResource(
+  'member-resource',
+  new ResourceTemplate('library://members/{member_id}', {
+    list: async () => ({
+      resources: Array.from(membersDb.values()).map(m => ({
+        uri: `library://members/${m.id}`,
+        name: m.name,
+        mimeType: 'application/json'
+      }))
+    })
+  }),
+  {
+    title: 'Member',
+    description: 'Información de un miembro',
+    mimeType: 'application/json'
+  },
+  async (uri, { member_id }) => {
+    const member = membersDb.get(member_id);
+    return {
+      contents: [{
+        uri: uri.href,
+        mimeType: 'application/json',
+        text: JSON.stringify(member ?? { error: 'NOT_FOUND' }, null, 2)
+      }]
+    };
+  }
+);
+
+server.registerResource(
+  'genres',
+  'library://genres',
+  {
+    title: 'Genres',
+    description: 'Lista de géneros disponibles',
+    mimeType: 'application/json'
+  },
+  async (uri) => {
+    const genres = [...new Set(Array.from(booksDb.values()).map(b => b.genre))].sort();
+    return {
+      contents: [{
+        uri: uri.href,
+        mimeType: 'application/json',
+        text: JSON.stringify({ genres }, null, 2)
+      }]
+    };
+  }
+);
+
+// ============== PROMPTS ==============
+
+server.registerPrompt(
+  'recommend_books',
+  {
+    title: 'Recommend Books',
+    description: 'Genera recomendaciones de libros',
+    argsSchema: z.object({
+      genre: completable(
+        z.string().describe('Género preferido'),
+        (v) => ['Novela', 'Distopía', 'Poesía', 'Ensayo'].filter(g => 
+          g.toLowerCase().startsWith(v.toLowerCase())
+        )
+      ),
+      mood: z.string().default('relaxing')
+    })
+  },
+  ({ genre, mood }) => {
+    const availableInGenre = Array.from(booksDb.values())
+      .filter(b => b.genre.toLowerCase() === genre.toLowerCase() && b.available);
+
+    return {
+      messages: [
+        {
+          role: 'system' as const,
+          content: {
+            type: 'text' as const,
+            text: 'Eres un bibliotecario experto. Recomienda libros basándote en el género y estado de ánimo.'
+          }
+        },
+        {
+          role: 'user' as const,
+          content: {
+            type: 'text' as const,
+            text: `Busco recomendaciones de libros.\n\nGénero: ${genre}\nEstado de ánimo: ${mood}\n\nLibros disponibles:\n${JSON.stringify(availableInGenre, null, 2)}`
+          }
+        }
+      ]
+    };
+  }
+);
+
+// ============== INICIAR SERVIDOR ==============
+
+const app = createMcpExpressApp({ port: 3000 });
+app.mcp.mount(server);
+
+app.listen(3000, () => {
+  console.log('📚 Library MCP Server running on http://localhost:3000');
+});
+----
+
+== Parte 9: Despliegue
+
+=== Docker
+
+[source,dockerfile]
+----
+# Dockerfile
+FROM node:20-slim
+
+WORKDIR /app
+
+# Instalar dependencias
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copiar código
+COPY . .
+
+# Exponer puerto
+EXPOSE 3000
+
+# Comando
+CMD ["node", "--import", "tsx", "library-server.ts"]
+----
+
+[source,json]
+----
+{
+  "name": "mcp-library-server",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node --import tsx library-server.ts",
+    "dev": "tsx watch library-server.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "^1.0.0",
+    "@modelcontextprotocol/express": "^1.0.0",
+    "@modelcontextprotocol/node": "^1.0.0",
+    "express": "^4.21.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "@types/node": "^22.0.0",
+    "@types/express": "^4.17.0",
+    "vitest": "^2.0.0"
+  }
+}
+----
+
+[source,bash]
+----
+# Construir
+docker build -t mcp-library .
+
+# Ejecutar
+docker run -p 3000:3000 mcp-library
+----
+
+=== Docker Compose
+
+[source,yaml]
+----
+# docker-compose.yml
+version: '3.8'
+
+services:
+  mcp-server:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+----
+
+== Apéndice: Referencia Rápida
+
+=== Métodos McpServer
+
+[cols="1,3"]
+|===
+| Método | Uso
+
+| `server.registerTool(name, config, handler)`
+| Registra una herramienta
+
+| `server.registerResource(name, uri, config, handler)`
+| Registra un resource estático
+
+| `server.registerResource(name, template, config, handler)`
+| Registra un resource dinámico
+
+| `server.registerPrompt(name, config, handler)`
+| Registra un prompt
+|===
+
+=== Métodos Client
+
+[cols="1,3"]
+|===
+| Método | Uso
+
+| `client.connect(transport)`
+| Conecta al servidor
+
+| `client.listTools()`
+| Lista herramientas
+
+| `client.callTool({ name, arguments })`
+| Invoca una herramienta
+
+| `client.listResources()`
+| Lista resources
+
+| `client.readResource({ uri })`
+| Lee un resource
+
+| `client.listPrompts()`
+| Lista prompts
+
+| `client.getPrompt({ name, arguments })`
+| Obtiene un prompt
+
+| `client.close()`
+| Cierra la conexión
+|===
+
+=== Transportes
+
+[cols="1,2,2"]
+|===
+| Transport | Uso | Creación
+
+| StdioServerTransport
+| Claude Desktop
+| `new StdioServerTransport()`
+
+| StreamableHTTPClientTransport
+| HTTP remoto
+| `new StreamableHTTPClientTransport(url)`
+
+| StdioClientTransport
+| Cliente a proceso
+| `new StdioClientTransport({ command, args })`
+|===
+
+=== Contexto en handlers
+
+[cols="1,3"]
+|===
+| Método | Descripción
+
+| `ctx.mcpReq.log(level, data)`
+| Enviar log al cliente
+
+| `ctx.mcpReq.notify(params)`
+| Enviar notificación
+
+| `ctx.mcpReq.requestSampling(params)`
+| Pedir generación de texto
+
+| `ctx.mcpReq.elicitInput(params)`
+| Pedir input al usuario
+|===
+
+== Recursos Adicionales
+
+* https://github.com/modelcontextprotocol/typescript-sdk[SDK TypeScript Oficial]
+* https://modelcontextprotocol.io[Documentación MCP]
+* https://spec.modelcontextprotocol.io[Especificación MCP]
+* https://docs.anthropic.com/en/docs/claude-code[Claude Code Docs]

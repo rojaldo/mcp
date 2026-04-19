@@ -1,0 +1,3121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.26">
+<meta name="author" content="Bot-Bunnny">
+<title>10 Ejercicios con MCP</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<style>
+/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+/* Uncomment the following line when using as a custom stylesheet */
+/* @import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"; */
+html{font-family:sans-serif;-webkit-text-size-adjust:100%}
+a{background:none}
+a:focus{outline:thin dotted}
+a:active,a:hover{outline:0}
+h1{font-size:2em;margin:.67em 0}
+b,strong{font-weight:bold}
+abbr{font-size:.9em}
+abbr[title]{cursor:help;border-bottom:1px dotted #dddddf;text-decoration:none}
+dfn{font-style:italic}
+hr{height:0}
+mark{background:#ff0;color:#000}
+code,kbd,pre,samp{font-family:monospace;font-size:1em}
+pre{white-space:pre-wrap}
+q{quotes:"\201C" "\201D" "\2018" "\2019"}
+small{font-size:80%}
+sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.25em}
+img{border:0}
+svg:not(:root){overflow:hidden}
+figure{margin:0}
+audio,video{display:inline-block}
+audio:not([controls]){display:none;height:0}
+fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
+legend{border:0;padding:0}
+button,input,select,textarea{font-family:inherit;font-size:100%;margin:0}
+button,input{line-height:normal}
+button,select{text-transform:none}
+button,html input[type=button],input[type=reset],input[type=submit]{-webkit-appearance:button;cursor:pointer}
+button[disabled],html input[disabled]{cursor:default}
+input[type=checkbox],input[type=radio]{padding:0}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}
+textarea{overflow:auto;vertical-align:top}
+table{border-collapse:collapse;border-spacing:0}
+*,::before,::after{box-sizing:border-box}
+html,body{font-size:100%}
+body{background:#fff;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Noto Serif","DejaVu Serif",serif;line-height:1;position:relative;cursor:auto;-moz-tab-size:4;-o-tab-size:4;tab-size:4;word-wrap:anywhere;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}
+a:hover{cursor:pointer}
+img,object,embed{max-width:100%;height:auto}
+object,embed{height:100%}
+img{-ms-interpolation-mode:bicubic}
+.left{float:left!important}
+.right{float:right!important}
+.text-left{text-align:left!important}
+.text-right{text-align:right!important}
+.text-center{text-align:center!important}
+.text-justify{text-align:justify!important}
+.hide{display:none}
+img,object,svg{display:inline-block;vertical-align:middle}
+textarea{height:auto;min-height:50px}
+select{width:100%}
+.subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
+div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0}
+a{color:#2156a5;text-decoration:underline;line-height:inherit}
+a:hover,a:focus{color:#1d4b8f}
+a img{border:0}
+p{line-height:1.6;margin-bottom:1.25em;text-rendering:optimizeLegibility}
+p aside{font-size:.875em;line-height:1.35;font-style:italic}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{font-family:"Open Sans","DejaVu Sans",sans-serif;font-weight:300;font-style:normal;color:#ba3925;text-rendering:optimizeLegibility;margin-top:1em;margin-bottom:.5em;line-height:1.0125em}
+h1 small,h2 small,h3 small,#toctitle small,.sidebarblock>.content>.title small,h4 small,h5 small,h6 small{font-size:60%;color:#e99b8f;line-height:0}
+h1{font-size:2.125em}
+h2{font-size:1.6875em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.375em}
+h4,h5{font-size:1.125em}
+h6{font-size:1em}
+hr{border:solid #dddddf;border-width:1px 0 0;clear:both;margin:1.25em 0 1.1875em}
+em,i{font-style:italic;line-height:inherit}
+strong,b{font-weight:bold;line-height:inherit}
+small{font-size:60%;line-height:inherit}
+code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
+ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
+ul,ol{margin-left:1.5em}
+ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
+ul.circle{list-style-type:circle}
+ul.disc{list-style-type:disc}
+ul.square{list-style-type:square}
+ul.circle ul:not([class]),ul.disc ul:not([class]),ul.square ul:not([class]){list-style:inherit}
+ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
+dl dt{margin-bottom:.3125em;font-weight:bold}
+dl dd{margin-bottom:1.25em}
+blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
+blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
+@media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
+h1{font-size:2.75em}
+h2{font-size:2.3125em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
+h4{font-size:1.4375em}}
+table{background:#fff;margin-bottom:1.25em;border:1px solid #dedede;word-wrap:normal}
+table thead,table tfoot{background:#f7f8f7}
+table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
+table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
+table tr.even,table tr.alt{background:#f8f8f7}
+table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{line-height:1.6}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
+h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
+.center{margin-left:auto;margin-right:auto}
+.stretch{width:100%}
+.clearfix::before,.clearfix::after,.float-group::before,.float-group::after{content:" ";display:table}
+.clearfix::after,.float-group::after{clear:both}
+:not(pre).nobreak{word-wrap:normal}
+:not(pre).nowrap{white-space:nowrap}
+:not(pre).pre-wrap{white-space:pre-wrap}
+:not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
+pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
+pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
+pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
+em em{font-style:normal}
+strong strong{font-weight:400}
+.keyseq{color:rgba(51,51,51,.8)}
+kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background:#f7f7f7;border:1px solid #ccc;border-radius:3px;box-shadow:0 1px 0 rgba(0,0,0,.2),inset 0 0 0 .1em #fff;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
+.keyseq kbd:first-child{margin-left:0}
+.keyseq kbd:last-child{margin-right:0}
+.menuseq,.menuref{color:#000}
+.menuseq b:not(.caret),.menuref{font-weight:inherit}
+.menuseq{word-spacing:-.02em}
+.menuseq b.caret{font-size:1.25em;line-height:.8}
+.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
+b.button::before,b.button::after{position:relative;top:-1px;font-weight:400}
+b.button::before{content:"[";padding:0 3px 0 2px}
+b.button::after{content:"]";padding:0 2px 0 3px}
+p a>code:hover{color:rgba(0,0,0,.9)}
+#header,#content,#footnotes,#footer{width:100%;margin:0 auto;max-width:62.5em;*zoom:1;position:relative;padding-left:.9375em;padding-right:.9375em}
+#header::before,#header::after,#content::before,#content::after,#footnotes::before,#footnotes::after,#footer::before,#footer::after{content:" ";display:table}
+#header::after,#content::after,#footnotes::after,#footer::after{clear:both}
+#content{margin-top:1.25em}
+#content::before{content:none}
+#header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
+#header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
+#header .details span:first-child{margin-left:-.125em}
+#header .details span.email a{color:rgba(0,0,0,.85)}
+#header .details br{display:none}
+#header .details br+span::before{content:"\00a0\2013\00a0"}
+#header .details br+span.author::before{content:"\00a0\22c5\00a0";color:rgba(0,0,0,.85)}
+#header .details br+span#revremark::before{content:"\00a0|\00a0"}
+#header #revnumber{text-transform:capitalize}
+#header #revnumber::after{content:"\00a0"}
+#content>h1:first-child:not([class]){color:rgba(0,0,0,.85);border-bottom:1px solid #dddddf;padding-bottom:8px;margin-top:0;padding-top:1rem;margin-bottom:1.25rem}
+#toc{border-bottom:1px solid #e7e7e9;padding-bottom:.5em}
+#toc>ul{margin-left:.125em}
+#toc ul.sectlevel0>li>a{font-style:italic}
+#toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
+#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
+#toc li{line-height:1.3334;margin-top:.3334em}
+#toc a{text-decoration:none}
+#toc a:active{text-decoration:underline}
+#toctitle{color:#7a2518;font-size:1.2em}
+@media screen and (min-width:768px){#toctitle{font-size:1.375em}
+body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
+#toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
+#toc.toc2>ul{font-size:.9em;margin-bottom:0}
+#toc.toc2 ul ul{margin-left:0;padding-left:1em}
+#toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
+body.toc2.toc-right{padding-left:0;padding-right:15em}
+body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #e7e7e9;left:auto;right:0}}
+@media screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
+#toc.toc2{width:20em}
+#toc.toc2 #toctitle{font-size:1.375em}
+#toc.toc2>ul{font-size:.95em}
+#toc.toc2 ul ul{padding-left:1.25em}
+body.toc2.toc-right{padding-left:0;padding-right:20em}}
+#content #toc{border:1px solid #e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;border-radius:4px}
+#content #toc>:first-child{margin-top:0}
+#content #toc>:last-child{margin-bottom:0}
+#footer{max-width:none;background:rgba(0,0,0,.8);padding:1.25em}
+#footer-text{color:hsla(0,0%,100%,.8);line-height:1.44}
+#content{margin-bottom:.625em}
+.sect1{padding-bottom:.625em}
+@media screen and (min-width:768px){#content{margin-bottom:1.25em}
+.sect1{padding-bottom:1.25em}}
+.sect1:last-child{padding-bottom:0}
+.sect1+.sect1{border-top:1px solid #e7e7e9}
+#content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
+#content h1>a.anchor::before,h2>a.anchor::before,h3>a.anchor::before,#toctitle>a.anchor::before,.sidebarblock>.content>.title>a.anchor::before,h4>a.anchor::before,h5>a.anchor::before,h6>a.anchor::before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
+#content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
+#content h1>a.link,h2>a.link,h3>a.link,#toctitle>a.link,.sidebarblock>.content>.title>a.link,h4>a.link,h5>a.link,h6>a.link{color:#ba3925;text-decoration:none}
+#content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
+details,.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
+details{margin-left:1.25rem}
+details>summary{cursor:pointer;display:block;position:relative;line-height:1.6;margin-bottom:.625rem;outline:none;-webkit-tap-highlight-color:transparent}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"";border:solid transparent;border-left:solid;border-width:.3em 0 .3em .5em;position:absolute;top:.5em;left:-1.25rem;transform:translateX(15%)}
+details[open]>summary::before{border:solid transparent;border-top:solid;border-width:.5em .3em 0;transform:translateY(15%)}
+details>summary::after{content:"";width:1.25rem;height:1em;position:absolute;top:.3em;left:-1.25rem}
+.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{text-rendering:optimizeLegibility;text-align:left;font-family:"Noto Serif","DejaVu Serif",serif;font-size:1rem;font-style:italic}
+table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
+.paragraph.lead>p,#preamble>.sectionbody>[class=paragraph]:first-of-type p{font-size:1.21875em;line-height:1.6;color:rgba(0,0,0,.85)}
+.admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
+.admonitionblock>table td.icon{text-align:center;width:80px}
+.admonitionblock>table td.icon img{max-width:none}
+.admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
+.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
+.admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
+.sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
+.sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
+.exampleblock>.content>:first-child,.sidebarblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child,.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
+@media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
+@media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
+.literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
+.literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
+.listingblock>.content{position:relative}
+.listingblock pre>code{display:block}
+.listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
+.listingblock:hover code[data-lang]::before{display:block}
+.listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
+.listingblock.terminal pre .command:not([data-prompt])::before{content:"$"}
+.listingblock pre.highlightjs{padding:0}
+.listingblock pre.highlightjs>code{padding:1em;border-radius:4px}
+.listingblock pre.prettyprint{border-width:0}
+.prettyprint{background:#f7f7f8}
+pre.prettyprint .linenums{line-height:1.45;margin-left:2em}
+pre.prettyprint li{background:none;list-style-type:inherit;padding-left:0}
+pre.prettyprint li code[data-lang]::before{opacity:1}
+pre.prettyprint li:not(:first-child) code[data-lang]::before{display:none}
+table.linenotable{border-collapse:separate;border:0;margin-bottom:0;background:none}
+table.linenotable td[class]{color:inherit;vertical-align:top;padding:0;line-height:inherit;white-space:normal}
+table.linenotable td.code{padding-left:.75em}
+table.linenotable td.linenos,pre.pygments .linenos{border-right:1px solid;opacity:.35;padding-right:.5em;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
+pre.pygments span.linenos{display:inline-block;margin-right:.75em}
+.quoteblock{margin:0 1em 1.25em 1.5em;display:table}
+.quoteblock:not(.excerpt)>.title{margin-left:-1.5em;margin-bottom:.75em}
+.quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
+.quoteblock blockquote{margin:0;padding:0;border:0}
+.quoteblock blockquote::before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
+.quoteblock blockquote>.paragraph:last-child p{margin-bottom:0}
+.quoteblock .attribution{margin-top:.75em;margin-right:.5ex;text-align:right}
+.verseblock{margin:0 1em 1.25em}
+.verseblock pre{font-family:"Open Sans","DejaVu Sans",sans-serif;font-size:1.15rem;color:rgba(0,0,0,.85);font-weight:300;text-rendering:optimizeLegibility}
+.verseblock pre strong{font-weight:400}
+.verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
+.quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
+.quoteblock .attribution br,.verseblock .attribution br{display:none}
+.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
+.quoteblock.abstract blockquote::before,.quoteblock.excerpt blockquote::before,.quoteblock .quoteblock blockquote::before{display:none}
+.quoteblock.abstract blockquote,.quoteblock.abstract p,.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{line-height:1.6;word-spacing:0}
+.quoteblock.abstract{margin:0 1em 1.25em;display:block}
+.quoteblock.abstract>.title{margin:0 0 .375em;font-size:1.15em;text-align:center}
+.quoteblock.excerpt>blockquote,.quoteblock .quoteblock{padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
+.quoteblock.excerpt,.quoteblock .quoteblock{margin-left:0}
+.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
+.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;font-size:.85rem;text-align:left;margin-right:0}
+p.tableblock:last-child{margin-bottom:0}
+td.tableblock>.content{margin-bottom:1.25em;word-wrap:anywhere}
+td.tableblock>.content>:last-child{margin-bottom:-1.25em}
+table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
+table.grid-all>*>tr>*{border-width:1px}
+table.grid-cols>*>tr>*{border-width:0 1px}
+table.grid-rows>*>tr>*{border-width:1px 0}
+table.frame-all{border-width:1px}
+table.frame-ends{border-width:1px 0}
+table.frame-sides{border-width:0 1px}
+table.frame-none>colgroup+*>:first-child>*,table.frame-sides>colgroup+*>:first-child>*{border-top-width:0}
+table.frame-none>:last-child>:last-child>*,table.frame-sides>:last-child>:last-child>*{border-bottom-width:0}
+table.frame-none>*>tr>:first-child,table.frame-ends>*>tr>:first-child{border-left-width:0}
+table.frame-none>*>tr>:last-child,table.frame-ends>*>tr>:last-child{border-right-width:0}
+table.stripes-all>*>tr,table.stripes-odd>*>tr:nth-of-type(odd),table.stripes-even>*>tr:nth-of-type(even),table.stripes-hover>*>tr:hover{background:#f8f8f7}
+th.halign-left,td.halign-left{text-align:left}
+th.halign-right,td.halign-right{text-align:right}
+th.halign-center,td.halign-center{text-align:center}
+th.valign-top,td.valign-top{vertical-align:top}
+th.valign-bottom,td.valign-bottom{vertical-align:bottom}
+th.valign-middle,td.valign-middle{vertical-align:middle}
+table thead th,table tfoot th{font-weight:bold}
+tbody tr th{background:#f7f8f7}
+tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
+p.tableblock>code:only-child{background:none;padding:0}
+p.tableblock{font-size:1em}
+ol{margin-left:1.75em}
+ul li ol{margin-left:1.5em}
+dl dd{margin-left:1.125em}
+dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
+li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
+ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
+ul.unstyled,ol.unstyled{margin-left:0}
+li>p:empty:only-child::before{content:"";display:inline-block}
+ul.checklist>li>p:first-child{margin-left:-1em}
+ul.checklist>li>p:first-child>.fa-square-o:first-child,ul.checklist>li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
+ul.checklist>li>p:first-child>input[type=checkbox]:first-child{margin-right:.25em}
+ul.inline{display:flex;flex-flow:row wrap;list-style:none;margin:0 0 .625em -1.25em}
+ul.inline>li{margin-left:1.25em}
+.unstyled dl dt{font-weight:400;font-style:normal}
+ol.arabic{list-style-type:decimal}
+ol.decimal{list-style-type:decimal-leading-zero}
+ol.loweralpha{list-style-type:lower-alpha}
+ol.upperalpha{list-style-type:upper-alpha}
+ol.lowerroman{list-style-type:lower-roman}
+ol.upperroman{list-style-type:upper-roman}
+ol.lowergreek{list-style-type:lower-greek}
+.hdlist>table,.colist>table{border:0;background:none}
+.hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
+td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
+td.hdlist1{font-weight:bold;padding-bottom:1.25em}
+td.hdlist2{word-wrap:anywhere}
+.literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
+.colist td:not([class]):first-child{padding:.4em .75em 0;line-height:1;vertical-align:top}
+.colist td:not([class]):first-child img{max-width:none}
+.colist td:not([class]):last-child{padding:.25em 0}
+.thumb,.th{line-height:0;display:inline-block;border:4px solid #fff;box-shadow:0 0 0 1px #ddd}
+.imageblock.left{margin:.25em .625em 1.25em 0}
+.imageblock.right{margin:.25em 0 1.25em .625em}
+.imageblock>.title{margin-bottom:0}
+.imageblock.thumb,.imageblock.th{border-width:6px}
+.imageblock.thumb>.title,.imageblock.th>.title{padding:0 .125em}
+.image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
+.image.left{margin-right:.625em}
+.image.right{margin-left:.625em}
+a.image{text-decoration:none;display:inline-block}
+a.image object{pointer-events:none}
+sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
+sup.footnote a,sup.footnoteref a{text-decoration:none}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
+#footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
+#footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
+#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
+#footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
+#footnotes .footnote:last-of-type{margin-bottom:0}
+#content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
+div.unbreakable{page-break-inside:avoid}
+.big{font-size:larger}
+.small{font-size:smaller}
+.underline{text-decoration:underline}
+.overline{text-decoration:overline}
+.line-through{text-decoration:line-through}
+.aqua{color:#00bfbf}
+.aqua-background{background:#00fafa}
+.black{color:#000}
+.black-background{background:#000}
+.blue{color:#0000bf}
+.blue-background{background:#0000fa}
+.fuchsia{color:#bf00bf}
+.fuchsia-background{background:#fa00fa}
+.gray{color:#606060}
+.gray-background{background:#7d7d7d}
+.green{color:#006000}
+.green-background{background:#007d00}
+.lime{color:#00bf00}
+.lime-background{background:#00fa00}
+.maroon{color:#600000}
+.maroon-background{background:#7d0000}
+.navy{color:#000060}
+.navy-background{background:#00007d}
+.olive{color:#606000}
+.olive-background{background:#7d7d00}
+.purple{color:#600060}
+.purple-background{background:#7d007d}
+.red{color:#bf0000}
+.red-background{background:#fa0000}
+.silver{color:#909090}
+.silver-background{background:#bcbcbc}
+.teal{color:#006060}
+.teal-background{background:#007d7d}
+.white{color:#bfbfbf}
+.white-background{background:#fafafa}
+.yellow{color:#bfbf00}
+.yellow-background{background:#fafa00}
+span.icon>.fa{cursor:default}
+a span.icon>.fa{cursor:inherit}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note::before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip::before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning::before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution::before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important::before{content:"\f06a";color:#bf0000}
+.conum[data-value]{display:inline-block;color:#fff!important;background:rgba(0,0,0,.8);border-radius:50%;text-align:center;font-size:.75em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Open Sans","DejaVu Sans",sans-serif;font-style:normal;font-weight:bold}
+.conum[data-value] *{color:#fff!important}
+.conum[data-value]+b{display:none}
+.conum[data-value]::after{content:attr(data-value)}
+pre .conum[data-value]{position:relative;top:-.125em}
+b.conum *{color:inherit!important}
+.conum:not([data-value]):empty{display:none}
+dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
+h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
+p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
+p,blockquote,dt,td.content,td.hdlist1,span.alt,summary{font-size:1.0625rem}
+p{margin-bottom:1.25rem}
+.sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
+.exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
+.print-only{display:none!important}
+@page{margin:1.25cm .75cm}
+@media print{*{box-shadow:none!important;text-shadow:none!important}
+html{font-size:80%}
+a{color:inherit!important;text-decoration:underline!important}
+a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
+a[href^="http:"]:not(.bare)::after,a[href^="https:"]:not(.bare)::after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
+abbr[title]{border-bottom:1px dotted}
+abbr[title]::after{content:" (" attr(title) ")"}
+pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
+thead{display:table-header-group}
+svg{max-width:100%}
+p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
+h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
+#header,#content,#footnotes,#footer{max-width:none}
+#toc,.sidebarblock,.exampleblock>.content{background:none!important}
+#toc{border-bottom:1px solid #dddddf!important;padding-bottom:0!important}
+body.book #header{text-align:center}
+body.book #header>h1:first-child{border:0!important;margin:2.5em 0 1em}
+body.book #header .details{border:0!important;display:block;padding:0!important}
+body.book #header .details span:first-child{margin-left:0!important}
+body.book #header .details br{display:block}
+body.book #header .details br+span::before{content:none!important}
+body.book #toc{border:0!important;text-align:left!important;padding:0!important;margin:0!important}
+body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-break-before:always}
+.listingblock code[data-lang]::before{display:block}
+#footer{padding:0 .9375em}
+.hide-on-print{display:none!important}
+.print-only{display:block!important}
+.hide-for-print{display:none!important}
+.show-for-print{display:inherit!important}}
+@media amzn-kf8,print{#header>h1:first-child{margin-top:1.25rem}
+.sect1{padding:0!important}
+.sect1+.sect1{border:0}
+#footer{background:none}
+#footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<h1>10 Ejercicios con MCP</h1>
+<div class="details">
+<span id="author" class="author">Bot-Bunnny</span><br>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_introducción">Introducción</a></li>
+<li><a href="#_ejercicio_1_el_traductor_de_yoda_speak">Ejercicio 1: El Traductor de "Yoda-speak"</a>
+<ul class="sectlevel2">
+<li><a href="#_enunciado">Enunciado</a></li>
+<li><a href="#_requisitos">Requisitos</a>
+<ul class="sectlevel3">
+<li><a href="#_tool_traducir_yoda">Tool: <code>traducir_yoda</code></a></li>
+<li><a href="#_resource_frases_clasicas">Resource: <code>frases_clasicas</code></a></li>
+<li><a href="#_prompt_entrenar_jedi">Prompt: <code>entrenar_jedi</code></a></li>
+</ul>
+</li>
+<li><a href="#_implementación_de_referencia_python">Implementación de Referencia (Python)</a></li>
+</ul>
+</li>
+<li><a href="#_ejercicio_2_el_generador_de_excusas_creativas">Ejercicio 2: El Generador de Excusas Creativas</a>
+<ul class="sectlevel2">
+<li><a href="#_enunciado_2">Enunciado</a></li>
+<li><a href="#_requisitos_2">Requisitos</a>
+<ul class="sectlevel3">
+<li><a href="#_tool_generar_excusa">Tool: <code>generar_excusa</code></a></li>
+<li><a href="#_tool_validar_excusa">Tool: <code>validar_excusa</code></a></li>
+<li><a href="#_resource_excusas_famosas">Resource: <code>excusas_famosas</code></a></li>
+<li><a href="#_prompt_defensa_excusa">Prompt: <code>defensa_excusa</code></a></li>
+</ul>
+</li>
+<li><a href="#_implementación_de_referencia_typescript">Implementación de Referencia (TypeScript)</a></li>
+</ul>
+</li>
+<li><a href="#_ejercicio_3_el_detector_de_spanglish_ofensivo">Ejercicio 3: El Detector de "Spanglish" Ofensivo</a>
+<ul class="sectlevel2">
+<li><a href="#_enunciado_3">Enunciado</a></li>
+<li><a href="#_requisitos_3">Requisitos</a>
+<ul class="sectlevel3">
+<li><a href="#_tool_analizar_spanglish">Tool: <code>analizar_spanglish</code></a></li>
+<li><a href="#_resource_diccionario_spanglish">Resource: <code>diccionario_spanglish</code></a></li>
+<li><a href="#_tool_corregir_automatico">Tool: <code>corregir_automatico</code></a></li>
+<li><a href="#_prompt_entrenar_oyente">Prompt: <code>entrenar_oyente</code></a></li>
+</ul>
+</li>
+<li><a href="#_implementación_de_referencia_python_2">Implementación de Referencia (Python)</a></li>
+</ul>
+</li>
+<li><a href="#_ejercicio_4_el_simulador_de_reuniones_eternas">Ejercicio 4: El Simulador de Reuniones Eternas</a>
+<ul class="sectlevel2">
+<li><a href="#_enunciado_4">Enunciado</a></li>
+<li><a href="#_requisitos_4">Requisitos</a>
+<ul class="sectlevel3">
+<li><a href="#_tool_generar_buzzword">Tool: <code>generar_buzzword</code></a></li>
+<li><a href="#_tool_estimar_duracion_reunion">Tool: <code>estimar_duracion_reunion</code></a></li>
+<li><a href="#_resource_frases_inmortales">Resource: <code>frases_inmortales</code></a></li>
+<li><a href="#_prompt_sobrevivir_reunion">Prompt: <code>sobrevivir_reunion</code></a></li>
+</ul>
+</li>
+<li><a href="#_implementación_de_referencia_python_3">Implementación de Referencia (Python)</a></li>
+</ul>
+</li>
+<li><a href="#_ejercicio_5_el_crítico_de_código_pasivo_agresivo">Ejercicio 5: El Crítico de Código Pasivo-Agresivo</a>
+<ul class="sectlevel2">
+<li><a href="#_enunciado_5">Enunciado</a></li>
+<li><a href="#_requisitos_5">Requisitos</a>
+<ul class="sectlevel3">
+<li><a href="#_tool_revisar_codigo">Tool: <code>revisar_codigo</code></a></li>
+<li><a href="#_tool_generar_pr_sarcastico">Tool: <code>generar_pr_sarcastico</code></a></li>
+<li><a href="#_resource_comentarios_clasicos">Resource: <code>comentarios_clasicos</code></a></li>
+<li><a href="#_prompt_defender_mi_codigo">Prompt: <code>defender_mi_codigo</code></a></li>
+</ul>
+</li>
+<li><a href="#_implementación_de_referencia_typescript_2">Implementación de Referencia (TypeScript)</a></li>
+</ul>
+</li>
+<li><a href="#_ejercicio_6_el_generador_de_recetas_de_programación">Ejercicio 6: El Generador de "Recetas" de Programación</a>
+<ul class="sectlevel2">
+<li><a href="#_enunciado_6">Enunciado</a></li>
+<li><a href="#_requisitos_6">Requisitos</a>
+<ul class="sectlevel3">
+<li><a href="#_tool_preparar_receta">Tool: <code>preparar_receta</code></a></li>
+<li><a href="#_resource_recetas_clasicas">Resource: <code>recetas_clasicas</code></a></li>
+<li><a href="#_tool_sustituir_ingrediente">Tool: <code>sustituir_ingrediente</code></a></li>
+<li><a href="#_prompt_menu_del_dia">Prompt: <code>menu_del_dia</code></a></li>
+</ul>
+</li>
+<li><a href="#_implementación_de_referencia_python_4">Implementación de Referencia (Python)</a></li>
+</ul>
+</li>
+<li><a href="#_ejercicio_7_el_traductor_de_cliente_speak_a_desarrollador">Ejercicio 7: El Traductor de "Cliente-speak" a "Desarrollador"</a>
+<ul class="sectlevel2">
+<li><a href="#_enunciado_7">Enunciado</a></li>
+<li><a href="#_requisitos_7">Requisitos</a>
+<ul class="sectlevel3">
+<li><a href="#_tool_traducir_requerimiento">Tool: <code>traducir_requerimiento</code></a></li>
+<li><a href="#_resource_diccionario_cliente">Resource: <code>diccionario_cliente</code></a></li>
+<li><a href="#_tool_estimar_esfuerzo_real">Tool: <code>estimar_esfuerzo_real</code></a></li>
+<li><a href="#_prompt_preparar_reunion_cliente">Prompt: <code>preparar_reunion_cliente</code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_ejercicio_8_el_generador_de_stand_up_comedy">Ejercicio 8: El Generador de "Stand-up" Comedy</a>
+<ul class="sectlevel2">
+<li><a href="#_enunciado_8">Enunciado</a></li>
+<li><a href="#_requisitos_8">Requisitos</a>
+<ul class="sectlevel3">
+<li><a href="#_tool_generar_update">Tool: <code>generar_update</code></a></li>
+<li><a href="#_tool_generar_bloqueo_creativo">Tool: <code>generar_bloqueo_creativo</code></a></li>
+<li><a href="#_resource_excusas_standup">Resource: <code>excusas_standup</code></a></li>
+<li><a href="#_prompt_retrospectiva_segura">Prompt: <code>retrospectiva_segura</code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_ejercicio_9_el_git_excuse_generator">Ejercicio 9: El "Git Excuse" Generator</a>
+<ul class="sectlevel2">
+<li><a href="#_enunciado_9">Enunciado</a></li>
+<li><a href="#_requisitos_9">Requisitos</a>
+<ul class="sectlevel3">
+<li><a href="#_tool_generar_mensaje_commit">Tool: <code>generar_mensaje_commit</code></a></li>
+<li><a href="#_tool_explicar_commit_raro">Tool: <code>explicar_commit_raro</code></a></li>
+<li><a href="#_resource_mensajes_clasicos">Resource: <code>mensajes_clasicos</code></a></li>
+<li><a href="#_tool_generar_changelog">Tool: <code>generar_changelog</code></a></li>
+<li><a href="#_prompt_escribir_pr_description">Prompt: <code>escribir_pr_description</code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_ejercicio_10_el_detector_de_horror_code_legacy">Ejercicio 10: El Detector de "Horror Code" Legacy</a>
+<ul class="sectlevel2">
+<li><a href="#_enunciado_10">Enunciado</a></li>
+<li><a href="#_requisitos_10">Requisitos</a>
+<ul class="sectlevel3">
+<li><a href="#_tool_excavar_codigo">Tool: <code>excavar_codigo</code></a></li>
+<li><a href="#_tool_generar_historia_horror">Tool: <code>generar_historia_horror</code></a></li>
+<li><a href="#_resource_patrones_antiguos">Resource: <code>patrones_antiguos</code></a></li>
+<li><a href="#_tool_proponer_refactor">Tool: <code>proponer_refactor</code></a></li>
+<li><a href="#_prompt_explicar_a_manager">Prompt: <code>explicar_a_manager</code></a></li>
+</ul>
+</li>
+<li><a href="#_implementación_de_referencia_python_5">Implementación de Referencia (Python)</a></li>
+</ul>
+</li>
+<li><a href="#_bonus_integración_final_developer_survival_kit">Bonus: Integración Final - Developer Survival Kit</a>
+<ul class="sectlevel2">
+<li><a href="#_requisitos_del_kit_de_supervivencia">Requisitos del Kit de Supervivencia</a></li>
+<li><a href="#_prompt_supervivencia_desarrollador">Prompt: <code>supervivencia_desarrollador</code></a></li>
+</ul>
+</li>
+<li><a href="#_conclusión">Conclusión</a>
+<ul class="sectlevel2">
+<li><a href="#_siguientes_pasos">Siguientes Pasos</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_introducción">Introducción</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Este documento contiene 10 ejercicios creativos y entretenidos para practicar con el Model Context Protocol (MCP). Cada ejercicio incluye enunciado completo, requisitos y ejemplos de implementación.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ejercicio_1_el_traductor_de_yoda_speak">Ejercicio 1: El Traductor de "Yoda-speak"</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_enunciado">Enunciado</h3>
+<div class="paragraph">
+<p>Crea un servidor MCP que transforme cualquier texto al estilo de habla de Yoda. El servidor debe implementar las siguientes primitivas MCP:</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_requisitos">Requisitos</h3>
+<div class="sect3">
+<h4 id="_tool_traducir_yoda">Tool: <code>traducir_yoda</code></h4>
+<div class="paragraph">
+<p>Transforma un texto al estilo de Yoda aplicando las siguientes reglas:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Mover verbos al final cuando sea posible</p>
+</li>
+<li>
+<p>Invertir orden de algunas palabras</p>
+</li>
+<li>
+<p>Añadir pausas "Hmm&#8230;&#8203;" y "Sí&#8230;&#8203;" aleatoriamente</p>
+</li>
+</ul>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. Parámetros</caption>
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 60%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parámetro</th>
+<th class="tableblock halign-left valign-top">Tipo</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>texto</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Texto a traducir</p></td>
+</tr>
+</tbody>
+</table>
+<div class="listingblock">
+<div class="title">Ejemplo de uso</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "texto": "Debes aprender el protocolo MCP"
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Resultado</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "traduccion": "El protocolo MCP, aprender debes. Hmm, sí."
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_resource_frases_clasicas">Resource: <code>frases_clasicas</code></h4>
+<div class="paragraph">
+<p>Devuelve una colección de frases icónicas de Yoda en formato JSON.</p>
+</div>
+<div class="listingblock">
+<div class="title">Ejemplo de contenido</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "frases": [
+    {
+      "original": "Do or do not. There is no try.",
+      "espanol": "Hazlo o no lo hagas. Pero no lo intentes.",
+      "contexto": "El Imperio Contraataca, 1980"
+    },
+    {
+      "original": "Fear leads to anger. Anger leads to hate. Hate leads to suffering.",
+      "espanol": "El miedo lleva a la ira. La ira lleva al odio. El odio lleva al sufrimiento.",
+      "contexto": "La Amenaza Fantasma, 1999"
+    },
+    {
+      "original": "Size matters not. Look at me. Judge me by my size, do you?",
+      "espanol": "El tamaño no importa. Mírame. ¿Me juzgas por mi tamaño?",
+      "contexto": "El Imperio Contraataca, 1980"
+    }
+  ]
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_prompt_entrenar_jedi">Prompt: <code>entrenar_jedi</code></h4>
+<div class="paragraph">
+<p>Genera consejos de sabiduría yoda-esque para una situación dada.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 2. Parámetros</caption>
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 60%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parámetro</th>
+<th class="tableblock halign-left valign-top">Tipo</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>situacion</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Situación que requiere consejo</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>nivel_sabiduria</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">integer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Nivel de profundidad (1-5)</p></td>
+</tr>
+</tbody>
+</table>
+<div class="listingblock">
+<div class="title">Ejemplo</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-markdown hljs" data-lang="markdown">Situación: "Mi código no compila y llevo 3 horas buscando el error"
+
+Consejo Yoda:
+"El error que buscas, dentro de ti está. Hmm. Paciencia, joven Padawan.
+Los 3 horas de búsqueda, enseñanza son, no fracaso. El compilador,
+tu aliado es, no tu enemigo. Cuando en silencio el código mires,
+la respuesta encontrarás. Sí, sí..."</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_implementación_de_referencia_python">Implementación de Referencia (Python)</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp.prompts import base
+import random
+import re
+
+mcp = FastMCP("yoda-translator")
+
+# Reglas de transformación
+VERBOS_COMUNES = [
+    "debes", "puedes", "quieres", "necesitas", "tienes", "vas",
+    "eres", "estás", "ser", "estar", "hacer", "tener", "ir"
+]
+
+PAUSAS_YODA = ["Hmm...", "Sí...", "Mmm...", ""]
+
+def traducir_a_yoda(texto: str) -&gt; str:
+    """Transforma texto al estilo Yoda."""
+    palabras = texto.lower().split()
+
+    # Encontrar verbos
+    verbos_encontrados = [p for p in palabras if p in VERBOS_COMUNES]
+
+    # Mover primer verbo al final si existe
+    if verbos_encontrados:
+        verbo = verbos_encontrados[0]
+        idx = palabras.index(verbo)
+        palabras.pop(idx)
+        palabras.append(verbo)
+
+    # Capitalizar primera letra
+    if palabras:
+        palabras[0] = palabras[0].capitalize()
+
+    # Añadir pausa aleatoria
+    pausa = random.choice(PAUSAS_YODA)
+
+    resultado = " ".join(palabras)
+    if pausa:
+        resultado += f". {pausa}"
+
+    return resultado
+
+
+@mcp.tool()
+def traducir_yoda(texto: str) -&gt; str:
+    """Traduce un texto al estilo de Yoda."""
+    return traducir_a_yoda(texto)
+
+
+@mcp.resource("yoda://frases_clasicas")
+def get_frases_clasicas() -&gt; str:
+    """Devuelve frases icónicas de Yoda."""
+    import json
+
+    frases = {
+        "frases": [
+            {
+                "original": "Do or do not. There is no try.",
+                "espanol": "Hazlo o no lo hagas. Pero no lo intentes.",
+                "contexto": "El Imperio Contraataca, 1980"
+            },
+            {
+                "original": "Fear leads to anger. Anger leads to hate.",
+                "espanol": "El miedo lleva a la ira. La ira lleva al odio.",
+                "contexto": "La Amenaza Fantasma, 1999"
+            }
+        ]
+    }
+
+    return json.dumps(frases, indent=2)
+
+
+@mcp.prompt()
+def entrenar_jedi(situacion: str, nivel_sabiduria: int = 3) -&gt; list[base.Message]:
+    """Genera consejos de sabiduría Yoda para una situación."""
+
+    return [
+        base.SystemMessage(
+            "Eres el Maestro Yoda. Tu sabiduría es antigua y profunda. "
+            "Hablas en tu estilo característico: invertir orden de palabras, "
+            "añadir pausas reflexivas 'Hmm...' y 'Sí...', y ofrecer "
+            "consejos que parecen simples pero tienen múltiples capas de significado."
+        ),
+        base.UserMessage(
+            f"Maestro Yoda, necesito tu consejo para esta situación:\n\n{situacion}"
+        )
+    ]
+
+
+if __name__ == "__main__":
+    mcp.run()</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ejercicio_2_el_generador_de_excusas_creativas">Ejercicio 2: El Generador de Excusas Creativas</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_enunciado_2">Enunciado</h3>
+<div class="paragraph">
+<p>Desarrolla un servidor MCP que genere excusas creativas para llegar tarde o no entregar un proyecto. El sistema debe cubrir diferentes contextos y niveles de creatividad.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_requisitos_2">Requisitos</h3>
+<div class="sect3">
+<h4 id="_tool_generar_excusa">Tool: <code>generar_excusa</code></h4>
+<div class="paragraph">
+<p>Genera una excusa creativa basada en parámetros.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 3. Parámetros</caption>
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 60%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parámetro</th>
+<th class="tableblock halign-left valign-top">Tipo</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>contexto</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Contexto: trabajo, escuela, cita, proyecto</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>nivel_creatividad</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">integer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Nivel de 1 (aburrido) a 5 (épico)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>longitud</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">corta, media, larga</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<div class="title">Ejemplos por nivel de creatividad</div>
+<p><strong>Nivel 1 - Aburrido:</strong><br>
+&gt; "Tuve mucho tráfico."</p>
+</div>
+<div class="paragraph">
+<p><strong>Nivel 3 - Creativo:</strong><br>
+&gt; "Mi alarma no sonó porque hubo un apagón nocturno y el celular se descargó."</p>
+</div>
+<div class="paragraph">
+<p><strong>Nivel 5 - Épico:</strong><br>
+&gt; "No pude entregar el proyecto porque mi gato aprendió a programar y refactorizó todo el código en Whitespace. Tengo 3000 líneas de espacios en blanco y tabs. Le dije que usaría Prettier pero me ignoró con dignidad felina."</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_tool_validar_excusa">Tool: <code>validar_excusa</code></h4>
+<div class="paragraph">
+<p>Analiza una excusa y devuelve métricas de viabilidad.</p>
+</div>
+<div class="listingblock">
+<div class="title">Resultado</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "probabilidad_exito": 67,
+  "puntos_debiles": [
+    "Mencionas gatos programadores - podría sonar falso"
+  ],
+  "sugerencias_mejora": [
+    "Añadir más detalles técnicos para mayor credibilidad",
+    "Incluir timestamp del supuesto evento"
+  ],
+  "veredicto": "Arriesgada pero memorable"
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_resource_excusas_famosas">Resource: <code>excusas_famosas</code></h4>
+<div class="paragraph">
+<p>Colección de excusas históricas categorizadas por contexto.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_prompt_defensa_excusa">Prompt: <code>defensa_excusa</code></h4>
+<div class="paragraph">
+<p>Prepara argumentos para defender una excusa cuando es cuestionada.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_implementación_de_referencia_typescript">Implementación de Referencia (TypeScript)</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-typescript hljs" data-lang="typescript">import { McpServer } from '@modelcontextprotocol/server';
+import * as z from 'zod/v4';
+
+const server = new McpServer({ name: 'excuse-generator', version: '1.0.0' });
+
+const ContextoSchema = z.enum(['trabajo', 'escuela', 'cita', 'proyecto']);
+const LongitudSchema = z.enum(['corta', 'media', 'larga']);
+
+const EXCUSAS_POR_NIVEL = {
+  1: {
+    trabajo: ["Tuve tráfico.", "Se me hizo tarde.", "El transporte falló."],
+    escuela: ["Me desperté tarde.", "Perdí el bus.", "Tenía otra tarea."],
+    cita: ["Tuve un imprevisto.", "Me confundí de hora.", "El tráfico."],
+    proyecto: ["Tuve problemas técnicos.", "Estaba enfermo.", "Falta de recursos."]
+  },
+  3: {
+    trabajo: [
+      "Mi alarma no sonó porque hubo un microapagón que reinició todo.",
+      "El ascensor se quedó atrapado entre pisos por 20 minutos.",
+      "Mi perro escondió mis llaves y tardé 30 minutos en encontrarlas."
+    ],
+    escuela: [
+      "Mi computadora se actualizó automáticamente justo cuando imprimía el trabajo.",
+      "El tráfico estaba bloqueado por un desfile espontáneo de mariachis.",
+      "Mi despertador estaba en hora militar y no me di cuenta."
+    ],
+    cita: [
+      "Mi GPS me llevó a una dirección completamente diferente.",
+      "Tuve que ayudar a una persona mayor que se cayó en la calle.",
+      "Mi auto no arrancó y tuve que pedir un ride que tardó mucho."
+    ],
+    proyecto: [
+      "El servidor de CI/CD se cayó justo cuando hacía el deploy.",
+      "Encontré un bug crítico a última hora que requería reescribir el módulo.",
+      "Mi rama tenía conflictos de merge que tardé horas en resolver."
+    ]
+  },
+  5: {
+    trabajo: [
+      "Un enjambre de abejas decidió migrar por la entrada de mi edificio. El equipo de emergencias tardó 45 minutos en reubicarlas. Tengo fotos y el reporte policial si lo necesitan.",
+      "Mi termostato inteligente decidió que hoy era el día perfecto para actualizar su firmware. Mi casa amaneció a 5°C y tuve que esperar al técnico porque no podía dejarla congelada.",
+      "El camión de mudanza de mi vecino se atascó en reversa bloqueando toda la cuadra. Participé en una cadena humana de empuje vecinal que nos unió como comunidad."
+    ],
+    escuela: [
+      "Un mapache entró a mi cocina por la ventana del segundo piso y activó la alarma. La policía vino, el mapache se resistió y terminamos esperando a control animal. El mapache gana: sigue ahí.",
+      "Mi proyecto de física experimental (un cohete de agua) funcionó mejor de lo esperado y aterrizó en el techo de la escuela. Tardamos 2 horas en recuperarlo con una grúa.",
+      "Intenté hacer desayuno y accidentalmente creé una reacción química que produjo una espuma incontrolable. Mi cocina ahora parece una escena de Los Fantasmas del Espacio."
+    ],
+    cita: [
+      "Mi reloj inteligente decidió que hoy cambiaríamos de zona horaria por wellness. Me despertó 2 horas tarde diciendo 'buenos días de productividad óptima'. Lo sigo investigando.",
+      "Un grupo de turistas me confundió con un guía turístico local. Por educación, les di un tour de 40 minutos antes de poder escapar. Tengo sus propinas como evidencia.",
+      "Mi GPS interpretó 'ir al centro' como 'ir al centro comercial equivocado en otra ciudad'. No noté hasta que vi señales de 'Bienvenidos a [ciudad diferente]'."
+    ],
+    proyecto: [
+      "Mi gata caminó sobre el teclado y escribió un script que eliminó node_modules de todos mis proyectos. Empecé desde cero a las 3 AM. La gata me mira con superioridad.",
+      "El tutorial que seguía tenía un error sutil que causó que mi base de datos creciera 50GB en datos corruptos. Estuve restaurando desde backups mientras aprendía que los backups también estaban corruptos.",
+      "Mi IDE decidió actualizar todos los plugins automáticamente durante el commit final. El resultado fue un archivo package-lock.json de 50,000 líneas. Lo arreglé, pero mis dedos piden vacaciones."
+    ]
+  }
+};
+
+server.registerTool(
+  'generar_excusa',
+  {
+    description: 'Genera una excusa creativa',
+    inputSchema: z.object({
+      contexto: ContextoSchema,
+      nivel_creatividad: z.number().int().min(1).max(5),
+      longitud: LongitudSchema.default('media')
+    })
+  },
+  async ({ contexto, nivel_creatividad, longitud }) =&gt; {
+    const nivel = Math.min(Math.max(nivel_creatividad, 1), 5);
+    const nivelReal = nivel &lt;= 1 ? 1 : nivel &lt;= 2 ? 1 : nivel &lt;= 3 ? 3 : 5;
+
+    const excusas = EXCUSAS_POR_NIVEL[nivelReal as keyof typeof EXCUSAS_POR_NIVEL][contexto];
+    const excusa = excusas[Math.floor(Math.random() * excusas.length)];
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify({
+          excusa,
+          nivel_creatividad: nivelReal,
+          contexto,
+          advertencia: nivelReal === 5 ? "⚠️ Excusa épica - usar con moderación" : undefined
+        }, null, 2)
+      }]
+    };
+  }
+);
+
+server.registerTool(
+  'validar_excusa',
+  {
+    description: 'Valida una excusa y da feedback',
+    inputSchema: z.object({
+      excusa: z.string(),
+      contexto: ContextoSchema
+    })
+  },
+  async ({ excusa, contexto }) =&gt; {
+    // Análisis simple
+    const longitud = excusa.length;
+    const tieneDetalles = excusa.includes('porque') || excusa.includes('cuando');
+    const tieneNumeros = /\d+/.test(excusa);
+    const tieneAnimales = /gato|perro|pájaro|abeja|mapache/i.test(excusa);
+    const tieneTecnologia = /computadora|servidor|código|bug|sistema/i.test(excusa);
+
+    let probabilidadExito = 50;
+    const puntosDebiles: string[] = [];
+    const sugerencias: string[] = [];
+
+    if (longitud &lt; 20) {
+      probabilidadExito -= 20;
+      puntosDebiles.push("Excusa muy corta - falta credibilidad");
+      sugerencias.push("Añadir más detalles circunstanciales");
+    }
+
+    if (tieneDetalles) probabilidadExito += 15;
+    if (tieneNumeros) probabilidadExito += 10;
+
+    if (tieneAnimales) {
+      probabilidadExito -= 15;
+      puntosDebiles.push("Involucrar animales reduce credibilidad");
+      sugerencias.push("Considerar reemplazar por factor tecnológico");
+    }
+
+    if (tieneTecnologia &amp;&amp; contexto === 'trabajo') {
+      probabilidadExito += 20;
+      sugerencias.push("Los problemas técnicos son bien recibidos en contexto laboral");
+    }
+
+    probabilidadExito = Math.max(0, Math.min(100, probabilidadExito));
+
+    let veredicto = "Dudosa";
+    if (probabilidadExito &gt;= 80) veredicto = "Excelente - alta probabilidad de éxito";
+    else if (probabilidadExito &gt;= 60) veredicto = "Buena - puede funcionar";
+    else if (probabilidadExito &gt;= 40) veredicto = "Riesgosa - preparar plan B";
+    else veredicto = "Pésima - mejor no usarla";
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify({
+          probabilidad_exito: probabilidadExito,
+          puntos_debiles: puntosDebiles,
+          sugerencias_mejora: sugerencias,
+          veredicto
+        }, null, 2)
+      }]
+    };
+  }
+);
+
+async function main() {
+  const { StdioServerTransport } = await import('@modelcontextprotocol/server');
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+}
+
+main().catch(console.error);</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ejercicio_3_el_detector_de_spanglish_ofensivo">Ejercicio 3: El Detector de "Spanglish" Ofensivo</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_enunciado_3">Enunciado</h3>
+<div class="paragraph">
+<p>Crea un servidor MCP humorístico que analice textos y detecte casos de "spanglish" cuestionable, ofreciendo alternativas y puntuaciones de pureza lingüística.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_requisitos_3">Requisitos</h3>
+<div class="sect3">
+<h4 id="_tool_analizar_spanglish">Tool: <code>analizar_spanglish</code></h4>
+<div class="paragraph">
+<p>Analiza un texto y detecta spanglishismos.</p>
+</div>
+<div class="listingblock">
+<div class="title">Resultado</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "texto_original": "Voy a parquear el carro y luego chequeo mi email",
+  "spanglishismos": [
+    {
+      "palabra": "parquear",
+      "ofensa": 3,
+      "alternativa": "estacionar",
+      "explicacion": "Anglicismo de 'park' - muy común pero innecesario"
+    },
+    {
+      "palabra": "carro",
+      "ofensa": 1,
+      "alternativa": "coche/auto",
+      "explicacion": "Aceptado en Latinoamérica, pero 'coche' es preferido en España"
+    },
+    {
+      "palabra": "chequeo",
+      "ofensa": 2,
+      "alternativa": "reviso",
+      "explicacion": "De 'check' - el verbo correcto es 'revisar'"
+    }
+  ],
+  "puntuacion_pureza": 45,
+  "nivel_contaminacion": "Moderado",
+  "recomendacion": "Texto funcional pero con mejoras posibles"
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_resource_diccionario_spanglish">Resource: <code>diccionario_spanglish</code></h4>
+<div class="paragraph">
+<p>Diccionario de spanglishismos comunes con explicaciones.</p>
+</div>
+<div class="listingblock">
+<div class="title">Contenido del resource</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "terminos": [
+    {
+      "spanglish": "parquear",
+      "correcto_es": "estacionar",
+      "correcto_en": "to park",
+      "nivel_ofensa": 3,
+      "explicacion": "Uno de los más comunes. 'Parque' en español no es verbo."
+    },
+    {
+      "spanglish": "te llamo para atrás",
+      "correcto_es": "te devuelvo la llamada",
+      "correcto_en": "I'll call you back",
+      "nivel_ofensa": 4,
+      "explicacion": "Traducción literal incorrecta del phrasal verb."
+    },
+    {
+      "spanglish": "aplicar (para trabajo)",
+      "correcto_es": "solicitar/postularse",
+      "correcto_en": "to apply",
+      "nivel_ofensa": 3,
+      "explicacion": "'Aplicar' significa 'poner en práctica', no 'solicitar'."
+    },
+    {
+      "spanglish": "chequear",
+      "correcto_es": "verificar/revisar",
+      "correcto_en": "to check",
+      "nivel_ofensa": 2,
+      "explicacion": "Muy común en tech, pero 'verificar' es más elegante."
+    },
+    {
+      "spanglish": "lonche/lonchear",
+      "correcto_es": "almuerzo/almorzar",
+      "correcto_en": "lunch",
+      "nivel_ofensa": 5,
+      "explicacion": "Fonética directa. El sustantivo correcto ya existe."
+    },
+    {
+      "spanglish": "marketa/marketear",
+      "correcto_es": "mercado/comercializar",
+      "correcto_en": "market/market",
+      "nivel_ofensa": 4,
+      "explicacion": "El español tiene la raíz 'mercado' desde hace siglos."
+    }
+  ]
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_tool_corregir_automatico">Tool: <code>corregir_automatico</code></h4>
+<div class="paragraph">
+<p>Ofrece versiones corregidas del texto en diferentes modos.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_prompt_entrenar_oyente">Prompt: <code>entrenar_oyente</code></h4>
+<div class="paragraph">
+<p>Prepara a alguien para entender spanglish de diferentes regiones.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_implementación_de_referencia_python_2">Implementación de Referencia (Python)</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp.prompts import base
+import json
+import re
+
+mcp = FastMcp("spanglish-detector")
+
+DICCIONARIO_SPANGLISH = {
+    "parquear": {"ofensa": 3, "alternativa": "estacionar", "en": "park"},
+    "carro": {"ofensa": 1, "alternativa": "coche/auto", "en": "car"},
+    "chequear": {"ofensa": 2, "alternativa": "verificar/revisar", "en": "check"},
+    "aplicar": {"ofensa": 3, "alternativa": "solicitar", "en": "apply"},
+    "lonche": {"ofensa": 5, "alternativa": "almuerzo", "en": "lunch"},
+    "lonchear": {"ofensa": 5, "alternativa": "almorzar", "en": "to lunch"},
+    "marketa": {"ofensa": 4, "alternativa": "mercado", "en": "market"},
+    "marketear": {"ofensa": 4, "alternativa": "comercializar", "en": "to market"},
+    "forrar": {"ofensa": 2, "alternativa": "fallar", "en": "to fail"},
+    "watchar": {"ofensa": 3, "alternativa": "ver/mirar", "en": "to watch"},
+    "parar": {"ofensa": 2, "alternativa": "detener", "en": "to stop"},
+    "vacunar": {"ofensa": 1, "alternativa": "vacunar (correcto)", "en": "to vaccinate"},
+    "pushar": {"ofensa": 3, "alternativa": "empujar", "en": "to push"},
+    "puchar": {"ofensa": 3, "alternativa": "empujar", "en": "to push"},
+    "grosería": {"ofensa": 1, "alternativa": "tago (correcto)", "en": "grocery"},
+    "folder": {"ofensa": 2, "alternativa": "carpeta", "en": "folder"},
+}
+
+FRASES_LITERAL = {
+    "llamo para atrás": {
+        "ofensa": 4,
+        "alternativa": "devuelvo la llamada",
+        "en": "call back"
+    },
+    "dar para atrás": {
+        "ofensa": 3,
+        "alternativa": "devolver",
+        "en": "give back"
+    },
+    "hacer sentido": {
+        "ofensa": 4,
+        "alternativa": "tener sentido",
+        "en": "make sense"
+    }
+}
+
+
+@mcp.tool()
+def analizar_spanglish(texto: str) -&gt; str:
+    """Analiza un texto y detecta spanglishismos."""
+    texto_lower = texto.lower()
+    spanglishismos = []
+
+    # Detectar palabras individuales
+    for palabra, info in DICCIONARIO_SPANGLISH.items():
+        if palabra in texto_lower:
+            spanglishismos.append({
+                "palabra": palabra,
+                "ofensa": info["ofensa"],
+                "alternativa": info["alternativa"],
+                "ingles_equivalente": info["en"]
+            })
+
+    # Detectar frases literales
+    for frase, info in FRASES_LITERAL.items():
+        if frase in texto_lower:
+            spanglishismos.append({
+                "frase": frase,
+                "ofensa": info["ofensa"],
+                "alternativa": info["alternativa"],
+                "ingles_equivalente": info["en"]
+            })
+
+    # Calcular puntuación
+    total_ofensa = sum(s.get("ofensa", 0) for s in spanglishismos)
+    puntuacion_pureza = max(0, 100 - (total_ofensa * 10))
+
+    # Determinar nivel
+    if puntuacion_pureza &gt;= 90:
+        nivel = "Purista"
+        recomendacion = "Texto impecable, sin contaminación detectada"
+    elif puntuacion_pureza &gt;= 70:
+        nivel = "Leve"
+        recomendacion = "Algunos anglicismos menores, aceptable"
+    elif puntuacion_pureza &gt;= 50:
+        nivel = "Moderado"
+        recomendacion = "Contaminación media, mejoras posibles"
+    elif puntuacion_pureza &gt;= 30:
+        nivel = "Severo"
+        recomendacion = "Spanglish significativo, considerar revisión"
+    else:
+        nivel = "Crítico"
+        recomendacion = "Texto altamente contaminado, reescritura recomendada"
+
+    return json.dumps({
+        "texto_original": texto,
+        "spanglishismos": spanglishismos,
+        "total_detectados": len(spanglishismos),
+        "puntuacion_pureza": puntuacion_pureza,
+        "nivel_contaminacion": nivel,
+        "recomendacion": recomendacion
+    }, indent=2)
+
+
+@mcp.resource("spanglish://diccionario")
+def get_diccionario() -&gt; str:
+    """Diccionario de spanglishismos."""
+    return json.dumps({
+        "terminos": [
+            {
+                "spanglish": k,
+                "correcto_es": v["alternativa"],
+                "correcto_en": v["en"],
+                "nivel_ofensa": v["ofensa"]
+            }
+            for k, v in DICCIONARIO_SPANGLISH.items()
+        ]
+    }, indent=2)
+
+
+@mcp.tool()
+def corregir_automatico(texto: str, modo: str = "español") -&gt; str:
+    """Corrige el texto automáticamente.
+
+    Args:
+        texto: Texto a corregir
+        modo: 'español', 'ingles' o 'híbrido'
+    """
+    texto_corregido = texto.lower()
+    correcciones = []
+
+    for palabra, info in DICCIONARIO_SPANGLISH.items():
+        if palabra in texto_corregido:
+            if modo == "español":
+                reemplazo = info["alternativa"].split("/")[0]
+            elif modo == "ingles":
+                reemplazo = info["en"]
+            else:  # híbrido
+                reemplazo = f"{info['alternativa']} ({info['en']})"
+
+            texto_corregido = texto_corregido.replace(palabra, reemplazo)
+            correcciones.append({
+                "original": palabra,
+                "correccion": reemplazo
+            })
+
+    return json.dumps({
+        "texto_original": texto,
+        "texto_corregido": texto_corregido,
+        "modo": modo,
+        "correcciones_realizadas": correcciones
+    }, indent=2)
+
+
+@mcp.prompt()
+def entrenar_oyente(region: str = "mexico") -&gt; list[base.Message]:
+    """Entrena a alguien para entender spanglish regional."""
+
+    guias_regionales = {
+        "mexico": "El spanglish mexicano es muy común en zonas fronterizas. Términos como 'lonche', 'parquear' y 'chequear' son cotidianos.",
+        "puerto_rico": "El puertorriqueño usa mucho 'forrar' (to fail), 'pichar' (to ignore), y palabras con influencia del inglés americano.",
+        "cuba": "El cubano-americano tiene términos únicos como 'asere' mezclado con inglés, y adaptaciones fonéticas muy marcadas.",
+        "dominicano": "El dominicano en NY usa mucho 'vacano', 'chévere' mezclados con inglés urbano."
+    }
+
+    return [
+        base.SystemMessage(
+            f"Eres un experto en variaciones regionales del spanglish latinoamericano. "
+            f"Tu especialidad es {region}. Explica el contexto cultural y lingüístico."
+        ),
+        base.UserMessage(
+            f"Ayúdame a entender el spanglish de {region}.\n\n"
+            f"Contexto: {guias_regionales.get(region, 'Región no documentada')}\n\n"
+            "Proporciona:\n"
+            "1. Los 10 términos más comunes\n"
+            "2. Contexto cultural de uso\n"
+            "3. Cuándo es apropiado y cuándo no"
+        )
+    ]
+
+
+if __name__ == "__main__":
+    mcp.run()</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ejercicio_4_el_simulador_de_reuniones_eternas">Ejercicio 4: El Simulador de Reuniones Eternas</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_enunciado_4">Enunciado</h3>
+<div class="paragraph">
+<p>Desarrolla un servidor MCP que simule el horror de las reuniones corporativas interminables, generando contenido satírico sobre la cultura de reuniones.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_requisitos_4">Requisitos</h3>
+<div class="sect3">
+<h4 id="_tool_generar_buzzword">Tool: <code>generar_buzzword</code></h4>
+<div class="paragraph">
+<p>Produce frases corporativas sin sentido.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 4. Parámetros</caption>
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 60%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parámetro</th>
+<th class="tableblock halign-left valign-top">Tipo</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>cantidad_palabras</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">integer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Número de palabras clave</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>nivel_jerga</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">junior, senior, executive</p></td>
+</tr>
+</tbody>
+</table>
+<div class="quoteblock">
+<div class="title">Ejemplo de output executive level</div>
+<blockquote>
+<div class="paragraph">
+<p>"Necesitamos leverage nuestros core competencies para pivot hacia un ecosystem más disruptive que capture mindshare en el marketplace y genere synergies cross-functionales aligned con nuestro north star metric."</p>
+</div>
+</blockquote>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_tool_estimar_duracion_reunion">Tool: <code>estimar_duracion_reunion</code></h4>
+<div class="paragraph">
+<p>Predice la duración real de una reunión vs. la planificada.</p>
+</div>
+<div class="listingblock">
+<div class="title">Resultado</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "duracion_planificada": "30 minutos",
+  "duracion_real_estimada": "1 hora 47 minutos",
+  "factor_multiplicacion": 3.56,
+  "puntos_de_alargue": [
+    "'¿Pueden escucharme todos?' (5 min)",
+    "Debate sobre agenda no planificada (15 min)",
+    "Historia de guerra de alguien (10 min)",
+    "'Pero volviendo al tema...' repetido 7 veces (20 min)",
+    "Problemas técnicos de screen share (8 min)"
+  ],
+  "action_items_generados": 12,
+  "action_items_que_se_completaran": 2
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_resource_frases_inmortales">Resource: <code>frases_inmortales</code></h4>
+<div class="paragraph">
+<p>Frases clásicas de reuniones.</p>
+</div>
+<div class="listingblock">
+<div class="title">Contenido</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "categorias": {
+    "apertura": [
+      "¿Pueden escuchar todos?",
+      "Voy a compartir mi pantalla",
+      "¿Me ven el slide?",
+      "Discúlpenme la demora, venía de otra reunión"
+    ],
+    "problemas_tecnicos": [
+      "Creo que te cortaste",
+      "Perdón, estaba en mute",
+      "No me deja compartir",
+      "Mi cámara no funciona",
+      "Tengo lag"
+    ],
+    "alargue": [
+      "Pero volviendo al tema...",
+      "Solo un comentario más",
+      "Esto no lo teníamos planeado pero...",
+      "¿Podemos tomar 5 minutos más?",
+      "En realidad esto conecta con otra cosa..."
+    ],
+    "cierre": [
+      "Genial, sigamos en el canal",
+      "Mándenme un email con el resumen",
+      "Agendemos una follow-up",
+      "Bueno, se nos acabó el tiempo"
+    ]
+  }
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_prompt_sobrevivir_reunion">Prompt: <code>sobrevivir_reunion</code></h4>
+<div class="paragraph">
+<p>Genera estrategias de supervivencia.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_implementación_de_referencia_python_3">Implementación de Referencia (Python)</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from mcp.server.fastmcp import FastMcp, FastMcp
+from mcp.server.fastmcp.prompts import base
+import json
+import random
+
+mcp = FastMcp("meeting-simulator")
+
+BUZZWORDS = {
+    "junior": [
+        "implementar", "desarrollar", "revisar", "actualizar",
+        "coordinar", "documentar", "analizar", "proponer"
+    ],
+    "senior": [
+        "optimize", "streamline", "leverage", "facilitate",
+        "spearhead", "drive", "champion", "empower"
+    ],
+    "executive": [
+        "synergize", "disrupt", "pivot", "leverage core competencies",
+        "capture mindshare", "ecosystem", "paradigm shift",
+        "north star metric", "cross-functional", "value proposition",
+        "market penetration", "thought leadership", "game changer"
+    ]
+}
+
+FRASES_INMORTALES = {
+    "categorias": {
+        "apertura": [
+            "¿Pueden escuchar todos?",
+            "Voy a compartir mi pantalla",
+            "¿Me ven el slide?",
+            "Discúlpenme la demora, venía de otra reunión"
+        ],
+        "problemas_tecnicos": [
+            "Creo que te cortaste",
+            "Perdón, estaba en mute",
+            "No me deja compartir",
+            "Tengo lag"
+        ],
+        "alargue": [
+            "Pero volviendo al tema...",
+            "Solo un comentario más",
+            "Esto no lo teníamos planeado pero...",
+            "¿Podemos tomar 5 minutos más?"
+        ]
+    }
+}
+
+
+@mcp.tool()
+def generar_buzzword(cantidad_palabras: int = 10, nivel_jerga: str = "senior") -&gt; str:
+    """Genera frases corporativas."""
+
+    palabras = BUZZWORDS.get(nivel_jerga, BUZZWORDS["senior"])
+    seleccionadas = random.sample(palabras, min(cantidad_palabras, len(palabras)))
+
+    # Construir frase según nivel
+    if nivel_jerga == "executive":
+        frase = f"Necesitamos {seleccionadas[0]} nuestro {seleccionadas[1]} para {seleccionadas[2]} hacia un {seleccionadas[3]} más {seleccionadas[4]} que {seleccionadas[5]} {seleccionadas[6]} en el marketplace."
+    elif nivel_jerga == "senior":
+        frase = f"El objetivo es {seleccionadas[0]} el proceso actual para {seleccionadas[1]} una mejor {seleccionadas[2]} del equipo y {seleccionadas[3]} los entregables."
+    else:
+        frase = f"Vamos a {seleccionadas[0]} el código, {seleccionadas[1]} la documentación y {seleccionadas[2]} las pruebas."
+
+    return json.dumps({
+        "frase_generada": frase,
+        "nivel_jerga": nivel_jerga,
+        "palabras_utilizadas": seleccionadas,
+        "traducción_humana": "No hice nada productivo hoy"
+    }, indent=2)
+
+
+@mcp.tool()
+def estimar_duracion_reunion(duracion_planificada_minutos: int) -&gt; str:
+    """Estima la duración real de una reunión."""
+
+    factor = random.uniform(2.5, 4.5)
+    duracion_real = int(duracion_planificada_minutos * factor)
+
+    puntos_alargue = [
+        f"'¿Pueden escucharme todos?' ({random.randint(3, 8)} min)",
+        f"Debate sobre agenda no planificada ({random.randint(10, 20)} min)",
+        f"Historia de guerra de alguien ({random.randint(8, 15)} min)",
+        f"'Pero volviendo al tema...' x{random.randint(3, 7)} ({random.randint(10, 25)} min)",
+        f"Problemas técnicos ({random.randint(5, 15)} min)",
+        f"'Solo una cosa más...' ({random.randint(5, 12)} min)",
+        f"Buscando el documento correcto ({random.randint(3, 10)} min)"
+    ]
+
+    seleccionados = random.sample(puntos_alargue, min(5, len(puntos_alargue)))
+
+    horas = duracion_real // 60
+    minutos = duracion_real % 60
+    duracion_formateada = f"{horas}h {minutos}min" if horas &gt; 0 else f"{minutos} min"
+
+    return json.dumps({
+        "duracion_planificada": f"{duracion_planificada_minutos} min",
+        "duracion_real_estimada": duracion_formateada,
+        "factor_multiplicacion": round(factor, 2),
+        "puntos_de_alargue": seleccionados,
+        "action_items_generados": random.randint(5, 15),
+        "action_items_que_se_completaran": random.randint(1, 3),
+        "probabilidad_follow_up": f"{random.randint(60, 95)}%"
+    }, indent=2)
+
+
+@mcp.resource("meeting://frases_inmortales")
+def get_frases_inmortales() -&gt; str:
+    """Frases clásicas de reuniones."""
+    return json.dumps(FRASES_INMORTALES, indent=2)
+
+
+@mcp.prompt()
+def sobrevivir_reunion(tipo_reunion: str, duracion_minutos: int) -&gt; list[base.Message]:
+    """Estrategias de supervivencia."""
+
+    return [
+        base.SystemMessage(
+            "Eres un experto en supervivencia corporativa. "
+            "Proporciona estrategias prácticas pero humorísticas "
+            "para sobrevivir reuniones interminables."
+        ),
+        base.UserMessage(
+            f"Tengo una reunión de {tipo_reunion} programada para {duracion_minutos} minutos.\n\n"
+            "Necesito estrategias para:\n"
+            "1. Parecer atento mientras hago otras cosas\n"
+            "2. Contribuir sin decir nada concreto\n"
+            "3. Escapar elegantemente si es necesario\n"
+            "4. Frases salvadoras cuando me preguntan algo"
+        )
+    ]
+
+
+if __name__ == "__main__":
+    mcp.run()</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ejercicio_5_el_crítico_de_código_pasivo_agresivo">Ejercicio 5: El Crítico de Código Pasivo-Agresivo</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_enunciado_5">Enunciado</h3>
+<div class="paragraph">
+<p>Crea un servidor MCP que actúe como un revisor de código con personalidad pasivo-agresiva, generando comentarios sarcásticos pero útiles.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_requisitos_5">Requisitos</h3>
+<div class="sect3">
+<h4 id="_tool_revisar_codigo">Tool: <code>revisar_codigo</code></h4>
+<div class="paragraph">
+<p>Analiza código y genera comentarios pasivo-agresivos.</p>
+</div>
+<div class="listingblock">
+<div class="title">Resultado</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "archivo": "utils.js",
+  "comentarios": [
+    {
+      "linea": 42,
+      "codigo": "var x = 1;",
+      "comentario": "Ah, 'var'. Qué nostálgico. Mi abuela también escribía así en 2015.",
+      "severidad": "snark",
+      "sugerencia_real": "Considera usar 'const' o 'let'"
+    },
+    {
+      "linea": 67,
+      "codigo": "// TODO: fix this",
+      "comentario": "Este TODO tiene 3 años. Heritage code, supongo.",
+      "severidad": "passive_aggressive",
+      "sugerencia_real": "Considera eliminar o implementar"
+    },
+    {
+      "linea": 89,
+      "codigo": "function a(b, c, d, e, f) {",
+      "comentario": "Una función con 5 parámetros llamada 'a'. Minimalista.",
+      "severidad": "sarcastic",
+      "sugerencia_real": "Considera usar un objeto de opciones"
+    }
+  ],
+  "veredicto": "Aprobado con una ceja levantada y un suspiro profundo.",
+  "puntuacion_snark": 7.5
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_tool_generar_pr_sarcastico">Tool: <code>generar_pr_sarcastico</code></h4>
+<div class="paragraph">
+<p>Crea descripciones de PR humorísticas.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_resource_comentarios_clasicos">Resource: <code>comentarios_clasicos</code></h4>
+<div class="paragraph">
+<p>Colección de gems de code review.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_prompt_defender_mi_codigo">Prompt: <code>defender_mi_codigo</code></h4>
+<div class="paragraph">
+<p>Prepara respuestas para críticas.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_implementación_de_referencia_typescript_2">Implementación de Referencia (TypeScript)</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-typescript hljs" data-lang="typescript">import { McpServer } from '@modelcontextprotocol/server';
+import * as z from 'zod/v4';
+
+const server = new McpServer({ name: 'passive-aggressive-reviewer', version: '1.0.0' });
+
+const COMENTARIOS_SNARK = {
+  var: [
+    "Ah, 'var'. Qué nostálgico. Mi abuela también escribía así en 2015.",
+    "Veo que disfrutas del hoisting y el scope global. Bold choice.",
+    "'var' en 2024. Respecto tu compromiso con el legado.",
+  ],
+  any: [
+    "Any? En TypeScript? Interesante elección de ignorar todo el sistema de tipos.",
+    "Ah sí, 'any', el tipo 'confío en mí mismo'. Buena suerte.",
+    "El tipo 'any' es como no usar cinturón de seguridad. Funciona hasta que no.",
+  ],
+  todo: [
+    "Este TODO tiene la edad suficiente para ir al jardín de infantes.",
+    "'TODO: fix later'. El 'later' llegó hace 2 años.",
+    "Un TODO de 2019. Heritage documentation.",
+  ],
+  console_log: [
+    "Console.log en producción. Tu equipo de DevOps te ama.",
+    "Veo que dejaste tus notas de debugging para todos. Considerado.",
+    "Este console.log será eterno, como las pirámides.",
+  ],
+  nombre_corto: [
+    "Una variable llamada 'x'. En producción. Respeto tu valentía.",
+    "'a', 'b', 'c'... Nombres descriptivos son para débiles.",
+    "Minimalismo en nombres. El código es arte abstracto.",
+  ],
+  funcion_larga: [
+    "Una función de 150 líneas. Un solo propósito, claramente.",
+    "Esto no es una función, es una novela corta.",
+    "He visto archivos más cortos que esta función.",
+  ],
+};
+
+const VEREDICTOS = [
+  "Aprobado con una ceja levantada y un suspiro profundo.",
+  "LGTM, pero estoy juzgando silenciosamente.",
+  "Mejor que el PR anterior. Eso no significa que esté bien.",
+  "Aprobado, pero quedo consternado.",
+  "Merge con una plegaria silenciosa.",
+];
+
+server.registerTool(
+  'revisar_codigo',
+  {
+    description: 'Revisa código con comentarios pasivo-agresivos',
+    inputSchema: z.object({
+      codigo: z.string(),
+      archivo: z.string().optional()
+    })
+  },
+  async ({ codigo, archivo }) =&gt; {
+    const lineas = codigo.split('\n');
+    const comentarios: any[] = [];
+
+    for (let i = 0; i &lt; lineas.length; i++) {
+      const linea = lineas[i];
+      const numLinea = i + 1;
+
+      // Detectar patrones
+      if (/\bvar\b/.test(linea)) {
+        comentarios.push({
+          linea: numLinea,
+          codigo: linea.trim(),
+          comentario: COMENTARIOS_SNARK.var[Math.floor(Math.random() * COMENTARIOS_SNARK.var.length)],
+          severidad: 'snark',
+          sugerencia_real: 'Usa const o let'
+        });
+      }
+
+      if (/: any\b/.test(linea)) {
+        comentarios.push({
+          linea: numLinea,
+          codigo: linea.trim(),
+          comentario: COMENTARIOS_SNARK.any[Math.floor(Math.random() * COMENTARIOS_SNARK.any.length)],
+          severidad: 'passive_aggressive',
+          sugerencia_real: 'Define un tipo específico'
+        });
+      }
+
+      if (/\/\/\s*TODO/i.test(linea)) {
+        comentarios.push({
+          linea: numLinea,
+          codigo: linea.trim(),
+          comentario: COMENTARIOS_SNARK.todo[Math.floor(Math.random() * COMENTARIOS_SNARK.todo.length)],
+          severidad: 'sarcastic',
+          sugerencia_real: 'Implementar o eliminar el TODO'
+        });
+      }
+
+      if (/console\.log/.test(linea)) {
+        comentarios.push({
+          linea: numLinea,
+          codigo: linea.trim(),
+          comentario: COMENTARIOS_SNARK.console_log[Math.floor(Math.random() * COMENTARIOS_SNARK.console_log.length)],
+          severidad: 'judgmental',
+          sugerencia_real: 'Remover antes de production'
+        });
+      }
+
+      // Variables de una letra
+      const match = linea.match(/\b(var|let|const)\s+([a-z])\s*=/);
+      if (match) {
+        comentarios.push({
+          linea: numLinea,
+          codigo: linea.trim(),
+          comentario: COMENTARIOS_SNARK.nombre_corto[Math.floor(Math.random() * COMENTARIOS_SNARK.nombre_corto.length)],
+          severidad: 'snark',
+          sugerencia_real: 'Usar nombres descriptivos'
+        });
+      }
+    }
+
+    const veredicto = VEREDICTOS[Math.floor(Math.random() * VEREDICTOS.length)];
+    const puntuacionSnark = Math.min(10, comentarios.length * 1.5);
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify({
+          archivo: archivo || 'archivo.ts',
+          total_comentarios: comentarios.length,
+          comentarios: comentarios.slice(0, 10),
+          veredicto,
+          puntuacion_snark: puntuacionSnark.toFixed(1)
+        }, null, 2)
+      }]
+    };
+  }
+);
+
+server.registerTool(
+  'generar_pr_sarcastico',
+  {
+    description: 'Genera descripción de PR sarcástica',
+    inputSchema: z.object({
+      cambios: z.array(z.string()),
+      drama_level: z.number().min(1).max(5).default(3)
+    })
+  },
+  async ({ cambios, drama_level }) =&gt; {
+    const titulos = [
+      "feat: implementación revolucionaria que cambiará todo",
+      "fix: corrigiendo los errores de mis antecesores",
+      "refactor: reescribiendo la historia (del código)",
+      "chore: cambios menores que definitivamente no rompen nada",
+    ];
+
+    const descripciones = [
+      "## Resumen Ejecutivo\n\nEste PR representa el pináculo del desarrollo de software moderno.",
+      "## Lo que cambia\n\nTodo. Absolutamente todo. Pero no te preocupes.",
+      "## Testing\n\nConfío en mi código. Los tests son para los que dudan.",
+    ];
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify({
+          titulo: titulos[Math.floor(Math.random() * titulos.length)],
+          descripcion: descripciones[Math.floor(Math.random() * descripciones.length)],
+          checklist: [
+            "- [ ] He probado esto en mi máquina",
+            "- [ ] Funciona en mi máquina",
+            "- [ ] Debería funcionar en producción (teóricamente)",
+            "- [ ] He buscado aprobación emocional de mi gato"
+          ],
+          advertencia: drama_level &gt;= 4 ? "⚠️ Alto nivel de drama detectado" : undefined
+        }, null, 2)
+      }]
+    };
+  }
+);
+
+async function main() {
+  const { StdioServerTransport } = await import('@modelcontextprotocol/server');
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+}
+
+main().catch(console.error);</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ejercicio_6_el_generador_de_recetas_de_programación">Ejercicio 6: El Generador de "Recetas" de Programación</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_enunciado_6">Enunciado</h3>
+<div class="paragraph">
+<p>Desarrolla un servidor MCP que "cocine" soluciones de programación como si fueran recetas de cocina, combinando creatividad culinaria con documentación técnica.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_requisitos_6">Requisitos</h3>
+<div class="sect3">
+<h4 id="_tool_preparar_receta">Tool: <code>preparar_receta</code></h4>
+<div class="paragraph">
+<p>Transforma un problema técnico en una receta culinaria.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 5. Parámetros</caption>
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 60%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parámetro</th>
+<th class="tableblock halign-left valign-top">Tipo</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>problema</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Problema técnico a resolver</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>complejidad</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">apprentice, home_cook, chef, master_chef</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>porciones</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">integer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Número de usuarios/deployments</p></td>
+</tr>
+</tbody>
+</table>
+<div class="listingblock">
+<div class="title">Resultado de ejemplo</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-markdown hljs" data-lang="markdown"># API REST Clásica (4 personas)
+
+## Ingredientes
+- 1 framework web (Express, FastAPI o Flask)
+- 2 bases de datos relacionales
+- 3 cucharadas de middleware de autenticación
+- 1 pizca de rate limiting (al gusto)
+- Validación de inputs (cantidad generosa)
+
+## Preparación (45 minutos)
+
+1. En un bowl grande, mezclar las rutas con los controladores hasta obtener una consistencia homogénea.
+
+2. Añadir los modelos de datos gradualmente, evitando grumos en las migraciones.
+
+3. Sazonar con documentación OpenAPI. IMPORTANTE: No escatimar aquí o el resultado quedará indigesto.
+
+4. Dejar reposar la autenticación durante 10 minutos hasta que los tokens estén firmados.
+
+5. Hornear en staging a 8080°C durante 15 minutos o hasta que los tests pasen.
+
+## Sugerencias del Chef
+Servir con una guarnición de logs estructurados y un coupling bajo.
+
+## Maridaje Recomendado
+Esta API va excelente con un frontend React de baja complejidad y un CDN para assets estáticos.</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_resource_recetas_clasicas">Resource: <code>recetas_clasicas</code></h4>
+<div class="paragraph">
+<p>Colección de recetas de patrones comunes.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_tool_sustituir_ingrediente">Tool: <code>sustituir_ingrediente</code></h4>
+<div class="paragraph">
+<p>Ofrece alternativas para tecnologías.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_prompt_menu_del_dia">Prompt: <code>menu_del_dia</code></h4>
+<div class="paragraph">
+<p>Genera un plan de desarrollo semanal como menú de restaurante.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_implementación_de_referencia_python_4">Implementación de Referencia (Python)</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from mcp.server.fastmcp import FastMCP, FastMcp
+from mcp.server.fastmcp.prompts import base
+import json
+
+mcp = FastMcp("code-recipes")
+
+RECETAS_CLASICAS = {
+    "crud_basico": {
+        "nombre": "CRUD a la Italiana",
+        "descripcion": "Simple, fresco, con ingredientes locales",
+        "tiempo": "30 min",
+        "dificultad": "Apprentice",
+        "ingredientes": [
+            "4 endpoints REST",
+            "1 modelo de datos",
+            "2 tazas de validación",
+            "1 pizca de error handling"
+        ]
+    },
+    "autenticacion_jwt": {
+        "nombre": "Autenticación al Curry",
+        "descripcion": "Picante pero nutritiva",
+        "tiempo": "60 min",
+        "dificultad": "Home Cook",
+        "ingredientes": [
+            "2 librerías de JWT",
+            "1 middleware de autenticación",
+            "3 endpoints de login/register/refresh",
+            "Secret sauce: refresh tokens"
+        ]
+    },
+    "microservicios": {
+        "nombre": "Microservicios Molecular",
+        "descripcion": "Cada ingrediente por separado",
+        "tiempo": "6 horas",
+        "dificultad": "Master Chef",
+        "ingredientes": [
+            "5 servicios independientes",
+            "1 API Gateway",
+            "2 bases de datos distribuidas",
+            "Message queue al gusto",
+            "Service mesh generoso"
+        ]
+    }
+}
+
+SUSTITUCIONES = {
+    "Redis": ["Memcached", "Hazelcast", "DragonflyDB"],
+    "PostgreSQL": ["MySQL", "MariaDB", "CockroachDB"],
+    "React": ["Vue", "Svelte", "Angular"],
+    "Express": ["Fastify", "Koa", "NestJS"],
+    "Docker": ["Podman", "containerd", "LXC"],
+}
+
+
+@mcp.tool()
+def preparar_receta(
+    problema: str,
+    complejidad: str = "home_cook",
+    porciones: int = 4
+) -&gt; str:
+    """Prepara una receta de programación."""
+
+    tiempos = {
+        "apprentice": "20-30 min",
+        "home_cook": "45-60 min",
+        "chef": "2-4 horas",
+        "master_chef": "1-2 semanas"
+    }
+
+    receta = f"""# {problema.title()} ({porciones} personas)
+
+## Ingredientes
+
+"""
+
+    # Generar ingredientes según complejidad
+    if complejidad == "apprentice":
+        receta += """- 1 framework web (Express o Flask)
+- 1 base de datos simple (SQLite)
+- 2 cucharadas de validación básica
+- Documentación mínima (un README corto)
+"""
+    elif complejidad == "home_cook":
+        receta += """- 1 framework web robusto (FastAPI o NestJS)
+- 1 base de datos relacional (PostgreSQL)
+- 3 cucharadas de middleware de autenticación
+- 1 pizca de rate limiting (al gusto)
+- Validación de inputs (cantidad generosa)
+- Tests unitarios (no escatimar)
+"""
+    elif complejidad == "chef":
+        receta += """- 1 arquitectura de microservicios
+- 2 bases de datos especializadas
+- Message broker (RabbitMQ o Kafka)
+- Service mesh (Istio)
+- Monitoring y observability completos
+- CI/CD pipeline con stages múltiples
+- Infrastructure as Code (Terraform)
+"""
+    else:  # master_chef
+        receta += """- Arquitectura de event sourcing
+- 3+ bases de datos distribuidas
+- Kubernetes cluster con auto-scaling
+- Service mesh con mTLS
+- Distributed tracing completo
+- Chaos engineering setup
+- Multi-region deployment
+- Custom operators y controllers
+"""
+
+    receta += f"""
+## Preparación ({tiempos.get(complejidad, "45 min")})
+
+1. En un bowl grande, mezclar los requisitos con los stakeholders hasta obtener una especificación homogénea.
+
+2. Añadir los modelos de datos gradualmente, evitando grumos en las migraciones.
+
+3. Sazonar con documentación. IMPORTANTE: No escatimar aquí o el resultado quedará indigesto.
+
+4. Dejar reposar la arquitectura durante el tiempo indicado, removiendo ocasionalmente para evitar que se peguen los monolitos.
+
+5. Hornear en staging a temperatura ambiente hasta que los tests pasen.
+
+## Sugerencias del Chef
+
+Servir con una guarnición de logs estructurados y un coupling bajo.
+
+## Advertencias
+
+- No abrir el horno (producción) antes de tiempo
+- Mantener los tests siempre encendidos
+- Los refactors son como el vino: mejor con tiempo
+"""
+
+    return json.dumps({
+        "receta": receta,
+        "tiempo_estimado": tiempos.get(complejidad, "45 min"),
+        "dificultad": complejidad,
+        "porciones": porciones
+    }, indent=2)
+
+
+@mcp.resource("recetas://clasicas")
+def get_recetas_clasicas() -&gt; str:
+    """Recetas clásicas de programación."""
+    return json.dumps(RECETAS_CLASICAS, indent=2)
+
+
+@mcp.tool()
+def sustituir_ingrediente(ingrediente: str) -&gt; str:
+    """Ofrece sustitutos para un ingrediente tecnológico."""
+
+    sustitutos = SUSTITUCIONES.get(ingrediente, [])
+
+    if not sustitutos:
+        return json.dumps({
+            "error": f"No conozco sustitutos para '{ingrediente}'",
+            "sugerencia": "Intenta con tecnologías más comunes"
+        }, indent=2)
+
+    mensaje = f"'{ingrediente}' puede ser sustituido por:\n\n"
+    for i, s in enumerate(sustitutos, 1):
+        mensaje += f"{i}. {s}\n"
+
+    mensaje += f"\nNota: Cada sustituto tiene un sabor ligeramente diferente. Ajusta las proporciones según el proyecto."
+
+    return json.dumps({
+        "ingrediente_original": ingrediente,
+        "sustitutos": sustitutos,
+        "nota_culinaria": mensaje
+    }, indent=2)
+
+
+@mcp.prompt()
+def menu_del_dia(semana: int = 1) -&gt; list[base.Message]:
+    """Genera un menú de desarrollo semanal."""
+
+    return [
+        base.SystemMessage(
+            "Eres un chef de software que planifica menús de desarrollo. "
+            "Cada día es un 'plato' de trabajo. Combina creatividad culinaria "
+            "con planificación realista de proyectos."
+        ),
+        base.UserMessage(
+            f"Planifica el menú de desarrollo para la semana {semana}.\n\n"
+            "Incluye para cada día:\n"
+            "- Nombre del 'plato' (tarea principal)\n"
+            "- Ingredientes (tecnologías)\n"
+            "- Tiempo de preparación\n"
+            "- Maridaje recomendado (colaboraciones)\n"
+            "- Postre (recompensa después de completar)"
+        )
+    ]
+
+
+if __name__ == "__main__":
+    mcp.run()</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ejercicio_7_el_traductor_de_cliente_speak_a_desarrollador">Ejercicio 7: El Traductor de "Cliente-speak" a "Desarrollador"</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_enunciado_7">Enunciado</h3>
+<div class="paragraph">
+<p>Crea un servidor MCP que traduzca solicitudes de clientes a lo que realmente significan para desarrolladores, con estimaciones realistas y análisis de complejidad.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_requisitos_7">Requisitos</h3>
+<div class="sect3">
+<h4 id="_tool_traducir_requerimiento">Tool: <code>traducir_requerimiento</code></h4>
+<div class="paragraph">
+<p>Convierte lenguaje de cliente a desarrollador.</p>
+</div>
+<div class="listingblock">
+<div class="title">Ejemplo</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "requerimiento_original": "Es algo simple, tipo Netflix pero más barato",
+  "traduccion": {
+    "complejidad_real": "Alta",
+    "descripcion_tecnica": "Plataforma de streaming con sistema de recomendaciones, gestión de contenido multimedia, autenticación, pagos y posiblemente CDN",
+    "componentes_necesarios": [
+      "Sistema de autenticación con OAuth",
+      "Almacenamiento de video con encoding",
+      "CDN para distribución global",
+      "Motor de recomendaciones (ML)",
+      "Sistema de pagos recurrentes",
+      "Panel de administración de contenido",
+      "Apps: web, iOS, Android, smart TV"
+    ],
+    "estimacion_cliente": "2 semanas",
+    "estimacion_real": "12-18 meses con equipo de 8+ personas",
+    "factor_realidad": 36.0
+  },
+  "diagnosticos": [
+    "Síndrome del 'es solo una app'",
+    "Subestimación severa de complejidad",
+    "Caso clásico de 'ya tengo la idea, solo falta codearla'"
+  ]
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_resource_diccionario_cliente">Resource: <code>diccionario_cliente</code></h4>
+<div class="paragraph">
+<p>Diccionario de traducciones cliente→desarrollador.</p>
+</div>
+<div class="listingblock">
+<div class="title">Contenido</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "terminos": [
+    {
+      "cliente_speak": "Es algo simple",
+      "desarrollador_speak": "Probablemente requiere refactorizar el 80% del código existente",
+      "ejemplo": "Un simple cambio de color involucra: actualizar design system, modificar 50 componentes, actualizar tests..."
+    },
+    {
+      "cliente_speak": "Tipo [app famosa] pero más barato",
+      "desarrollador_speak": "MVP con 3 funcionalidades básicas y sin el algoritmo secreto",
+      "ejemplo": "'Tipo Uber' = formulario de contacto + Google Maps embed"
+    },
+    {
+      "cliente_speak": "Lo necesito para ayer",
+      "desarrollador_speak": "Si duermes 2 horas por día, quizás para la próxima semana",
+      "ejemplo": "Deadline de viernes = entregable de martes siguiente"
+    },
+    {
+      "cliente_speak": "Intuitivo",
+      "desarrollador_speak": "Copiar la UI de [competidor reconocido]",
+      "ejemplo": "Hazlo como [app popular] es la única especificación"
+    },
+    {
+      "cliente_speak": "Escalable",
+      "desarrollador_speak": "Nadie lo usará pero el cliente quiere que aguante millones de usuarios",
+      "ejemplo": "Arquitectura de microservicios para una landing page"
+    },
+    {
+      "cliente_speak": "Flexible",
+      "desarrollador_speak": "No tienen ni idea de lo que quieren",
+      "ejemplo": "'Que se pueda adaptar a cualquier cosa' = requisitos indefinidos"
+    }
+  ]
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_tool_estimar_esfuerzo_real">Tool: <code>estimar_esfuerzo_real</code></h4>
+<div class="paragraph">
+<p>Aplica el "factor de realidad" a estimaciones.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_prompt_preparar_reunion_cliente">Prompt: <code>preparar_reunion_cliente</code></h4>
+<div class="paragraph">
+<p>Genera respuestas diplomáticas.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ejercicio_8_el_generador_de_stand_up_comedy">Ejercicio 8: El Generador de "Stand-up" Comedy</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_enunciado_8">Enunciado</h3>
+<div class="paragraph">
+<p>Desarrolla un servidor MCP que genere contenido para reuniones diarias (stand-ups) que sea profesional pero con toques de humor interno.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_requisitos_8">Requisitos</h3>
+<div class="sect3">
+<h4 id="_tool_generar_update">Tool: <code>generar_update</code></h4>
+<div class="paragraph">
+<p>Crea actualizaciones de estatus diarias.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 6. Parámetros</caption>
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 60%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parámetro</th>
+<th class="tableblock halign-left valign-top">Tipo</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>nivel_entusiasmo</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">integer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1-10</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>incluir_bloqueo</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Si incluir bloqueos</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>modo</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">honesto, optimista, supervivencia</p></td>
+</tr>
+</tbody>
+</table>
+<div class="listingblock">
+<div class="title">Resultado</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "ayer": "Avancé con la integración del servicio de pagos. Tuve que refactorizar un poco porque encontré algunos edge cases que no estaban contemplados, pero ya está casi listo.",
+  "hoy": "Voy a terminar los tests de la integración y empezar con el manejo de webhooks. Si todo va bien, puedo hacer el PR esta tarde.",
+  "bloqueos": "Ninguno crítico, pero el entorno de staging está un poco lento hoy. Ya le avisé al equipo de DevOps.",
+  "nivel_entusiasmo_real": 4,
+  "nivel_entusiasmo_declarado": 7,
+  "traducción_interna": "Ayer no hice mucho. Hoy intentaré algo. No me pregunten mucho."
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_tool_generar_bloqueo_creativo">Tool: <code>generar_bloqueo_creativo</code></h4>
+<div class="paragraph">
+<p>Produce bloqueos verosímiles.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_resource_excusas_standup">Resource: <code>excusas_standup</code></h4>
+<div class="paragraph">
+<p>Excusas categorizadas por tipo.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_prompt_retrospectiva_segura">Prompt: <code>retrospectiva_segura</code></h4>
+<div class="paragraph">
+<p>Genera reflexiones genéricas.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ejercicio_9_el_git_excuse_generator">Ejercicio 9: El "Git Excuse" Generator</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_enunciado_9">Enunciado</h3>
+<div class="paragraph">
+<p>Crea un servidor MCP que genere mensajes de commit y excusas para git, transformando acciones simples en descripciones impresionantes.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_requisitos_9">Requisitos</h3>
+<div class="sect3">
+<h4 id="_tool_generar_mensaje_commit">Tool: <code>generar_mensaje_commit</code></h4>
+<div class="paragraph">
+<p>Genera mensajes de commit según estado emocional.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 7. Parámetros</caption>
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 60%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parámetro</th>
+<th class="tableblock halign-left valign-top">Tipo</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>tipo</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">feat, fix, refactor, docs, chore, desesperado</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>nivel_detalle</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">minimal, normal, detallado, novela</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>estado_emocional</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">orgulloso, avergonzado, confundido</p></td>
+</tr>
+</tbody>
+</table>
+<div class="listingblock">
+<div class="title">Ejemplos</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "cambio_real": "Corregí un typo en una variable",
+  "mensaje_minimal": "fix: typo",
+  "mensaje_normal": "fix(core): correct variable naming for consistency",
+  "mensaje_detallado": "fix(core): correct variable naming in user authentication module\n\nThe variable 'usrename' was incorrectly spelled. This commit\nfixes the typo to 'username' for consistency with the codebase\nnaming conventions.\n\nFixes #123",
+  "mensaje_novela": "fix(core): rectify nomenclature discrepancy in authentication subsystem\n\nIn the grand tapestry of our codebase, a single thread was\nmiswoven. The variable 'usrename', a vestige of perhaps\nhasty coding or a momentary lapse in concentration, has\nbeen carefully restored to its proper form: 'username'.\n\nThis correction, though seemingly minor, represents our\nunwavering commitment to code quality and the eternal\nstruggle against entropy in software development.\n\nMay future generations of developers gaze upon this\ncommit and know that here, someone cared.\n\nFixes #123"
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_tool_explicar_commit_raro">Tool: <code>explicar_commit_raro</code></h4>
+<div class="paragraph">
+<p>Justifica commits vergonzosos.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_resource_mensajes_clasicos">Resource: <code>mensajes_clasicos</code></h4>
+<div class="paragraph">
+<p>Mensajes de commit legendarios.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_tool_generar_changelog">Tool: <code>generar_changelog</code></h4>
+<div class="paragraph">
+<p>Convierte commits en changelog profesional.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_prompt_escribir_pr_description">Prompt: <code>escribir_pr_description</code></h4>
+<div class="paragraph">
+<p>Genera descripciones impresionantes.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ejercicio_10_el_detector_de_horror_code_legacy">Ejercicio 10: El Detector de "Horror Code" Legacy</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_enunciado_10">Enunciado</h3>
+<div class="paragraph">
+<p>Desarrolla un servidor MCP que actúe como un historiador del terror analizando código legacy, generando narrativas sobre su origen y proponiendo refactors.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_requisitos_10">Requisitos</h3>
+<div class="sect3">
+<h4 id="_tool_excavar_codigo">Tool: <code>excavar_codigo</code></h4>
+<div class="paragraph">
+<p>Analiza código legacy y detecta artefactos arqueológicos.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 8. Parámetros</caption>
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 60%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parámetro</th>
+<th class="tableblock halign-left valign-top">Tipo</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>codigo</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Código a analizar</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>edad_estimada</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Año aproximado de creación</p></td>
+</tr>
+</tbody>
+</table>
+<div class="listingblock">
+<div class="title">Resultado</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "antiguedad_estimada": "2013",
+  "nivel_terror": 4,
+  "artefactos_encontrados": [
+    {
+      "tipo": "var declarations",
+      "descripcion": "Uso extensivo de 'var' sin scope de bloque",
+      "fantasmas": "👻👻",
+      "era": "Pre-ES6"
+    },
+    {
+      "tipo": "callback hell",
+      "descripcion": "Anidación de 7 niveles de callbacks",
+      "fantasmas": "👻👻👻👻",
+      "era": "La Era de los Callbacks (2010-2015)"
+    },
+    {
+      "tipo": "comentario_muerto",
+      "descripcion": "// TODO: refactor this - 2014",
+      "fantasmas": "👻",
+      "era": "Promesa incumplida"
+    },
+    {
+      "tipo": "jQuery",
+      "descripcion": "Seletores DOM con jQuery en cada función",
+      "fantasmas": "👻👻👻",
+      "era": "La Edad de Oro de jQuery"
+    }
+  ],
+  "historia": "En 2013, cuando los smartphones aún tenían botones físicos, alguien escribió este código. El 'TODO' que encontraron data de la era pre-Promise, cuando los desarrolladores aún caminaban por la Tierra sin async/await. El callback hell de 7 niveles sugiere que el autor estaba bajo deadline o poseído por el espíritu del código espagueti.",
+  "recomendacion": "Conservar como monumento histórico o refactorizar con async/await. La decisión depende de cuánto valoran la arqueología de software."
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_tool_generar_historia_horror">Tool: <code>generar_historia_horror</code></h4>
+<div class="paragraph">
+<p>Crea una narrativa del código.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_resource_patrones_antiguos">Resource: <code>patrones_antiguos</code></h4>
+<div class="paragraph">
+<p>Documenta patrones de eras pasadas.</p>
+</div>
+<div class="listingblock">
+<div class="title">Contenido</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "eras": [
+    {
+      "nombre": "La Era del Namespace Global",
+      "periodo": "1995-2010",
+      "patrones": [
+        "Variables globales sin 'var'",
+        "Funciones en window object",
+        "Script tags sin módulos"
+      ],
+      "artefactos": "window.myApp = {}"
+    },
+    {
+      "nombre": "La Edad de Oro de jQuery",
+      "periodo": "2008-2016",
+      "patrones": [
+        "$('selector').click()",
+        "AJAX con $.ajax",
+        "DOM manipulation intensiva"
+      ],
+      "artefactos": "$(document).ready()"
+    },
+    {
+      "nombre": "El Callback Hell",
+      "periodo": "2010-2015",
+      "patrones": [
+        "Pirámide de callbacks",
+        "Error handling en cada nivel",
+        "Callback como último parámetro"
+      ],
+      "artefactos": "function(err, data) { if (err)..."
+    },
+    {
+      "nombre": "La Era Promise",
+      "periodo": "2015-2017",
+      "patrones": [
+        ".then().then().catch()",
+        "Promise.all()",
+        "Bluebird como polyfill"
+      ],
+      "artefactos": "new Promise((resolve, reject) =&gt;"
+    },
+    {
+      "nombre": "Async/Await Moderno",
+      "periodo": "2017-presente",
+      "patrones": [
+        "async function",
+        "try/catch con await",
+        "Top-level await"
+      ],
+      "artefactos": "const data = await fetch()"
+    }
+  ]
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_tool_proponer_refactor">Tool: <code>proponer_refactor</code></h4>
+<div class="paragraph">
+<p>Ofrece versión moderna y evalúa riesgo.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_prompt_explicar_a_manager">Prompt: <code>explicar_a_manager</code></h4>
+<div class="paragraph">
+<p>Justifica refactorizar código que "funciona".</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_implementación_de_referencia_python_5">Implementación de Referencia (Python)</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">from mcp.server.fastmcp import FastMCP, FastMcp
+from mcp.server.fastmcp.prompts import base
+import json
+import re
+from datetime import datetime
+
+mcp = FastMcp("legacy-horror-detector")
+
+ERAS = {
+    "namespace_global": {
+        "nombre": "La Era del Namespace Global",
+        "periodo": "1995-2010",
+        "patrones": ["window\\.\\w+", "^\\w+\\s*=\\s*function", "var\\s+\\w+\\s*="]
+    },
+    "jquery": {
+        "nombre": "La Edad de Oro de jQuery",
+        "periodo": "2008-2016",
+        "patrones": ["\\$\\(", "jQuery\\(", "\\.click\\(", "\\.ajax\\("]
+    },
+    "callback_hell": {
+        "nombre": "El Callback Hell",
+        "periodo": "2010-2015",
+        "patrones": ["function\\s*\\([^)]*\\)\\s*{[^}]*function\\s*\\("]
+    },
+    "es5": {
+        "nombre": "Pre-ES6",
+        "periodo": "2015",
+        "patrones": ["\\bvar\\b", "function\\s*\\(", "\\.bind\\("]
+    }
+}
+
+ARTEFACTOS = {
+    "var": {
+        "descripcion": "Uso de 'var' sin scope de bloque",
+        "fantasmas": "👻👻",
+        "alternativa": "const/let"
+    },
+    "callback": {
+        "descripcion": "Callbacks anidados sin Promise",
+        "fantasmas": "👻👻👻👻",
+        "alternativa": "async/await"
+    },
+    "jquery": {
+        "descripcion": "Manipulación DOM con jQuery",
+        "fantasmas": "👻👻👻",
+        "alternativa": "Vanilla JS o framework moderno"
+    },
+    "todo": {
+        "descripcion": "TODO antiguo sin resolver",
+        "fantasmas": "👻",
+        "alternativa": "Implementar o eliminar"
+    },
+    "console_log": {
+        "descripcion": "Console.log en producción",
+        "fantasmas": "👻👻",
+        "alternativa": "Sistema de logging apropiado"
+    }
+}
+
+
+@mcp.tool()
+def excavar_codigo(codigo: str, edad_estimada: str = "2015") -&gt; str:
+    """Analiza código legacy y detecta artefactos."""
+
+    artefactos_encontrados = []
+    nivel_terror = 0
+
+    # Detectar var
+    var_count = len(re.findall(r'\bvar\b', codigo))
+    if var_count &gt; 0:
+        artefactos_encontrados.append({
+            "tipo": "var declarations",
+            "cantidad": var_count,
+            "descripcion": f"Encontradas {var_count} declaraciones 'var'",
+            "fantasmas": "👻" * min(var_count, 4),
+            "era": "Pre-ES6 (antes de 2015)",
+            "alternativa": "const/let"
+        })
+        nivel_terror += var_count
+
+    # Detectar callbacks
+    callback_pattern = r'function\s*\([^)]*\)\s*{[^}]*function\s*\('
+    callback_matches = re.findall(callback_pattern, codigo)
+    if callback_matches:
+        max_nesting = max(len(re.findall(r'function\s*\(', m)) for m in callback_matches) if callback_matches else 0
+        artefactos_encontrados.append({
+            "tipo": "callback hell",
+            "descripcion": f"Anidación de hasta {max_nesting} callbacks",
+            "fantasmas": "👻" * min(max_nesting + 1, 5),
+            "era": "La Era de los Callbacks (2010-2015)",
+            "alternativa": "async/await"
+        })
+        nivel_terror += max_nesting * 2
+
+    # Detectar jQuery
+    jquery_count = len(re.findall(r'\$\(|jQuery\(', codigo))
+    if jquery_count &gt; 0:
+        artefactos_encontrados.append({
+            "tipo": "jQuery",
+            "descripcion": f"{jquery_count} llamadas jQuery detectadas",
+            "fantasmas": "👻" * min(jquery_count, 3),
+            "era": "La Edad de Oro de jQuery (2008-2016)",
+            "alternativa": "Vanilla JS o framework moderno"
+        })
+        nivel_terror += jquery_count
+
+    # Detectar TODOs antiguos
+    todos = re.findall(r'//\s*TODO[:\s]+([^\n]+)', codigo)
+    if todos:
+        artefactos_encontrados.append({
+            "tipo": "TODO legacy",
+            "descripcion": f"{len(todos)} TODO(s) sin resolver: '{todos[0][:50]}...'",
+            "fantasmas": "👻",
+            "era": "Promesa incumplida",
+            "alternativa": "Implementar o eliminar"
+        })
+        nivel_terror += len(todos)
+
+    # Calcular nivel de terror (0-5)
+    nivel_terror = min(5, nivel_terror // 5 + 1)
+
+    # Generar historia
+    historia = generar_historia(edad_estimada, artefactos_encontrados)
+
+    return json.dumps({
+        "antiguedad_estimada": edad_estimada,
+        "nivel_terror": nivel_terror,
+        "artefactos_encontrados": artefactos_encontrados,
+        "historia": historia,
+        "recomendacion": "Conservar como monumento histórico o refactorizar gradualmente"
+    }, indent=2)
+
+
+def generar_historia(edad: str, artefactos: list) -&gt; str:
+    """Genera una historia narrativa del código."""
+
+    anio = int(edad) if edad.isdigit() else 2015
+
+    historia = f"En {edad}, "
+
+    if anio &lt; 2010:
+        historia += "cuando Internet Explorer aún dominaba el mercado, "
+    elif anio &lt; 2015:
+        historia += "cuando los smartphones revolucionaban la web, "
+    elif anio &lt; 2020:
+        historia += "cuando JavaScript moderno apenas emergía, "
+    else:
+        historia += "en tiempos recientes, "
+
+    if any(a["tipo"] == "var declarations" for a in artefactos):
+        historia += "alguien escribió código sin conocer 'const' y 'let'. "
+
+    if any(a["tipo"] == "callback hell" for a in artefactos):
+        historia += "Las Promises aún no eran estándar, y el infierno de callbacks era una realidad cotidiana. "
+
+    if any(a["tipo"] == "jQuery" for a in artefactos):
+        historia += "jQuery era la herramienta indispensable para cualquier proyecto web. "
+
+    historia += "\n\nEste código es un testamento de su época. Tratarlo con respeto... y refactorizarlo con cuidado."
+
+    return historia
+
+
+@mcp.resource("legacy://patrones_antiguos")
+def get_patrones_antiguos() -&gt; str:
+    """Documenta patrones de eras pasadas."""
+
+    eras = [
+        {
+            "nombre": "La Era del Namespace Global",
+            "periodo": "1995-2010",
+            "patrones": [
+                "Variables globales sin 'var'",
+                "Funciones en window object",
+                "Script tags sin módulos"
+            ],
+            "artefactos_comunes": "window.myApp = {}"
+        },
+        {
+            "nombre": "La Edad de Oro de jQuery",
+            "periodo": "2008-2016",
+            "patrones": [
+                "$('selector').click()",
+                "AJAX con $.ajax",
+                "DOM manipulation intensiva"
+            ],
+            "artefactos_comunes": "$(document).ready()"
+        },
+        {
+            "nombre": "El Callback Hell",
+            "periodo": "2010-2015",
+            "patrones": [
+                "Pirámide de callbacks",
+                "Error handling en cada nivel",
+                "Callback como último parámetro"
+            ],
+            "artefactos_comunes": "function(err, data) { if (err)..."
+        },
+        {
+            "nombre": "La Era Promise",
+            "periodo": "2015-2017",
+            "patrones": [
+                ".then().then().catch()",
+                "Promise.all()",
+                "Bluebird como polyfill"
+            ],
+            "artefactos_comunes": "new Promise((resolve, reject) =&gt;"
+        },
+        {
+            "nombre": "Async/Await Moderno",
+            "periodo": "2017-presente",
+            "patrones": [
+                "async function",
+                "try/catch con await",
+                "Top-level await"
+            ],
+            "artefactos_comunes": "const data = await fetch()"
+        }
+    ]
+
+    return json.dumps({"eras": eras}, indent=2)
+
+
+@mcp.tool()
+def proponer_refactor(codigo: str, nivel_riesgo: str = "medio") -&gt; str:
+    """Propone refactorización con evaluación de riesgo."""
+
+    # Análisis simple
+    lineas = len(codigo.split('\n'))
+    funciones = len(re.findall(r'function\s+\w+|const\s+\w+\s*=\s*(?:async\s*)?\(', codigo))
+
+    return json.dumps({
+        "version_moderna": "Ver implementación con async/await",
+        "nivel_riesgo": nivel_riesgo,
+        "probabilidad_romper_produccion": {
+            "bajo": "10-20%",
+            "medio": "40-60%",
+            "alto": "80-95%"
+        }.get(nivel_riesgo, "50%"),
+        "tiempo_estimado_refactor": f"{lineas // 20 + funciones} horas",
+        "tests_requeridos": max(1, funciones * 3),
+        "excusa_recomendada": "Mejor lo dejamos para el próximo sprint",
+        "pasos_seguros": [
+            "1. Añadir tests antes de tocar nada",
+            "2. Refactorizar en funciones pequeñas",
+            "3. Un cambio a la vez + commit",
+            "4. Rezar a los dioses del deploy"
+        ]
+    }, indent=2)
+
+
+@mcp.prompt()
+def explicar_a_manager(lineas_codigo: int = 1000, anos_en_produccion: int = 5) -&gt; list[base.Message]:
+    """Genera justificación para refactorizar."""
+
+    return [
+        base.SystemMessage(
+            "Eres un experto en comunicación técnica con management. "
+            "Traduces problemas de deuda técnica a lenguaje de negocio "
+            "con métricas y ROI."
+        ),
+        base.UserMessage(
+            f"Necesito justificar refactorizar {lineas_codigo} líneas de código "
+            f"que llevan {anos_en_produccion} años en producción.\n\n"
+            "El código 'funciona' pero es difícil de mantener.\n\n"
+            "Proporciona:\n"
+            "1. Argumentos de negocio (no técnicos)\n"
+            "2. Métricas de ROI\n"
+            "3. Riesgos de NO refactorizar\n"
+            "4. Propuesta gradual (no big bang)"
+        )
+    ]
+
+
+if __name__ == "__main__":
+    mcp.run()</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_bonus_integración_final_developer_survival_kit">Bonus: Integración Final - Developer Survival Kit</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Como ejercicio integrador, combina los servidores anteriores en un sistema unificado:</p>
+</div>
+<div class="sect2">
+<h3 id="_requisitos_del_kit_de_supervivencia">Requisitos del Kit de Supervivencia</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Detector de Horror Code Legacy</strong> - Para analizar código heredado</p>
+</li>
+<li>
+<p><strong>Generador de Excusas Creativas</strong> - Para cuando las cosas salen mal</p>
+</li>
+<li>
+<p><strong>Traductor de Cliente-speak</strong> - Para entender requerimientos</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_prompt_supervivencia_desarrollador">Prompt: <code>supervivencia_desarrollador</code></h3>
+<div class="paragraph">
+<p>Combina los tres servidores para crear una estrategia completa de crisis:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-markdown hljs" data-lang="markdown"># Escenario de Crisis
+
+1. Recibiste código legacy de un proyecto de 2012
+2. El cliente quiere "algo simple tipo Netflix" para la próxima semana
+3. El código tiene 47 archivos de 500+ líneas cada uno
+4. Hay 23 TODOs sin resolver desde 2014
+
+# Estrategia de Supervivencia
+
+1. **Análisis del Legacy** (usar detector de horror)
+   - Evaluar nivel de terror
+   - Identificar patrones antiguos
+   - Estimar riesgo de refactor
+
+2. **Traducción del Requerimiento** (usar traductor cliente)
+   - Decodificar "simple tipo Netflix"
+   - Estimar esfuerzo real
+   - Preparar contrapropuesta
+
+3. **Plan de Contingencia** (usar generador de excusas)
+   - Preparar excusas de respaldo
+   - Validar credibilidad
+   - Practicar delivery
+
+4. **Comunicación con Stakeholders**
+   - Reunión de "alignment"
+   - Presentación de "findings"
+   - Negociación de "scope"</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusión">Conclusión</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Estos 10 ejercicios cubren los conceptos fundamentales de MCP:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Tools</strong> - Funciones ejecutables con validación</p>
+</li>
+<li>
+<p><strong>Resources</strong> - Datos expuestos al modelo</p>
+</li>
+<li>
+<p><strong>Prompts</strong> - Plantillas de interacción</p>
+</li>
+<li>
+<p><strong>Context</strong> - Capacidades avanzadas</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Cada ejercicio puede implementarse de forma independiente o combinarse para crear sistemas más complejos.</p>
+</div>
+<div class="sect2">
+<h3 id="_siguientes_pasos">Siguientes Pasos</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Implementar uno de los ejercicios en Python o TypeScript</p>
+</li>
+<li>
+<p>Probar con el MCP Inspector</p>
+</li>
+<li>
+<p>Crear un cliente para interactuar con el servidor</p>
+</li>
+<li>
+<p>Añadir tests unitarios</p>
+</li>
+<li>
+<p>Desplegar con Docker</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>¡Que la creatividad te acompañe! 🚀</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2026-04-19 22:11:46 +0200
+</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
+</body>
+</html>

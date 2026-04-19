@@ -1,0 +1,2232 @@
+= MCP Python SDK - Guía Completa
+:author: Bot-Bunnny
+:version: 1.0
+:toc: left
+:toclevels: 4
+:source-highlighter: highlightjs
+
+== Introducción
+
+El Model Context Protocol (MCP) es un protocolo que permite a las aplicaciones proporcionar contexto a los LLMs de forma estandarizada. Este documento cubre el SDK oficial de Python para crear servidores y clientes MCP.
+
+=== Requisitos Previos
+
+* Python 3.10 o superior
+* uv (gestor de paquetes recomendado) o pip
+* Conocimientos básicos de async/await en Python
+
+=== Instalación
+
+[source,bash]
+----
+# Con uv (recomendado)
+uv init mcp-python-demo
+cd mcp-python-demo
+uv add "mcp[cli]"
+
+# Con pip
+pip install "mcp[cli]"
+----
+
+El extra `[cli]` incluye herramientas de desarrollo como `mcp dev` y `mcp install`.
+
+== Parte 1: Servidor MCP Básico
+
+=== Servidor mínimo con stdio
+
+El transporte stdio es el más simple y se usa principalmente con Claude Desktop.
+
+[source,python]
+----
+# server_basic.py
+from mcp.server.fastmcp import FastMCP
+
+# Crear el servidor
+mcp = FastMCP(
+    "demo-server",
+    instructions="Este es un servidor de demostración con herramientas básicas."
+)
+
+
+@mcp.tool()
+def hello(name: str) -> str:
+    """Saluda a una persona por su nombre.
+    
+    Args:
+        name: El nombre de la persona a saludar
+        
+    Returns:
+        Un saludo personalizado
+    """
+    return f"¡Hola, {name}! Bienvenido al servidor MCP."
+
+
+@mcp.tool()
+def add(a: int, b: int) -> int:
+    """Suma dos números enteros.
+    
+    Args:
+        a: Primer número
+        b: Segundo número
+        
+    Returns:
+        La suma de ambos números
+    """
+    return a + b
+
+
+if __name__ == "__main__":
+    # Ejecutar con transporte stdio
+    mcp.run()
+----
+
+=== Ejecutar el servidor
+
+[source,bash]
+----
+# Ejecutar directamente
+python server_basic.py
+
+# O con uv
+uv run python server_basic.py
+
+# Ejecutar con MCP Inspector (recomendado para desarrollo)
+uv run mcp dev server_basic.py
+----
+
+=== Configurar en Claude Desktop
+
+[source,json]
+----
+// claude_desktop_config.json
+{
+  "mcpServers": {
+    "demo": {
+      "command": "python",
+      "args": ["/ruta/absoluta/a/server_basic.py"]
+    }
+  }
+}
+----
+
+== Parte 2: Tools Avanzadas
+
+=== Tool con validación completa
+
+[source,python]
+----
+# server_tools_advanced.py
+from mcp.server.fastmcp import FastMCP, Context
+from pydantic import BaseModel, Field, EmailStr, field_validator
+from typing import Optional
+from enum import Enum
+import re
+
+mcp = FastMCP("tools-advanced")
+
+
+class UserRole(str, Enum):
+    """Roles de usuario disponibles."""
+    USER = "user"
+    ADMIN = "admin"
+    MODERATOR = "moderator"
+
+
+class UserCreate(BaseModel):
+    """Schema para crear un usuario."""
+    username: str = Field(
+        min_length=3, 
+        max_length=20,
+        description="Nombre de usuario único"
+    )
+    email: EmailStr = Field(description="Email del usuario")
+    age: int = Field(ge=18, le=120, description="Edad del usuario")
+    role: UserRole = Field(default=UserRole.USER, description="Rol del usuario")
+    bio: Optional[str] = Field(
+        default=None, 
+        max_length=500,
+        description="Biografía del usuario"
+    )
+    
+    @field_validator('username')
+    @classmethod
+    def validate_username(cls, v: str) -> str:
+        if not re.match(r'^[a-zA-Z0-9_]+$', v):
+            raise ValueError('Username solo puede contener letras, números y guión bajo')
+        return v.lower()
+
+
+class UserResponse(BaseModel):
+    """Respuesta al crear un usuario."""
+    id: str
+    username: str
+    email: str
+    age: int
+    role: str
+    created_at: str
+
+
+# Almacenamiento en memoria
+users_db: dict[str, UserResponse] = {}
+
+
+@mcp.tool()
+def create_user(user: UserCreate) -> UserResponse:
+    """Crea un nuevo usuario en el sistema.
+    
+    Esta herramienta valida todos los campos del usuario antes de crearlo.
+    
+    Args:
+        user: Objeto con todos los datos del usuario a crear
+        
+    Returns:
+        El usuario creado con su ID asignado
+        
+    Raises:
+        ValidationError: Si los datos no son válidos
+    """
+    import uuid
+    from datetime import datetime
+    
+    user_id = str(uuid.uuid4())[:8]
+    
+    # Verificar que el username no existe
+    for existing_user in users_db.values():
+        if existing_user.username == user.username:
+            raise ValueError(f"El username '{user.username}' ya está en uso")
+    
+    response = UserResponse(
+        id=user_id,
+        username=user.username,
+        email=user.email,
+        age=user.age,
+        role=user.role.value,
+        created_at=datetime.now().isoformat()
+    )
+    
+    users_db[user_id] = response
+    return response
+
+
+@mcp.tool()
+def get_user(user_id: str) -> Optional[UserResponse]:
+    """Obtiene un usuario por su ID.
+    
+    Args:
+        user_id: El ID del usuario a buscar
+        
+    Returns:
+        El usuario encontrado o None si no existe
+    """
+    return users_db.get(user_id)
+
+
+@mcp.tool()
+def list_users(
+    role: Optional[UserRole] = None,
+    min_age: Optional[int] = None,
+    limit: int = 10
+) -> list[UserResponse]:
+    """Lista usuarios con filtros opcionales.
+    
+    Args:
+        role: Filtrar por rol (opcional)
+        min_age: Edad mínima (opcional)
+        limit: Número máximo de resultados (default: 10)
+        
+    Returns:
+        Lista de usuarios que coinciden con los filtros
+    """
+    results = list(users_db.values())
+    
+    if role:
+        results = [u for u in results if u.role == role.value]
+    
+    if min_age:
+        results = [u for u in results if u.age >= min_age]
+    
+    return results[:limit]
+
+
+@mcp.tool()
+def delete_user(user_id: str) -> dict:
+    """Elimina un usuario del sistema.
+    
+    Esta operación es destructiva y no se puede deshacer.
+    
+    Args:
+        user_id: El ID del usuario a eliminar
+        
+    Returns:
+        Confirmación de eliminación
+    """
+    if user_id not in users_db:
+        raise ValueError(f"Usuario con ID '{user_id}' no encontrado")
+    
+    deleted = users_db.pop(user_id)
+    return {
+        "deleted": True,
+        "user": deleted.model_dump()
+    }
+
+
+if __name__ == "__main__":
+    mcp.run()
+----
+
+=== Tool con progreso y logging
+
+[source,python]
+----
+# server_progress.py
+from mcp.server.fastmcp import FastMCP, Context
+from mcp.server.session import ServerSession
+import asyncio
+import time
+
+mcp = FastMCP(
+    "progress-server",
+    capabilities={"logging": {}}
+)
+
+
+@mcp.tool()
+async def process_files(
+    files: list[str],
+    ctx: Context[ServerSession, None],
+    delay: float = 0.5
+) -> dict:
+    """Procesa múltiples archivos con reporte de progreso.
+    
+    Args:
+        files: Lista de nombres de archivos a procesar
+        ctx: Contexto MCP (inyectado automáticamente)
+        delay: Segundos de delay entre archivos (para demo)
+        
+    Returns:
+        Resumen del procesamiento
+    """
+    total = len(files)
+    processed = []
+    errors = []
+    
+    await ctx.info(f"Iniciando procesamiento de {total} archivos")
+    
+    for i, filename in enumerate(files):
+        # Reportar progreso
+        progress = (i + 1) / total
+        await ctx.report_progress(
+            progress=progress,
+            total=1.0,
+            message=f"Procesando archivo {i + 1}/{total}: {filename}"
+        )
+        
+        await ctx.debug(f"Iniciando: {filename}")
+        
+        # Simular procesamiento
+        await asyncio.sleep(delay)
+        
+        # Simular error aleatorio
+        if filename.endswith(".error"):
+            await ctx.warning(f"Error en archivo: {filename}")
+            errors.append(filename)
+        else:
+            await ctx.debug(f"Completado: {filename}")
+            processed.append(filename)
+    
+    await ctx.info(f"Procesamiento completado: {len(processed)} exitosos, {len(errors)} errores")
+    
+    return {
+        "total": total,
+        "processed": processed,
+        "errors": errors,
+        "success_rate": len(processed) / total if total > 0 else 0
+    }
+
+
+@mcp.tool()
+async def long_calculation(
+    n: int,
+    ctx: Context[ServerSession, None],
+    steps: int = 10
+) -> dict:
+    """Realiza un cálculo largo con actualizaciones de progreso.
+    
+    Args:
+        n: Número base para el cálculo
+        ctx: Contexto MCP
+        steps: Número de pasos a realizar
+        
+    Returns:
+        Resultado del cálculo
+    """
+    await ctx.info(f"Iniciando cálculo con n={n}, steps={steps}")
+    
+    result = 0
+    start_time = time.time()
+    
+    for i in range(steps):
+        # Cálculo simulado
+        result += n ** 2
+        
+        # Reportar progreso
+        await ctx.report_progress(
+            progress=(i + 1) / steps,
+            total=1.0,
+            message=f"Paso {i + 1}/{steps} completado"
+        )
+        
+        await asyncio.sleep(0.2)
+    
+    elapsed = time.time() - start_time
+    await ctx.info(f"Cálculo completado en {elapsed:.2f}s")
+    
+    return {
+        "input": n,
+        "steps": steps,
+        "result": result,
+        "elapsed_seconds": round(elapsed, 2)
+    }
+
+
+if __name__ == "__main__":
+    mcp.run()
+----
+
+== Parte 3: Resources
+
+=== Resources estáticos y dinámicos
+
+[source,python]
+----
+# server_resources.py
+from mcp.server.fastmcp import FastMCP
+from datetime import datetime
+import json
+
+mcp = FastMCP("resources-server")
+
+
+# ============== Resources Estáticos ==============
+
+@mcp.resource("config://app")
+def get_app_config() -> str:
+    """Configuración de la aplicación.
+    
+    Este resource devuelve la configuración estática de la aplicación.
+    """
+    config = {
+        "app_name": "Mi App MCP",
+        "version": "1.0.0",
+        "debug": False,
+        "features": {
+            "authentication": True,
+            "rate_limiting": True,
+            "caching": True
+        },
+        "limits": {
+            "max_users": 1000,
+            "max_requests_per_minute": 100
+        }
+    }
+    return json.dumps(config, indent=2)
+
+
+@mcp.resource("config://database")
+def get_db_config() -> str:
+    """Configuración de base de datos."""
+    config = {
+        "host": "localhost",
+        "port": 5432,
+        "database": "mcp_demo",
+        "pool_size": 10,
+        "timeout": 30
+    }
+    return json.dumps(config, indent=2)
+
+
+# ============== Resources Dinámicos ==============
+
+# Almacenamiento en memoria para demo
+products_db = {
+    "prod-001": {"id": "prod-001", "name": "Laptop", "price": 999.99, "stock": 50},
+    "prod-002": {"id": "prod-002", "name": "Mouse", "price": 29.99, "stock": 200},
+    "prod-003": {"id": "prod-003", "name": "Keyboard", "price": 79.99, "stock": 150},
+}
+
+
+@mcp.resource("product://{product_id}")
+def get_product(product_id: str) -> str:
+    """Obtiene información de un producto específico.
+    
+    Args:
+        product_id: El ID del producto a buscar
+        
+    Returns:
+        Información del producto en formato JSON
+    """
+    if product_id not in products_db:
+        return json.dumps({
+            "error": "NOT_FOUND",
+            "message": f"Producto '{product_id}' no encontrado"
+        })
+    
+    return json.dumps(products_db[product_id], indent=2)
+
+
+@mcp.resource("user://{user_id}/profile")
+def get_user_profile(user_id: str) -> str:
+    """Obtiene el perfil de un usuario.
+    
+    Args:
+        user_id: El ID del usuario
+        
+    Returns:
+        Perfil del usuario en formato JSON
+    """
+    # Simulación de datos de usuario
+    profile = {
+        "user_id": user_id,
+        "username": f"user_{user_id}",
+        "email": f"user_{user_id}@example.com",
+        "created_at": "2024-01-15T10:30:00Z",
+        "stats": {
+            "logins": 42,
+            "last_login": datetime.now().isoformat()
+        }
+    }
+    return json.dumps(profile, indent=2)
+
+
+@mcp.resource("report://{type}/{year}/{month}")
+def get_monthly_report(type: str, year: str, month: str) -> str:
+    """Obtiene un reporte mensual.
+    
+    Args:
+        type: Tipo de reporte (sales, users, analytics)
+        year: Año del reporte
+        month: Mes del reporte
+        
+    Returns:
+        Reporte en formato JSON
+    """
+    report = {
+        "type": type,
+        "period": f"{year}-{month}",
+        "generated_at": datetime.now().isoformat(),
+        "data": {
+            "total": 1500,
+            "breakdown": {
+                "week_1": 350,
+                "week_2": 400,
+                "week_3": 375,
+                "week_4": 375
+            }
+        }
+    }
+    return json.dumps(report, indent=2)
+
+
+if __name__ == "__main__":
+    mcp.run()
+----
+
+== Parte 4: Prompts
+
+=== Prompts con argumentos y completions
+
+[source,python]
+----
+# server_prompts.py
+from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp.prompts import base
+from typing import Optional
+
+mcp = FastMCP("prompts-server")
+
+
+# ============== Prompt Simple ==============
+
+@mcp.prompt()
+def greet(name: str) -> str:
+    """Genera un saludo personalizado.
+    
+    Args:
+        name: Nombre de la persona a saludar
+        
+    Returns:
+        Un mensaje de saludo
+    """
+    return f"¡Hola {name}! ¿En qué puedo ayudarte hoy?"
+
+
+# ============== Prompt con múltiples mensajes ==============
+
+@mcp.prompt()
+def code_review(code: str, language: str = "python") -> list[base.Message]:
+    """Prepara una revisión de código estructurada.
+    
+    Args:
+        code: El código a revisar
+        language: Lenguaje de programación (default: python)
+        
+    Returns:
+        Lista de mensajes para el prompt
+    """
+    return [
+        base.SystemMessage(
+            f"Eres un experto en {language}. Tu tarea es revisar código "
+            f"buscando bugs, problemas de rendimiento y mejoras de estilo."
+        ),
+        base.UserMessage(
+            f"Por favor revisa el siguiente código {language}:\n\n"
+            f"```{language}\n{code}\n```"
+        ),
+        base.AssistantMessage(
+            "Voy a revisar el código buscando:"
+            "\n1. Errores potenciales"
+            "\n2. Problemas de rendimiento"
+            "\n3. Mejoras de estilo y legibilidad"
+            "\n4. Vulnerabilidades de seguridad"
+        )
+    ]
+
+
+# ============== Prompt con análisis específico ==============
+
+@mcp.prompt()
+def analyze_data(
+    data_description: str,
+    analysis_type: str = "descriptive",
+    output_format: str = "markdown"
+) -> str:
+    """Genera un prompt para análisis de datos.
+    
+    Args:
+        data_description: Descripción de los datos a analizar
+        analysis_type: Tipo de análisis (descriptive, predictive, diagnostic)
+        output_format: Formato de salida (markdown, json, table)
+        
+    Returns:
+        Prompt completo para análisis
+    """
+    analysis_prompts = {
+        "descriptive": "Describe las características principales de los datos",
+        "predictive": "Identifica patrones y haz predicciones",
+        "diagnostic": "Identifica causas y correlaciones"
+    }
+    
+    format_instructions = {
+        "markdown": "Usa formato markdown con secciones claramente definidas",
+        "json": "Devuelve los resultados en formato JSON estructurado",
+        "table": "Presenta los resultados en formato tabular"
+    }
+    
+    return f"""# Análisis de Datos
+
+## Datos
+{data_description}
+
+## Tipo de Análisis
+{analysis_prompts.get(analysis_type, analysis_prompts["descriptive"])}
+
+## Formato de Salida
+{format_instructions.get(output_format, format_instructions["markdown"])}
+
+## Instrucciones
+1. Identifica las variables principales
+2. Busca patrones y anomalías
+3. Proporciona insights accionables
+4. Incluye recomendaciones
+"""
+
+
+# ============== Prompt con roles ==============
+
+@mcp.prompt()
+def role_play(role: str, task: str, context: Optional[str] = None) -> list[base.Message]:
+    """Configura un prompt para role-play.
+    
+    Args:
+        role: El rol a interpretar
+        task: La tarea a realizar
+        context: Contexto adicional (opcional)
+        
+    Returns:
+        Lista de mensajes para configurar el rol
+    """
+    messages = [
+        base.SystemMessage(
+            f"Eres un {role} experto. Tienes años de experiencia y "
+            f"proporcionas consejos prácticos y accionables. "
+            f"Tu tono es profesional pero accesible."
+        )
+    ]
+    
+    if context:
+        messages.append(
+            base.UserMessage(f"Contexto:\n{context}\n\nTarea: {task}")
+        )
+    else:
+        messages.append(
+            base.UserMessage(f"Tarea: {task}")
+        )
+    
+    return messages
+
+
+if __name__ == "__main__":
+    mcp.run()
+----
+
+== Parte 5: Servidor HTTP con Streamable HTTP
+
+=== Servidor HTTP completo
+
+[source,python]
+----
+# server_http.py
+from mcp.server.fastmcp import FastMCP, Context
+from pydantic import BaseModel
+from typing import Optional
+import uuid
+from datetime import datetime
+
+# Crear servidor con configuración HTTP
+mcp = FastMCP(
+    "http-server",
+    instructions="Servidor MCP con transporte HTTP",
+    json_response=True,        # Usar JSON en lugar de SSE
+    stateless_http=True        # Modo sin estado (más simple)
+)
+
+
+# ============== Modelos ==============
+
+class Task(BaseModel):
+    """Modelo de tarea."""
+    id: str
+    title: str
+    description: str
+    status: str = "pending"
+    priority: str = "medium"
+    created_at: str
+    updated_at: str
+
+
+class TaskCreate(BaseModel):
+    """Modelo para crear tarea."""
+    title: str
+    description: str = ""
+    priority: str = "medium"
+
+
+class TaskUpdate(BaseModel):
+    """Modelo para actualizar tarea."""
+    title: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[str] = None
+    priority: Optional[str] = None
+
+
+# ============== Almacenamiento ==============
+
+tasks_db: dict[str, Task] = {}
+
+
+# ============== Tools ==============
+
+@mcp.tool()
+def create_task(task: TaskCreate) -> Task:
+    """Crea una nueva tarea.
+    
+    Args:
+        task: Datos de la tarea a crear
+        
+    Returns:
+        La tarea creada con su ID asignado
+    """
+    now = datetime.now().isoformat()
+    task_id = str(uuid.uuid4())[:8]
+    
+    new_task = Task(
+        id=task_id,
+        title=task.title,
+        description=task.description,
+        priority=task.priority,
+        created_at=now,
+        updated_at=now
+    )
+    
+    tasks_db[task_id] = new_task
+    return new_task
+
+
+@mcp.tool()
+def get_task(task_id: str) -> Optional[Task]:
+    """Obtiene una tarea por su ID.
+    
+    Args:
+        task_id: ID de la tarea
+        
+    Returns:
+        La tarea encontrada o None
+    """
+    return tasks_db.get(task_id)
+
+
+@mcp.tool()
+def list_tasks(
+    status: Optional[str] = None,
+    priority: Optional[str] = None,
+    limit: int = 20
+) -> list[Task]:
+    """Lista tareas con filtros opcionales.
+    
+    Args:
+        status: Filtrar por estado (pending, in_progress, completed)
+        priority: Filtrar por prioridad (low, medium, high)
+        limit: Máximo número de resultados
+        
+    Returns:
+        Lista de tareas filtradas
+    """
+    results = list(tasks_db.values())
+    
+    if status:
+        results = [t for t in results if t.status == status]
+    
+    if priority:
+        results = [t for t in results if t.priority == priority]
+    
+    return results[:limit]
+
+
+@mcp.tool()
+def update_task(task_id: str, updates: TaskUpdate) -> Task:
+    """Actualiza una tarea existente.
+    
+    Args:
+        task_id: ID de la tarea a actualizar
+        updates: Campos a actualizar
+        
+    Returns:
+        La tarea actualizada
+    """
+    if task_id not in tasks_db:
+        raise ValueError(f"Tarea '{task_id}' no encontrada")
+    
+    task = tasks_db[task_id]
+    update_data = updates.model_dump(exclude_unset=True)
+    
+    for key, value in update_data.items():
+        setattr(task, key, value)
+    
+    task.updated_at = datetime.now().isoformat()
+    return task
+
+
+@mcp.tool()
+def delete_task(task_id: str) -> dict:
+    """Elimina una tarea.
+    
+    Args:
+        task_id: ID de la tarea a eliminar
+        
+    Returns:
+        Confirmación de eliminación
+    """
+    if task_id not in tasks_db:
+        raise ValueError(f"Tarea '{task_id}' no encontrada")
+    
+    deleted = tasks_db.pop(task_id)
+    return {"deleted": True, "task_id": task_id, "title": deleted.title}
+
+
+# ============== Resources ==============
+
+@mcp.resource("tasks://stats")
+def get_task_stats() -> str:
+    """Estadísticas de tareas."""
+    import json
+    
+    tasks = list(tasks_db.values())
+    stats = {
+        "total": len(tasks),
+        "by_status": {},
+        "by_priority": {},
+        "recent": []
+    }
+    
+    for task in tasks:
+        stats["by_status"][task.status] = stats["by_status"].get(task.status, 0) + 1
+        stats["by_priority"][task.priority] = stats["by_priority"].get(task.priority, 0) + 1
+    
+    # Obtener las 5 más recientes
+    sorted_tasks = sorted(tasks, key=lambda t: t.created_at, reverse=True)
+    stats["recent"] = [{"id": t.id, "title": t.title} for t in sorted_tasks[:5]]
+    
+    return json.dumps(stats, indent=2)
+
+
+if __name__ == "__main__":
+    # Ejecutar con transporte HTTP
+    mcp.run(transport="streamable-http")
+----
+
+=== Ejecutar el servidor HTTP
+
+[source,bash]
+----
+# Ejecutar el servidor HTTP
+python server_http.py
+
+# El servidor estará disponible en:
+# http://localhost:8000 (puerto por defecto)
+
+# Para especificar host y puerto:
+# mcp.run(transport="streamable-http", host="0.0.0.0", port=3000)
+----
+
+== Parte 6: Cliente MCP en Python
+
+=== Cliente básico con stdio
+
+[source,python]
+----
+# client_stdio.py
+import asyncio
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
+
+
+async def main():
+    """Cliente MCP que se conecta via stdio."""
+    
+    # Configurar parámetros del servidor
+    server_params = StdioServerParameters(
+        command="python",
+        args=["server_basic.py"],
+        env=None
+    )
+    
+    # Conectar al servidor
+    async with stdio_client(server_params) as (read, write):
+        async with ClientSession(read, write) as session:
+            # Inicializar conexión
+            await session.initialize()
+            
+            # Listar tools disponibles
+            tools = await session.list_tools()
+            print("Herramientas disponibles:")
+            for tool in tools.tools:
+                print(f"  - {tool.name}: {tool.description}")
+            
+            # Llamar a una tool
+            result = await session.call_tool(
+                "hello",
+                arguments={"name": "Daniel"}
+            )
+            print(f"\nResultado de 'hello': {result.content}")
+            
+            # Otra llamada
+            result = await session.call_tool(
+                "add",
+                arguments={"a": 5, "b": 3}
+            )
+            print(f"Resultado de 'add': {result.content}")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+----
+
+=== Cliente HTTP completo
+
+[source,python]
+----
+# client_http.py
+import asyncio
+import httpx
+from mcp import ClientSession
+from mcp.client.streamable_http import streamablehttp_client
+
+
+async def main():
+    """Cliente MCP que se conecta via HTTP."""
+    
+    # URL del servidor MCP
+    server_url = "http://localhost:8000/mcp"
+    
+    # Conectar al servidor
+    async with streamablehttp_client(server_url) as (read, write, get_session_id):
+        async with ClientSession(read, write) as session:
+            # Inicializar conexión
+            await session.initialize()
+            
+            session_id = get_session_id()
+            print(f"Conectado. Session ID: {session_id}")
+            
+            # Obtener instrucciones del servidor
+            instructions = session.get_instructions()
+            if instructions:
+                print(f"\nInstrucciones del servidor:\n{instructions}\n")
+            
+            # Listar tools
+            tools_result = await session.list_tools()
+            print(f"Encontradas {len(tools_result.tools)} tools:")
+            for tool in tools_result.tools:
+                print(f"  - {tool.name}")
+            
+            # Crear una tarea
+            print("\n--- Creando tarea ---")
+            create_result = await session.call_tool(
+                "create_task",
+                arguments={
+                    "task": {
+                        "title": "Aprender MCP",
+                        "description": "Estudiar el protocolo MCP a fondo",
+                        "priority": "high"
+                    }
+                }
+            )
+            print(f"Resultado: {create_result.content[0].text}")
+            
+            # Listar tareas
+            print("\n--- Listando tareas ---")
+            list_result = await session.call_tool(
+                "list_tasks",
+                arguments={}
+            )
+            print(f"Tareas: {list_result.content[0].text}")
+            
+            # Listar resources
+            print("\n--- Resources disponibles ---")
+            resources = await session.list_resources()
+            for resource in resources.resources:
+                print(f"  - {resource.uri}: {resource.name}")
+            
+            # Leer un resource
+            print("\n--- Leyendo resource tasks://stats ---")
+            content = await session.read_resource("tasks://stats")
+            print(f"Contenido: {content.contents[0].text}")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+----
+
+=== Cliente con manejo de progreso
+
+[source,python]
+----
+# client_progress.py
+import asyncio
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
+
+
+async def main():
+    """Cliente con manejo de notificaciones de progreso."""
+    
+    server_params = StdioServerParameters(
+        command="python",
+        args=["server_progress.py"]
+    )
+    
+    async with stdio_client(server_params) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            
+            # Configurar handler de logs
+            def log_handler(notification):
+                level = notification.params.get("level", "info")
+                data = notification.params.get("data", "")
+                print(f"[{level.upper()}] {data}")
+            
+            # Registrar handler de notificaciones
+            session._incoming_message_listener = log_handler
+            
+            # Llamar a tool con progreso
+            print("Procesando archivos...")
+            result = await session.call_tool(
+                "process_files",
+                arguments={
+                    "files": ["doc1.txt", "doc2.txt", "test.error", "doc3.txt"],
+                    "delay": 0.3
+                }
+            )
+            
+            print(f"\nResultado final: {result.content[0].text}")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+----
+
+=== Cliente interactivo
+
+[source,python]
+----
+# client_interactive.py
+import asyncio
+import json
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
+
+
+class MCPClient:
+    """Cliente MCP interactivo."""
+    
+    def __init__(self, server_command: str, server_args: list[str]):
+        self.server_params = StdioServerParameters(
+            command=server_command,
+            args=server_args
+        )
+        self.session: ClientSession = None
+    
+    async def connect(self):
+        """Conecta al servidor MCP."""
+        self.read, self.write = await stdio_client(self.server_params).__aenter__()
+        self.session = ClientSession(self.read, self.write)
+        await self.session.__aenter__()
+        await self.session.initialize()
+        print("✓ Conectado al servidor MCP")
+    
+    async def disconnect(self):
+        """Desconecta del servidor."""
+        if self.session:
+            await self.session.__aexit__(None, None, None)
+    
+    async def list_tools(self):
+        """Lista todas las tools disponibles."""
+        result = await self.session.list_tools()
+        print("\n📋 Tools disponibles:")
+        for tool in result.tools:
+            print(f"  • {tool.name}")
+            print(f"    {tool.description}")
+        return result.tools
+    
+    async def list_resources(self):
+        """Lista todos los resources disponibles."""
+        result = await self.session.list_resources()
+        print("\n📁 Resources disponibles:")
+        for resource in result.resources:
+            print(f"  • {resource.uri}: {resource.name}")
+        return result.resources
+    
+    async def call_tool(self, name: str, arguments: dict):
+        """Llama a una tool."""
+        print(f"\n🔧 Ejecutando: {name}")
+        print(f"   Argumentos: {json.dumps(arguments, indent=2)}")
+        
+        result = await self.session.call_tool(name, arguments)
+        
+        if result.isError:
+            print(f"   ❌ Error: {result.content[0].text}")
+        else:
+            print(f"   ✓ Resultado: {result.content[0].text}")
+        
+        return result
+    
+    async def read_resource(self, uri: str):
+        """Lee un resource."""
+        print(f"\n📖 Leyendo: {uri}")
+        result = await self.session.read_resource(uri)
+        print(f"   Contenido: {result.contents[0].text}")
+        return result
+    
+    async def run_repl(self):
+        """Ejecuta un REPL interactivo."""
+        print("\n" + "="*50)
+        print("MCP Client REPL")
+        print("Comandos: tools, resources, call <name> <json>, read <uri>, quit")
+        print("="*50)
+        
+        while True:
+            try:
+                cmd = input("\n> ").strip()
+                
+                if not cmd:
+                    continue
+                
+                if cmd == "quit":
+                    break
+                
+                elif cmd == "tools":
+                    await self.list_tools()
+                
+                elif cmd == "resources":
+                    await self.list_resources()
+                
+                elif cmd.startswith("call "):
+                    parts = cmd[5:].split(maxsplit=1)
+                    tool_name = parts[0]
+                    args = json.loads(parts[1]) if len(parts) > 1 else {}
+                    await self.call_tool(tool_name, args)
+                
+                elif cmd.startswith("read "):
+                    uri = cmd[5:]
+                    await self.read_resource(uri)
+                
+                else:
+                    print(f"Comando desconocido: {cmd}")
+            
+            except json.JSONDecodeError:
+                print("Error: JSON inválido")
+            except Exception as e:
+                print(f"Error: {e}")
+
+
+async def main():
+    client = MCPClient("python", ["server_http.py"])
+    
+    try:
+        await client.connect()
+        await client.list_tools()
+        await client.list_resources()
+        await client.run_repl()
+    finally:
+        await client.disconnect()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+----
+
+== Parte 7: Testing
+
+=== Tests unitarios para servidor MCP
+
+[source,python]
+----
+# test_server.py
+import pytest
+import asyncio
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
+
+
+@pytest.fixture
+async def mcp_session():
+    """Fixture que proporciona una sesión MCP conectada."""
+    server_params = StdioServerParameters(
+        command="python",
+        args=["server_tools_advanced.py"]
+    )
+    
+    async with stdio_client(server_params) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            yield session
+
+
+class TestUserTools:
+    """Tests para las tools de usuario."""
+    
+    @pytest.mark.asyncio
+    async def test_create_user(self, mcp_session):
+        """Test crear usuario."""
+        result = await mcp_session.call_tool(
+            "create_user",
+            arguments={
+                "user": {
+                    "username": "testuser",
+                    "email": "test@example.com",
+                    "age": 25
+                }
+            }
+        )
+        
+        assert not result.isError
+        content = result.content[0].text
+        assert "testuser" in content
+        assert "test@example.com" in content
+    
+    @pytest.mark.asyncio
+    async def test_create_user_invalid_email(self, mcp_session):
+        """Test crear usuario con email inválido."""
+        result = await mcp_session.call_tool(
+            "create_user",
+            arguments={
+                "user": {
+                    "username": "testuser",
+                    "email": "invalid-email",
+                    "age": 25
+                }
+            }
+        )
+        
+        assert result.isError
+    
+    @pytest.mark.asyncio
+    async def test_create_user_underage(self, mcp_session):
+        """Test crear usuario menor de edad."""
+        result = await mcp_session.call_tool(
+            "create_user",
+            arguments={
+                "user": {
+                    "username": "testuser",
+                    "email": "test@example.com",
+                    "age": 15
+                }
+            }
+        )
+        
+        assert result.isError
+    
+    @pytest.mark.asyncio
+    async def test_list_users(self, mcp_session):
+        """Test listar usuarios."""
+        # Crear un usuario primero
+        await mcp_session.call_tool(
+            "create_user",
+            arguments={
+                "user": {
+                    "username": "listtest",
+                    "email": "list@example.com",
+                    "age": 30
+                }
+            }
+        )
+        
+        # Listar usuarios
+        result = await mcp_session.call_tool("list_users", arguments={})
+        assert not result.isError
+    
+    @pytest.mark.asyncio
+    async def test_get_user(self, mcp_session):
+        """Test obtener usuario por ID."""
+        # Crear usuario
+        create_result = await mcp_session.call_tool(
+            "create_user",
+            arguments={
+                "user": {
+                    "username": "gettoest",
+                    "email": "get@example.com",
+                    "age": 28
+                }
+            }
+        )
+        
+        # Extraer ID del resultado
+        import json
+        user_data = json.loads(create_result.content[0].text)
+        user_id = user_data["id"]
+        
+        # Obtener usuario
+        result = await mcp_session.call_tool(
+            "get_user",
+            arguments={"user_id": user_id}
+        )
+        
+        assert not result.isError
+    
+    @pytest.mark.asyncio
+    async def test_delete_user(self, mcp_session):
+        """Test eliminar usuario."""
+        # Crear usuario
+        create_result = await mcp_session.call_tool(
+            "create_user",
+            arguments={
+                "user": {
+                    "username": "deletetest",
+                    "email": "delete@example.com",
+                    "age": 22
+                }
+            }
+        )
+        
+        import json
+        user_data = json.loads(create_result.content[0].text)
+        user_id = user_data["id"]
+        
+        # Eliminar usuario
+        result = await mcp_session.call_tool(
+            "delete_user",
+            arguments={"user_id": user_id}
+        )
+        
+        assert not result.isError
+        
+        # Verificar que no existe
+        get_result = await mcp_session.call_tool(
+            "get_user",
+            arguments={"user_id": user_id}
+        )
+        
+        # El resultado debería indicar que no existe
+        assert get_result.isError or "no encontrado" in get_result.content[0].text.lower()
+
+
+# Ejecutar tests:
+# pytest test_server.py -v
+----
+
+== Parte 8: Proyecto Completo
+
+=== Servidor de gestión de biblioteca
+
+[source,python]
+----
+# library_server.py
+"""
+Servidor MCP completo para gestión de biblioteca.
+Demuestra: Tools, Resources, Prompts, Context, HTTP transport.
+"""
+from mcp.server.fastmcp import FastMCP, Context
+from mcp.server.session import ServerSession
+from pydantic import BaseModel, Field
+from typing import Optional
+from datetime import datetime
+import json
+import uuid
+
+# ============== Configuración del Servidor ==============
+
+mcp = FastMCP(
+    "library-server",
+    instructions="""
+    Servidor de gestión de biblioteca.
+    
+    Flujo recomendado:
+    1. Usa list_books para ver el catálogo
+    2. Usa search_books para encontrar libros específicos
+    3. Usa borrow_book para prestar un libro
+    4. Usa return_book para devolverlo
+    
+    Los recursos están disponibles bajo library://
+    """,
+    json_response=True,
+    stateless_http=True
+)
+
+
+# ============== Modelos ==============
+
+class Book(BaseModel):
+    """Modelo de libro."""
+    id: str
+    title: str
+    author: str
+    isbn: str
+    year: int
+    genre: str
+    available: bool = True
+    borrowed_by: Optional[str] = None
+    borrowed_at: Optional[str] = None
+
+
+class Member(BaseModel):
+    """Modelo de miembro."""
+    id: str
+    name: str
+    email: str
+    phone: Optional[str] = None
+    borrowed_books: list[str] = Field(default_factory=list)
+    created_at: str
+
+
+class BookCreate(BaseModel):
+    """Schema para crear libro."""
+    title: str = Field(min_length=1, max_length=200)
+    author: str = Field(min_length=1, max_length=100)
+    isbn: str = Field(pattern=r"^\d{10}|\d{13}$")
+    year: int = Field(ge=1450, le=2100)
+    genre: str
+
+
+class MemberCreate(BaseModel):
+    """Schema para crear miembro."""
+    name: str = Field(min_length=2, max_length=100)
+    email: str = Field(pattern=r"^[\w\.-]+@[\w\.-]+\.\w+$")
+    phone: Optional[str] = None
+
+
+# ============== Base de datos en memoria ==============
+
+books_db: dict[str, Book] = {
+    "book-001": Book(
+        id="book-001", title="El Quijote", author="Cervantes",
+        isbn="9788420412140", year=1605, genre="Novela"
+    ),
+    "book-002": Book(
+        id="book-002", title="Cien años de soledad", author="García Márquez",
+        isbn="9780307350403", year=1967, genre="Novela"
+    ),
+    "book-003": Book(
+        id="book-003", title="1984", author="George Orwell",
+        isbn="9780451524935", year=1949, genre="Distopía"
+    ),
+}
+
+members_db: dict[str, Member] = {}
+
+
+# ============== TOOLS ==============
+
+# --- Libros ---
+
+@mcp.tool()
+def create_book(book: BookCreate) -> Book:
+    """Añade un nuevo libro a la biblioteca.
+    
+    Args:
+        book: Datos del libro a añadir
+        
+    Returns:
+        El libro creado con su ID asignado
+    """
+    book_id = f"book-{uuid.uuid4().hex[:6]}"
+    
+    new_book = Book(
+        id=book_id,
+        **book.model_dump()
+    )
+    
+    books_db[book_id] = new_book
+    return new_book
+
+
+@mcp.tool()
+def get_book(book_id: str) -> Optional[Book]:
+    """Obtiene información de un libro.
+    
+    Args:
+        book_id: ID del libro
+        
+    Returns:
+        Información del libro o None si no existe
+    """
+    return books_db.get(book_id)
+
+
+@mcp.tool()
+def list_books(
+    genre: Optional[str] = None,
+    available_only: bool = False,
+    limit: int = 20
+) -> list[dict]:
+    """Lista libros con filtros opcionales.
+    
+    Args:
+        genre: Filtrar por género
+        available_only: Solo mostrar disponibles
+        limit: Máximo número de resultados
+        
+    Returns:
+        Lista de libros filtrados
+    """
+    results = list(books_db.values())
+    
+    if genre:
+        results = [b for b in results if b.genre.lower() == genre.lower()]
+    
+    if available_only:
+        results = [b for b in results if b.available]
+    
+    return [b.model_dump() for b in results[:limit]]
+
+
+@mcp.tool()
+def search_books(query: str) -> list[dict]:
+    """Busca libros por título o autor.
+    
+    Args:
+        query: Término de búsqueda
+        
+    Returns:
+        Libros que coinciden con la búsqueda
+    """
+    query_lower = query.lower()
+    
+    results = [
+        b for b in books_db.values()
+        if query_lower in b.title.lower() or query_lower in b.author.lower()
+    ]
+    
+    return [b.model_dump() for b in results]
+
+
+@mcp.tool()
+def delete_book(book_id: str) -> dict:
+    """Elimina un libro de la biblioteca.
+    
+    Args:
+        book_id: ID del libro a eliminar
+        
+    Returns:
+        Confirmación de eliminación
+    """
+    if book_id not in books_db:
+        raise ValueError(f"Libro '{book_id}' no encontrado")
+    
+    book = books_db.pop(book_id)
+    return {"deleted": True, "book": book.model_dump()}
+
+
+# --- Miembros ---
+
+@mcp.tool()
+def create_member(member: MemberCreate) -> Member:
+    """Registra un nuevo miembro.
+    
+    Args:
+        member: Datos del miembro
+        
+    Returns:
+        El miembro creado
+    """
+    member_id = f"member-{uuid.uuid4().hex[:6]}"
+    
+    new_member = Member(
+        id=member_id,
+        **member.model_dump(),
+        borrowed_books=[],
+        created_at=datetime.now().isoformat()
+    )
+    
+    members_db[member_id] = new_member
+    return new_member
+
+
+@mcp.tool()
+def get_member(member_id: str) -> Optional[dict]:
+    """Obtiene información de un miembro.
+    
+    Args:
+        member_id: ID del miembro
+        
+    Returns:
+        Información del miembro
+    """
+    if member_id not in members_db:
+        return None
+    
+    member = members_db[member_id]
+    
+    # Incluir información de libros prestados
+    borrowed = []
+    for book_id in member.borrowed_books:
+        if book_id in books_db:
+            borrowed.append({
+                "id": book_id,
+                "title": books_db[book_id].title
+            })
+    
+    return {
+        **member.model_dump(),
+        "borrowed_books_details": borrowed
+    }
+
+
+@mcp.tool()
+def list_members(limit: int = 20) -> list[dict]:
+    """Lista todos los miembros.
+    
+    Args:
+        limit: Máximo número de resultados
+        
+    Returns:
+        Lista de miembros
+    """
+    return [m.model_dump() for m in list(members_db.values())[:limit]]
+
+
+# --- Préstamos ---
+
+@mcp.tool()
+async def borrow_book(
+    book_id: str,
+    member_id: str,
+    ctx: Context[ServerSession, None]
+) -> dict:
+    """Presta un libro a un miembro.
+    
+    Args:
+        book_id: ID del libro a prestar
+        member_id: ID del miembro
+        ctx: Contexto MCP
+        
+    Returns:
+        Confirmación del préstamo
+    """
+    await ctx.info(f"Iniciando préstamo: libro {book_id} a miembro {member_id}")
+    
+    # Verificar que el libro existe
+    if book_id not in books_db:
+        raise ValueError(f"Libro '{book_id}' no encontrado")
+    
+    # Verificar que el miembro existe
+    if member_id not in members_db:
+        raise ValueError(f"Miembro '{member_id}' no encontrado")
+    
+    book = books_db[book_id]
+    member = members_db[member_id]
+    
+    # Verificar disponibilidad
+    if not book.available:
+        await ctx.warning(f"Libro '{book.title}' no disponible")
+        raise ValueError(f"El libro '{book.title}' no está disponible")
+    
+    # Verificar límite de préstamos
+    if len(member.borrowed_books) >= 5:
+        raise ValueError("El miembro ya tiene el máximo de libros prestados (5)")
+    
+    # Realizar préstamo
+    book.available = False
+    book.borrowed_by = member_id
+    book.borrowed_at = datetime.now().isoformat()
+    member.borrowed_books.append(book_id)
+    
+    await ctx.info(f"Préstamo completado: {book.title} → {member.name}")
+    
+    return {
+        "success": True,
+        "book": book.model_dump(),
+        "member": member.name,
+        "borrowed_at": book.borrowed_at
+    }
+
+
+@mcp.tool()
+async def return_book(
+    book_id: str,
+    ctx: Context[ServerSession, None]
+) -> dict:
+    """Devuelve un libro prestado.
+    
+    Args:
+        book_id: ID del libro a devolver
+        ctx: Contexto MCP
+        
+    Returns:
+        Confirmación de devolución
+    """
+    await ctx.info(f"Procesando devolución: {book_id}")
+    
+    if book_id not in books_db:
+        raise ValueError(f"Libro '{book_id}' no encontrado")
+    
+    book = books_db[book_id]
+    
+    if book.available:
+        raise ValueError("Este libro no está prestado")
+    
+    member_id = book.borrowed_by
+    
+    if member_id and member_id in members_db:
+        member = members_db[member_id]
+        member.borrowed_books.remove(book_id)
+    
+    book.available = True
+    book.borrowed_by = None
+    book.borrowed_at = None
+    
+    await ctx.info(f"Devolución completada: {book.title}")
+    
+    return {
+        "success": True,
+        "book": book.model_dump(),
+        "returned_by": member_id
+    }
+
+
+# ============== RESOURCES ==============
+
+@mcp.resource("library://stats")
+def get_library_stats() -> str:
+    """Estadísticas de la biblioteca."""
+    total_books = len(books_db)
+    available_books = sum(1 for b in books_db.values() if b.available)
+    total_members = len(members_db)
+    
+    genres = {}
+    for book in books_db.values():
+        genres[book.genre] = genres.get(book.genre, 0) + 1
+    
+    stats = {
+        "total_books": total_books,
+        "available_books": available_books,
+        "borrowed_books": total_books - available_books,
+        "total_members": total_members,
+        "genres": genres
+    }
+    
+    return json.dumps(stats, indent=2)
+
+
+@mcp.resource("library://books/{book_id}")
+def get_book_resource(book_id: str) -> str:
+    """Resource para un libro específico."""
+    if book_id not in books_db:
+        return json.dumps({"error": "NOT_FOUND"})
+    return json.dumps(books_db[book_id].model_dump(), indent=2)
+
+
+@mcp.resource("library://members/{member_id}")
+def get_member_resource(member_id: str) -> str:
+    """Resource para un miembro específico."""
+    if member_id not in members_db:
+        return json.dumps({"error": "NOT_FOUND"})
+    return json.dumps(members_db[member_id].model_dump(), indent=2)
+
+
+@mcp.resource("library://genres")
+def list_genres() -> str:
+    """Lista de géneros disponibles."""
+    genres = sorted(set(b.genre for b in books_db.values()))
+    return json.dumps({"genres": genres}, indent=2)
+
+
+# ============== PROMPTS ==============
+
+from mcp.server.fastmcp.prompts import base
+
+@mcp.prompt()
+def recommend_books(genre: str, mood: str = "relaxing") -> list[base.Message]:
+    """Genera recomendaciones de libros.
+    
+    Args:
+        genre: Género preferido
+        mood: Estado de ánimo
+        
+    Returns:
+        Prompt para recomendaciones
+    """
+    available_in_genre = [
+        b.model_dump() for b in books_db.values()
+        if b.genre.lower() == genre.lower() and b.available
+    ]
+    
+    return [
+        base.SystemMessage(
+            "Eres un bibliotecario experto. Recomienda libros basándote "
+            "en el género y estado de ánimo del usuario."
+        ),
+        base.UserMessage(f"""
+        Busco recomendaciones de libros.
+        
+        Género: {genre}
+        Estado de ánimo: {mood}
+        
+        Libros disponibles en este género:
+        {json.dumps(available_in_genre, indent=2)}
+        
+        Por favor recomienda el más adecuado y explica por qué.
+        """)
+    ]
+
+
+@mcp.prompt()
+def analyze_reading(member_id: str) -> str:
+    """Analiza los hábitos de lectura de un miembro.
+    
+    Args:
+        member_id: ID del miembro
+        
+    Returns:
+        Prompt para análisis
+    """
+    member = members_db.get(member_id)
+    
+    if not member:
+        return f"No se encontró el miembro {member_id}"
+    
+    borrowed_details = []
+    for book_id in member.borrowed_books:
+        if book_id in books_db:
+            book = books_db[book_id]
+            borrowed_details.append({
+                "title": book.title,
+                "genre": book.genre
+            })
+    
+    return f"""
+    Analiza los hábitos de lectura de este miembro:
+    
+    Nombre: {member.name}
+    Libros actualmente prestados: {len(member.borrowed_books)}
+    Historial de géneros: {[b['genre'] for b in borrowed_details]}
+    
+    Proporciona:
+    1. Análisis de preferencias
+    2. Recomendaciones personalizadas
+    3. Estadísticas de lectura
+    """
+
+
+# ============== MAIN ==============
+
+if __name__ == "__main__":
+    print("📚 Iniciando servidor de biblioteca MCP...")
+    mcp.run(transport="streamable-http")
+----
+
+=== Cliente para la biblioteca
+
+[source,python]
+----
+# library_client.py
+"""
+Cliente MCP interactivo para la biblioteca.
+"""
+import asyncio
+import json
+from mcp import ClientSession
+from mcp.client.streamable_http import streamablehttp_client
+
+
+class LibraryClient:
+    """Cliente para el servidor de biblioteca."""
+    
+    def __init__(self, server_url: str = "http://localhost:8000/mcp"):
+        self.server_url = server_url
+        self.session: ClientSession = None
+    
+    async def connect(self):
+        """Conecta al servidor."""
+        self.read, self.write, self._get_session_id = await streamablehttp_client(
+            self.server_url
+        ).__aenter__()
+        
+        self.session = ClientSession(self.read, self.write)
+        await self.session.__aenter__()
+        await self.session.initialize()
+        
+        print(f"✓ Conectado a {self.server_url}")
+        
+        instructions = self.session.get_instructions()
+        if instructions:
+            print(f"\n📖 {instructions}\n")
+    
+    async def disconnect(self):
+        """Desconecta del servidor."""
+        if self.session:
+            await self.session.__aexit__(None, None, None)
+    
+    async def show_menu(self):
+        """Muestra el menú principal."""
+        print("\n" + "="*50)
+        print("📚 BIBLIOTECA MCP")
+        print("="*50)
+        print("1. Ver catálogo de libros")
+        print("2. Buscar libro")
+        print("3. Ver estadísticas")
+        print("4. Registrar miembro")
+        print("5. Prestar libro")
+        print("6. Devolver libro")
+        print("7. Ver miembros")
+        print("8. Recomendar libros")
+        print("0. Salir")
+        print("="*50)
+    
+    async def list_books(self):
+        """Lista libros."""
+        result = await self.session.call_tool("list_books", arguments={})
+        books = json.loads(result.content[0].text)
+        
+        print(f"\n📚 Catálogo ({len(books)} libros):")
+        for book in books:
+            status = "✅" if book["available"] else "❌"
+            print(f"  {status} [{book['id']}] {book['title']} - {book['author']}")
+    
+    async def search_books(self):
+        """Busca libros."""
+        query = input("Buscar: ")
+        result = await self.session.call_tool(
+            "search_books",
+            arguments={"query": query}
+        )
+        books = json.loads(result.content[0].text)
+        
+        if books:
+            print(f"\n🔍 Resultados ({len(books)}):")
+            for book in books:
+                print(f"  • {book['title']} - {book['author']}")
+        else:
+            print("\nNo se encontraron resultados")
+    
+    async def show_stats(self):
+        """Muestra estadísticas."""
+        content = await self.session.read_resource("library://stats")
+        stats = json.loads(content.contents[0].text)
+        
+        print("\n📊 Estadísticas:")
+        print(f"  Total libros: {stats['total_books']}")
+        print(f"  Disponibles: {stats['available_books']}")
+        print(f"  Prestados: {stats['borrowed_books']}")
+        print(f"  Miembros: {stats['total_members']}")
+        print(f"  Géneros: {', '.join(stats['genres'].keys())}")
+    
+    async def register_member(self):
+        """Registra un nuevo miembro."""
+        name = input("Nombre: ")
+        email = input("Email: ")
+        phone = input("Teléfono (opcional): ") or None
+        
+        result = await self.session.call_tool(
+            "create_member",
+            arguments={
+                "member": {
+                    "name": name,
+                    "email": email,
+                    "phone": phone
+                }
+            }
+        )
+        
+        if result.isError:
+            print(f"\n❌ Error: {result.content[0].text}")
+        else:
+            member = json.loads(result.content[0].text)
+            print(f"\n✅ Miembro registrado: {member['id']}")
+    
+    async def borrow_book(self):
+        """Presta un libro."""
+        book_id = input("ID del libro: ")
+        member_id = input("ID del miembro: ")
+        
+        result = await self.session.call_tool(
+            "borrow_book",
+            arguments={
+                "book_id": book_id,
+                "member_id": member_id
+            }
+        )
+        
+        if result.isError:
+            print(f"\n❌ Error: {result.content[0].text}")
+        else:
+            data = json.loads(result.content[0].text)
+            print(f"\n✅ Préstamo realizado:")
+            print(f"  Libro: {data['book']['title']}")
+            print(f"  Miembro: {data['member']}")
+    
+    async def return_book(self):
+        """Devuelve un libro."""
+        book_id = input("ID del libro a devolver: ")
+        
+        result = await self.session.call_tool(
+            "return_book",
+            arguments={"book_id": book_id}
+        )
+        
+        if result.isError:
+            print(f"\n❌ Error: {result.content[0].text}")
+        else:
+            data = json.loads(result.content[0].text)
+            print(f"\n✅ Libro devuelto: {data['book']['title']}")
+    
+    async def list_members(self):
+        """Lista miembros."""
+        result = await self.session.call_tool("list_members", arguments={})
+        members = json.loads(result.content[0].text)
+        
+        print(f"\n👥 Miembros ({len(members)}):")
+        for member in members:
+            borrowed = len(member['borrowed_books'])
+            print(f"  • [{member['id']}] {member['name']} ({borrowed} libros)")
+    
+    async def get_recommendation(self):
+        """Obtiene recomendaciones."""
+        genre = input("Género: ")
+        mood = input("Estado de ánimo (opcional): ") or "relaxing"
+        
+        result = await self.session.get_prompt(
+            "recommend_books",
+            arguments={"genre": genre, "mood": mood}
+        )
+        
+        print("\n💡 Recomendación:")
+        for msg in result.messages:
+            if hasattr(msg.content, 'text'):
+                print(msg.content.text)
+    
+    async def run(self):
+        """Ejecuta el cliente."""
+        await self.connect()
+        
+        while True:
+            await self.show_menu()
+            choice = input("\nOpción: ")
+            
+            if choice == "0":
+                break
+            elif choice == "1":
+                await self.list_books()
+            elif choice == "2":
+                await self.search_books()
+            elif choice == "3":
+                await self.show_stats()
+            elif choice == "4":
+                await self.register_member()
+            elif choice == "5":
+                await self.borrow_book()
+            elif choice == "6":
+                await self.return_book()
+            elif choice == "7":
+                await self.list_members()
+            elif choice == "8":
+                await self.get_recommendation()
+            else:
+                print("Opción inválida")
+        
+        await self.disconnect()
+        print("\n¡Hasta pronto!")
+
+
+async def main():
+    client = LibraryClient()
+    await client.run()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+----
+
+== Parte 9: Despliegue
+
+=== Docker
+
+[source,dockerfile]
+----
+# Dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Instalar dependencias
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar código
+COPY . .
+
+# Exponer puerto
+EXPOSE 8000
+
+# Comando por defecto
+CMD ["python", "library_server.py"]
+----
+
+[source,text]
+----
+# requirements.txt
+mcp[cli]>=1.0.0
+pydantic>=2.0.0
+----
+
+[source,bash]
+----
+# Construir imagen
+docker build -t mcp-library .
+
+# Ejecutar contenedor
+docker run -p 8000:8000 mcp-library
+----
+
+=== Docker Compose
+
+[source,yaml]
+----
+# docker-compose.yml
+version: '3.8'
+
+services:
+  mcp-server:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - MCP_HOST=0.0.0.0
+      - MCP_PORT=8000
+    restart: unless-stopped
+----
+
+== Apéndice: Referencia Rápida
+
+=== Decoradores FastMCP
+
+[cols="1,3"]
+|===
+| Decorador | Uso
+
+| `@mcp.tool()`
+| Define una herramienta invocable
+
+| `@mcp.resource("uri")`
+| Define un resource estático
+
+| `@mcp.resource("uri://{param}")`
+| Define un resource dinámico
+
+| `@mcp.prompt()`
+| Define un prompt reutilizable
+|===
+
+=== Tipos de Retorno
+
+[cols="1,3"]
+|===
+| Tipo | Comportamiento
+
+| `str`
+| Texto directo
+
+| `int`, `float`, `bool`
+| Wrapp en `{"result": value}`
+
+| `dict`
+| Dict como JSON
+
+| `BaseModel` (Pydantic)
+| Structured output con validación
+
+| `TypedDict`
+| Structured output
+
+| `list[T]`
+| Wrapp en `{"result": [...]}`
+|===
+
+=== Transportes
+
+[cols="1,2,2"]
+|===
+| Transport | Uso | Comando
+
+| stdio
+| Claude Desktop
+| `mcp.run()`
+
+| streamable-http
+| Servidores remotos
+| `mcp.run(transport="streamable-http")`
+|===
+
+=== Contexto
+
+[cols="1,3"]
+|===
+| Método | Descripción
+
+| `ctx.mcpReq.log(level, data)`
+| Enviar log al cliente
+
+| `ctx.mcpReq.report_progress(progress, total, message)`
+| Reportar progreso
+
+| `ctx.mcpReq.request_sampling(messages)`
+| Pedir generación de texto
+
+| `ctx.mcpReq.elicit_input(params)`
+| Pedir input al usuario
+|===
+
+== Recursos Adicionales
+
+* https://github.com/modelcontextprotocol/python-sdk[SDK Python Oficial]
+* https://modelcontextprotocol.io[Documentación MCP]
+* https://spec.modelcontextprotocol.io[Especificación MCP]
+* https://docs.anthropic.com/en/docs/claude-code[Claude Code Docs]

@@ -1,0 +1,12 @@
+{
+  "name": "webmcp-hibrido-demo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "WebMCP hibrido demo client in TypeScript",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}

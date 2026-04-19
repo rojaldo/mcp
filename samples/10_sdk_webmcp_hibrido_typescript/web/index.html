@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebMCP Hibrido Demo</title>
+    <style>
+      :root { --bg: #0f172a; --panel: #111827; --panel-2: #1f2937; --text: #e5e7eb; --accent: #22d3ee; }
+      body { margin: 0; font-family: "IBM Plex Sans", "Segoe UI", sans-serif; background: radial-gradient(circle at top left, #1e293b, var(--bg)); color: var(--text); }
+      .container { max-width: 900px; margin: 32px auto; padding: 0 16px; }
+      .panel { background: linear-gradient(180deg, var(--panel), var(--panel-2)); border: 1px solid #334155; border-radius: 12px; padding: 16px; }
+      h1 { margin-top: 0; }
+      button { background: var(--accent); color: #0f172a; border: 0; padding: 10px 12px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+      code { background: #0b1220; border: 1px solid #334155; padding: 2px 6px; border-radius: 6px; }
+      #log { white-space: pre-wrap; background: #020617; border: 1px solid #334155; border-radius: 8px; padding: 12px; min-height: 180px; margin-top: 12px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="panel">
+        <h1>WebMCP Hibrido Demo (TypeScript)</h1>
+        <p>
+          Frontend: tools WebMCP en <code>navigator.modelContext</code>.
+          Backend: servidor MCP Python con <code>sync_cart</code>, <code>checkout</code>, <code>check_stock</code>.
+        </p>
+        <button id="register-btn">Register WebMCP tools</button>
+        <div id="log"></div>
+      </div>
+    </div>
+    <script type="module" src="/static/main.js"></script>
+  </body>
+</html>
