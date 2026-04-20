@@ -1,6 +1,6 @@
 # Diseño de Servicios MCP: Buenas Prácticas
 
-## Presentación Extensa para Desarrolladores
+## Presentación Extensa para Desarrolladores - Python + FastMCP
 
 ---
 
@@ -11,6 +11,8 @@
 ### Buenas Prácticas y Patrones de Arquitectura
 
 ---
+
+**Implementación en Python con FastMCP**
 
 **Duración estimada: 2-3 horas**
 
@@ -145,11 +147,11 @@ La IA no ve tu código. Solo ve el esquema JSON.
 
 **Mala descripción:**
 
-```json
-{
-  "name": "process",
-  "description": "Process the input"
-}
+```python
+@mcp.tool
+def process(data: str) -> str:
+    """Process the input."""
+    return "done"
 ```
 
 *¿Qué hace? ¿Qué devuelve? ¿Cuándo usarla?*
@@ -158,11 +160,19 @@ La IA no ve tu código. Solo ve el esquema JSON.
 
 **Buena descripción:**
 
-```json
-{
-  "name": "processPayment",
-  "description": "Procesa un pago con tarjeta. Recibe los datos de la tarjeta y el importe, devuelve el resultado de la transacción con ID de confirmación o mensaje de error."
-}
+```python
+@mcp.tool
+def process_payment(
+    card_number: str,
+    amount: float
+) -> dict:
+    """Procesa un pago con tarjeta.
+    
+    Recibe los datos de la tarjeta y el importe.
+    Devuelve el resultado de la transacción con 
+    ID de confirmación o mensaje de error.
+    """
+    return {"success": True, "transaction_id": "tx_123"}
 ```
 
 ---
@@ -181,28 +191,37 @@ La IA no ve tu código. Solo ve el esquema JSON.
 
 ---
 
-**Ejemplo completo:**
+**Ejemplo completo con FastMCP:**
 
-```json
-{
-  "name": "searchUsers",
-  "description": "Busca usuarios en el sistema por nombre o email. Devuelve una lista paginada de usuarios que coinciden con el criterio de búsqueda, ordenados por relevancia."
-}
+```python
+from fastmcp import FastMCP
+
+mcp = FastMCP("mi-servidor")
+
+@mcp.tool
+def search_users(
+    query: str,
+    limit: int = 20
+) -> list[dict]:
+    """Busca usuarios en el sistema por nombre o email.
+    
+    Devuelve una lista paginada de usuarios que coinciden
+    con el criterio de búsqueda, ordenados por relevancia.
+    
+    Args:
+        query: Texto a buscar (nombre o email)
+        limit: Número máximo de resultados (1-100)
+    
+    Returns:
+        Lista de usuarios con id, nombre y email
+    """
+    users = db.search_users(query, limit)
+    return users
 ```
 
 ---
 
-**Elementos:**
-
-- Verbo de acción (busca, crea, elimina, actualiza)
-- Objeto afectado (usuarios, pagos, pedidos)
-- Parámetros clave (nombre o email)
-- Tipo de respuesta (lista paginada)
-- Ordenamiento (por relevancia)
-
----
-
-# Claridad - inputSchema Descriptivo
+# Claridad - Parámetros Descriptivos
 
 ## Cada campo explicado
 
@@ -210,36 +229,37 @@ La IA no ve tu código. Solo ve el esquema JSON.
 
 **Malo:**
 
-```json
-{
-  "properties": {
-    "q": { "type": "string" },
-    "n": { "type": "integer" }
-  }
-}
+```python
+@mcp.tool
+def search(q: str, n: int) -> list:
+    """Search."""
+    return []
 ```
 
 ---
 
 **Bueno:**
 
-```json
-{
-  "properties": {
-    "query": {
-      "type": "string",
-      "description": "Texto a buscar. Puede ser nombre completo, email parcial o nombre de usuario."
-    },
-    "limit": {
-      "type": "integer",
-      "minimum": 1,
-      "maximum": 100,
-      "default": 20,
-      "description": "Número máximo de resultados a devolver (1-100)."
-    }
-  },
-  "required": ["query"]
-}
+```python
+from typing import Annotated
+from pydantic import Field
+
+@mcp.tool
+def search_users(
+    query: Annotated[str, Field(
+        description="Texto a buscar. Puede ser nombre completo, "
+                    "email parcial o nombre de usuario.",
+        min_length=1,
+        max_length=200
+    )],
+    limit: Annotated[int, Field(
+        description="Número máximo de resultados a devolver (1-100).",
+        ge=1,
+        le=100
+    )] = 20
+) -> list[dict]:
+    """Busca usuarios en el sistema por nombre o email."""
+    return db.search_users(query, limit)
 ```
 
 ---
@@ -252,19 +272,26 @@ La IA no ve tu código. Solo ve el esquema JSON.
 
 **Añadir ejemplos para casos complejos:**
 
-```json
-{
-  "name": "scheduleTask",
-  "description": "Programa una tarea para ejecutarse en el futuro. El tiempo puede ser absoluto (ISO 8601) o relativo (ej: '5m', '2h', '1d').",
-  "inputSchema": {
-    "properties": {
-      "time": {
-        "type": "string",
-        "description": "Tiempo de ejecución. Ejemplos: '2026-04-18T15:00:00Z', '30m', '2h', '1d'"
-      }
-    }
-  }
-}
+```python
+@mcp.tool
+def schedule_task(
+    time: str,
+    task: str
+) -> dict:
+    """Programa una tarea para ejecutarse en el futuro.
+    
+    El tiempo puede ser absoluto (ISO 8601) o relativo.
+    
+    Ejemplos de tiempo:
+    - Absoluto: '2026-04-18T15:00:00Z'
+    - Relativo: '30m', '2h', '1d'
+    
+    Args:
+        time: Tiempo de ejecución
+        task: Descripción de la tarea
+    """
+    scheduled_time = parse_time(time)
+    return schedule(scheduled_time, task)
 ```
 
 ---
@@ -287,15 +314,18 @@ Si el formato es complejo, incluye ejemplos en la descripción.
 
 **Inconsistente:**
 
-```json
-// Tool 1
-{ "name": "getUser", "inputSchema": { "properties": { "userId": "string" } } }
+```python
+# Tool 1
+@mcp.tool
+def get_user(userId: str) -> dict: ...
 
-// Tool 2
-{ "name": "deleteUser", "inputSchema": { "properties": { "id": "string" } } }
+# Tool 2
+@mcp.tool
+def delete_user(id: str) -> dict: ...
 
-// Tool 3
-{ "name": "updateUser", "inputSchema": { "properties": { "user_id": "string" } } }
+# Tool 3
+@mcp.tool
+def update_user(user_id: str) -> dict: ...
 ```
 
 *¿userId, id o user_id?*
@@ -312,12 +342,12 @@ Si el formato es complejo, incluye ejemplos en la descripción.
 
 | Acción | Patrón | Ejemplo |
 |--------|--------|---------|
-| Leer uno | `get<Entidad>` | `getUser`, `getOrder` |
-| Leer varios | `list<Entidad>s` | `listUsers`, `listOrders` |
-| Crear | `create<Entidad>` | `createUser`, `createOrder` |
-| Actualizar | `update<Entidad>` | `updateUser`, `updateOrder` |
-| Eliminar | `delete<Entidad>` | `deleteUser`, `deleteOrder` |
-| Buscar | `search<Entidad>s` | `searchUsers`, `searchOrders` |
+| Leer uno | `get_<entidad>` | `get_user`, `get_order` |
+| Leer varios | `list_<entidad>s` | `list_users`, `list_orders` |
+| Crear | `create_<entidad>` | `create_user`, `create_order` |
+| Actualizar | `update_<entidad>` | `update_user`, `update_order` |
+| Eliminar | `delete_<entidad>` | `delete_user`, `delete_order` |
+| Buscar | `search_<entidad>s` | `search_users`, `search_orders` |
 
 ---
 
@@ -325,10 +355,10 @@ Si el formato es complejo, incluye ejemplos en la descripción.
 
 | Uso | Patrón | Ejemplo |
 |-----|--------|---------|
-| ID único | `<entidad>Id` | `userId`, `orderId` |
+| ID único | `<entidad>_id` | `user_id`, `order_id` |
 | Límite | `limit` | `limit` |
 | Desplazamiento | `offset` | `offset` |
-| Filtros | `<campo>Filter` | `statusFilter` |
+| Filtros | `<campo>_filter` | `status_filter` |
 
 ---
 
@@ -340,33 +370,41 @@ Si el formato es complejo, incluye ejemplos en la descripción.
 
 **Estructura estándar:**
 
-```json
-{
-  "success": true,
-  "data": { ... },
-  "metadata": {
-    "timestamp": "2026-04-18T15:00:00Z",
-    "version": "1.0"
-  }
-}
-```
+```python
+from dataclasses import dataclass
+from typing import Generic, TypeVar
 
----
+T = TypeVar('T')
 
-**Para errores:**
+@dataclass
+class MCPResponse(Generic[T]):
+    success: bool
+    data: T | None = None
+    error: dict | None = None
+    metadata: dict | None = None
 
-```json
-{
-  "success": false,
-  "error": {
-    "code": "USER_NOT_FOUND",
-    "message": "Usuario no encontrado",
-    "details": {
-      "userId": "123",
-      "suggestion": "Verifique que el ID sea correcto"
+# Uso
+@mcp.tool
+def get_user(user_id: str) -> dict:
+    """Obtiene un usuario por ID."""
+    user = db.get_user(user_id)
+    
+    if not user:
+        return {
+            "success": False,
+            "error": {
+                "code": "USER_NOT_FOUND",
+                "message": f"Usuario {user_id} no encontrado"
+            }
+        }
+    
+    return {
+        "success": True,
+        "data": user,
+        "metadata": {
+            "timestamp": datetime.now().isoformat()
+        }
     }
-  }
-}
 ```
 
 ---
@@ -379,29 +417,32 @@ Si el formato es complejo, incluye ejemplos en la descripción.
 
 **Entrada:**
 
-```json
-{
-  "properties": {
-    "limit": { "type": "integer", "default": 20, "maximum": 100 },
-    "offset": { "type": "integer", "default": 0 },
-    "cursor": { "type": "string", "description": "Token de paginación del resultado anterior" }
-  }
-}
+```python
+@mcp.tool
+def list_users(
+    limit: Annotated[int, Field(ge=1, le=100)] = 20,
+    offset: Annotated[int, Field(ge=0)] = 0,
+    cursor: Annotated[str | None, Field(
+        description="Token de paginación del resultado anterior"
+    )] = None
+) -> dict:
+    """Lista usuarios con paginación."""
+    # ...
 ```
 
 ---
 
 **Salida:**
 
-```json
-{
-  "success": true,
-  "data": {
-    "items": [...],
-    "total": 150,
-    "hasMore": true,
-    "nextCursor": "eyJvZmZzZXQiOjIwfQ=="
-  }
+```python
+return {
+    "success": True,
+    "data": {
+        "items": users,
+        "total": 150,
+        "has_more": True,
+        "next_cursor": "eyJvZmZzZXQiOjIwfQ=="
+    }
 }
 ```
 
@@ -437,34 +478,78 @@ Un error en una tool no debe interrumpir la sesión del usuario.
 
 **Validar antes de procesar:**
 
-```javascript
-async function execute(input) {
-  // Validación temprana
-  if (!input.userId) {
-    return {
-      success: false,
-      error: {
-        code: "MISSING_PARAMETER",
-        message: "userId es obligatorio",
-        field: "userId"
-      }
-    };
-  }
+```python
+import re
+from typing import Annotated
+from pydantic import Field, validate_call
 
-  if (!input.userId.match(/^usr_[a-zA-Z0-9]+$/)) {
-    return {
-      success: false,
-      error: {
-        code: "INVALID_FORMAT",
-        message: "userId debe tener formato usr_xxx",
-        field: "userId",
-        received: input.userId
-      }
-    };
-  }
+@mcp.tool
+def get_user(
+    user_id: Annotated[str, Field(
+        pattern=r"^usr_[a-zA-Z0-9]+$",
+        description="ID del usuario (formato: usr_xxx)"
+    )]
+) -> dict:
+    """Obtiene un usuario por su ID."""
+    # La validación la hace Pydantic automáticamente
+    
+    user = db.get_user(user_id)
+    
+    if not user:
+        return {
+            "success": False,
+            "error": {
+                "code": "USER_NOT_FOUND",
+                "message": f"Usuario {user_id} no encontrado"
+            }
+        }
+    
+    return {"success": True, "data": user}
+```
 
-  // Continuar con la lógica...
-}
+---
+
+# Robustez - Validación Manual
+
+## Cuando Pydantic no es suficiente
+
+---
+
+```python
+from pydantic import BaseModel, field_validator
+import re
+
+class UserInput(BaseModel):
+    user_id: str
+    
+    @field_validator('user_id')
+    @classmethod
+    def validate_user_id(cls, v):
+        if not v:
+            raise ValueError('user_id es obligatorio')
+        if not re.match(r'^usr_[a-zA-Z0-9]+$', v):
+            raise ValueError(
+                'user_id debe tener formato usr_xxx'
+            )
+        return v
+
+@mcp.tool
+def get_user(user_id: str) -> dict:
+    """Obtiene un usuario por ID."""
+    try:
+        # Validar con Pydantic
+        validated = UserInput(user_id=user_id)
+    except ValueError as e:
+        return {
+            "success": False,
+            "error": {
+                "code": "VALIDATION_ERROR",
+                "message": str(e),
+                "field": "user_id"
+            }
+        }
+    
+    # Procesar...
 ```
 
 ---
@@ -477,47 +562,61 @@ async function execute(input) {
 
 **Incorrecto:**
 
-```javascript
-async function execute(input) {
-  const user = await db.getUser(input.userId);  // Puede lanzar
-  return { success: true, data: user };
-}
+```python
+@mcp.tool
+def get_user(user_id: str) -> dict:
+    user = db.get_user(user_id)  # Puede lanzar excepción
+    return {"success": True, "data": user}
 ```
 
 ---
 
 **Correcto:**
 
-```javascript
-async function execute(input) {
-  try {
-    const user = await db.getUser(input.userId);
+```python
+import logging
+import uuid
+
+logger = logging.getLogger(__name__)
+
+@mcp.tool
+def get_user(user_id: str) -> dict:
+    """Obtiene un usuario por ID."""
+    request_id = str(uuid.uuid4())[:8]
     
-    if (!user) {
-      return {
-        success: false,
-        error: {
-          code: "USER_NOT_FOUND",
-          message: `Usuario ${input.userId} no encontrado`
+    try:
+        user = db.get_user(user_id)
+        
+        if not user:
+            return {
+                "success": False,
+                "error": {
+                    "code": "USER_NOT_FOUND",
+                    "message": f"Usuario {user_id} no encontrado",
+                    "request_id": request_id
+                }
+            }
+        
+        return {"success": True, "data": user}
+        
+    except DatabaseError as e:
+        logger.error(
+            "Database error",
+            extra={
+                "request_id": request_id,
+                "error": str(e),
+                "user_id": user_id
+            }
+        )
+        
+        return {
+            "success": False,
+            "error": {
+                "code": "INTERNAL_ERROR",
+                "message": "Error interno. Inténtelo más tarde.",
+                "request_id": request_id
+            }
         }
-      };
-    }
-    
-    return { success: true, data: user };
-    
-  } catch (dbError) {
-    logger.error("Database error", { error: dbError, userId: input.userId });
-    
-    return {
-      success: false,
-      error: {
-        code: "INTERNAL_ERROR",
-        message: "Error interno. Por favor, inténtelo más tarde.",
-        requestId: generateRequestId()
-      }
-    };
-  }
-}
 ```
 
 ---
@@ -530,13 +629,13 @@ async function execute(input) {
 
 **Error sin sugerencia:**
 
-```json
-{
-  "success": false,
-  "error": {
-    "code": "INSUFFICIENT_STOCK",
-    "message": "No hay suficiente stock"
-  }
+```python
+return {
+    "success": False,
+    "error": {
+        "code": "INSUFFICIENT_STOCK",
+        "message": "No hay suficiente stock"
+    }
 }
 ```
 
@@ -544,19 +643,33 @@ async function execute(input) {
 
 **Error con sugerencia:**
 
-```json
-{
-  "success": false,
-  "error": {
-    "code": "INSUFFICIENT_STOCK",
-    "message": "No hay suficiente stock del producto",
-    "details": {
-      "requested": 10,
-      "available": 3,
-      "suggestion": "Puede añadir 3 unidades ahora o esperar a que se reponga el stock"
-    }
-  }
-}
+```python
+@mcp.tool
+def add_to_cart(
+    product_id: str,
+    quantity: int
+) -> dict:
+    """Añade un producto al carrito."""
+    stock = get_stock(product_id)
+    
+    if stock < quantity:
+        return {
+            "success": False,
+            "error": {
+                "code": "INSUFFICIENT_STOCK",
+                "message": "No hay suficiente stock del producto",
+                "details": {
+                    "requested": quantity,
+                    "available": stock,
+                    "suggestion": (
+                        f"Puede añadir {stock} unidades ahora "
+                        "o esperar reposición"
+                    )
+                }
+            }
+        }
+    
+    # Procesar...
 ```
 
 ---
@@ -569,382 +682,482 @@ async function execute(input) {
 
 ---
 
-# Arquitectura de un Servidor MCP
+# Arquitectura de un Servidor MCP con FastMCP
 
 ## Componentes principales
 
 ---
 
-```
-┌─────────────────────────────────────────────────┐
-│                  MCP SERVER                      │
-├─────────────────────────────────────────────────┤
-│                                                  │
-│  ┌─────────────┐  ┌─────────────┐  ┌──────────┐ │
-│  │   Router    │  │  Validator  │  │  Logger  │ │
-│  └─────────────┘  └─────────────┘  └──────────┘ │
-│                                                  │
-│  ┌─────────────────────────────────────────────┐│
-│  │              Tool Registry                   ││
-│  │  ┌───────┐ ┌───────┐ ┌───────┐ ┌───────┐   ││
-│  │  │ Tool  │ │ Tool  │ │ Tool  │ │ Tool  │   ││
-│  │  │   A   │ │   B   │ │   C   │ │   D   │   ││
-│  │  └───────┘ └───────┘ └───────┘ └───────┘   ││
-│  └─────────────────────────────────────────────┘│
-│                                                  │
-│  ┌─────────────────────────────────────────────┐│
-│  │           Resource Registry                  ││
-│  └─────────────────────────────────────────────┘│
-│                                                  │
-│  ┌─────────────────────────────────────────────┐│
-│  │           Prompt Registry                    ││
-│  └─────────────────────────────────────────────┘│
-│                                                  │
-├─────────────────────────────────────────────────┤
-│              Transport Layer                     │
-│         (STDIO / HTTP / WebSocket)              │
-└─────────────────────────────────────────────────┘
+```python
+# server.py - Estructura completa
+from fastmcp import FastMCP
+
+# Crear servidor
+mcp = FastMCP(
+    "mi-servidor",
+    version="1.0.0",
+    description="Servidor MCP para gestión de usuarios"
+)
+
+# Registrar tools
+from tools import users, orders, products
+
+# Tools se registran automáticamente al importar
+# o usar mcp.add_tool() explícitamente
+
+# Configurar logging
+import logging
+logging.basicConfig(level=logging.INFO)
+
+# Ejecutar servidor
+if __name__ == "__main__":
+    mcp.run()
 ```
 
 ---
 
-# Transport Layer
+# Arquitectura Modular
 
-## Opciones y consideraciones
-
----
-
-### STDIO
-
-**Uso:** Herramientas locales, CLIs
-
-**Ventajas:**
-- Simplicidad
-- Sin configuración de red
-- Ideal para desarrollo
-
-**Desventajas:**
-- Solo un cliente por proceso
-- No apto para producción multi-cliente
+## Organización de archivos
 
 ---
 
-### HTTP + SSE
-
-**Uso:** Servicios remotos, producción
-
-**Ventajas:**
-- Múltiples clientes
-- Depuración sencilla
-- Compatible con proxies
-
-**Desventajas:**
-- Requiere servidor HTTP
-- Más complejo
-
----
-
-### WebSocket
-
-**Uso:** Tiempo real, bidireccional
-
-**Ventajas:**
-- Comunicación bidireccional
-- Menor latencia
-- Ideal para notificaciones
-
-**Desventajas:**
-- Más complejo de implementar
-- Requiere keepalive
-
----
-
-# Patrón de Registro
-
-## Cómo organizar las tools
-
----
-
-**Opción 1: Registro directo**
-
-```javascript
-server.addTool({
-  name: "getUser",
-  // ... definición
-});
-
-server.addTool({
-  name: "createUser",
-  // ... definición
-});
+```
+mi_servidor_mcp/
+├── server.py           # Punto de entrada
+├── tools/
+│   ├── __init__.py
+│   ├── users.py        # Tools de usuarios
+│   ├── orders.py       # Tools de pedidos
+│   └── products.py     # Tools de productos
+├── resources/
+│   ├── __init__.py
+│   ├── configs.py      # Resources de configuración
+│   └── docs.py         # Resources de documentación
+├── prompts/
+│   ├── __init__.py
+│   └── templates.py    # Prompts predefinidos
+├── models/
+│   ├── __init__.py
+│   ├── user.py         # Modelos Pydantic
+│   └── order.py
+├── validators/
+│   ├── __init__.py
+│   └── common.py       # Validadores reutilizables
+├── errors/
+│   ├── __init__.py
+│   └── handlers.py      # Manejo de errores
+└── utils/
+    ├── __init__.py
+    ├── cache.py        # Sistema de caché
+    └── logging.py      # Utilidades de logging
 ```
 
 ---
 
-**Opción 2: Módulos organizados**
+# Tools Modulares
 
-```javascript
-// tools/users.js
-export const userTools = [
-  { name: "getUser", ... },
-  { name: "createUser", ... },
-  { name: "updateUser", ... },
-  { name: "deleteUser", ... },
-  { name: "listUsers", ... }
-];
+## Separar por dominio
 
-// tools/orders.js
-export const orderTools = [
-  { name: "getOrder", ... },
-  { name: "createOrder", ... },
-  // ...
-];
+---
 
-// server.js
-import { userTools } from "./tools/users.js";
-import { orderTools } from "./tools/orders.js";
+```python
+# tools/users.py
+from fastmcp import FastMCP
+from models.user import User, UserCreate, UserUpdate
+from errors.handlers import MCPError, to_response
 
-[...userTools, ...orderTools].forEach(tool => server.addTool(tool));
+# Crear sub-aplicación o importar mcp principal
+mcp = FastMCP.get_instance()  # O pasar como parámetro
+
+@mcp.tool
+def get_user(user_id: str) -> dict:
+    """Obtiene un usuario por ID."""
+    try:
+        user = db.get_user(user_id)
+        if not user:
+            raise MCPError("NOT_FOUND", f"Usuario {user_id} no encontrado")
+        return {"success": True, "data": user}
+    except MCPError as e:
+        return to_response(e)
+
+@mcp.tool
+def create_user(user: UserCreate) -> dict:
+    """Crea un nuevo usuario."""
+    # ...
+    
+@mcp.tool
+def update_user(user_id: str, updates: UserUpdate) -> dict:
+    """Actualiza un usuario existente."""
+    # ...
+
+@mcp.tool
+def delete_user(user_id: str) -> dict:
+    """Elimina un usuario."""
+    # ...
+
+@mcp.tool
+def list_users(limit: int = 20, offset: int = 0) -> dict:
+    """Lista usuarios con paginación."""
+    # ...
 ```
 
 ---
 
-# Patrón de Validación
+# Patrón de Validación Centralizada
 
-## Centralizar la lógica de validación
+## Validadores reutilizables
 
 ---
 
-**Validador reutilizable:**
+```python
+# validators/common.py
+from typing import Any
+import re
 
-```javascript
-// validators/common.js
-export const validators = {
-  required: (field, value) => {
-    if (!value) {
-      return { valid: false, error: `${field} es obligatorio` };
-    }
-    return { valid: true };
-  },
-  
-  pattern: (field, value, regex, message) => {
-    if (!regex.test(value)) {
-      return { valid: false, error: message };
-    }
-    return { valid: true };
-  },
-  
-  range: (field, value, min, max) => {
-    if (value < min || value > max) {
-      return { valid: false, error: `${field} debe estar entre ${min} y ${max}` };
-    }
-    return { valid: true };
-  }
-};
+def validate_required(field: str, value: Any) -> tuple[bool, str | None]:
+    """Valida que un campo no esté vacío."""
+    if not value:
+        return False, f"{field} es obligatorio"
+    return True, None
+
+def validate_pattern(
+    field: str, 
+    value: str, 
+    pattern: str, 
+    message: str
+) -> tuple[bool, str | None]:
+    """Valida que un campo coincida con un patrón."""
+    if not re.match(pattern, value):
+        return False, message
+    return True, None
+
+def validate_range(
+    field: str,
+    value: int | float,
+    min_val: int | float,
+    max_val: int | float
+) -> tuple[bool, str | None]:
+    """Valida que un valor esté en un rango."""
+    if value < min_val or value > max_val:
+        return False, f"{field} debe estar entre {min_val} y {max_val}"
+    return True, None
+
+def validate_email(field: str, value: str) -> tuple[bool, str | None]:
+    """Valida formato de email."""
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if not re.match(pattern, value):
+        return False, f"{field} no tiene formato de email válido"
+    return True, None
 ```
 
 ---
 
-**Uso en tool:**
+# Uso de Validadores
 
-```javascript
-import { validators } from "./validators/common.js";
+---
 
-async function execute(input) {
-  // Validación
-  const validations = [
-    validators.required("userId", input.userId),
-    validators.pattern("userId", input.userId, /^usr_/, "userId debe empezar por usr_"),
-    validators.range("limit", input.limit, 1, 100)
-  ];
-  
-  for (const v of validations) {
-    if (!v.valid) {
-      return { success: false, error: { code: "VALIDATION_ERROR", message: v.error } };
-    }
-  }
-  
-  // Procesar...
-}
+```python
+from validators.common import (
+    validate_required,
+    validate_pattern,
+    validate_range
+)
+
+@mcp.tool
+def search_users(
+    query: str,
+    limit: int = 20
+) -> dict:
+    """Busca usuarios con validación manual."""
+    
+    errors = []
+    
+    # Validar requerido
+    valid, error = validate_required("query", query)
+    if not valid:
+        errors.append({"field": "query", "message": error})
+    
+    # Validar patrón
+    valid, error = validate_pattern(
+        "query", query,
+        r'^[a-zA-Z0-9\s]+$',
+        "query solo puede contener letras, números y espacios"
+    )
+    if not valid:
+        errors.append({"field": "query", "message": error})
+    
+    # Validar rango
+    valid, error = validate_range("limit", limit, 1, 100)
+    if not valid:
+        errors.append({"field": "limit", "message": error})
+    
+    if errors:
+        return {
+            "success": False,
+            "error": {
+                "code": "VALIDATION_ERROR",
+                "message": "Errores de validación",
+                "details": errors
+            }
+        }
+    
+    # Procesar...
 ```
 
 ---
 
 # Patrón de Error Handler
 
-## Centralizar manejo de errores
+## Clases de error centralizadas
 
 ---
 
-```javascript
-// errors/index.js
-export class MCPError extends Error {
-  constructor(code, message, details = {}) {
-    super(message);
-    this.code = code;
-    this.details = details;
-  }
-}
+```python
+# errors/handlers.py
+from dataclasses import dataclass
+from typing import Any
+import uuid
 
-export const Errors = {
-  NOT_FOUND: (resource, id) => new MCPError(
-    "NOT_FOUND",
-    `${resource} no encontrado`,
-    { resource, id }
-  ),
-  
-  INVALID_INPUT: (field, reason) => new MCPError(
-    "INVALID_INPUT",
-    `Campo ${field} inválido: ${reason}`,
-    { field, reason }
-  ),
-  
-  UNAUTHORIZED: (action) => new MCPError(
-    "UNAUTHORIZED",
-    `No autorizado para ${action}`,
-    { action }
-  ),
-  
-  INTERNAL: (requestId) => new MCPError(
-    "INTERNAL_ERROR",
-    "Error interno",
-    { requestId }
-  )
-};
+@dataclass
+class MCPError(Exception):
+    """Error estructurado para MCP."""
+    code: str
+    message: str
+    details: dict[str, Any] | None = None
+    request_id: str | None = None
+    
+    def __post_init__(self):
+        if self.request_id is None:
+            self.request_id = str(uuid.uuid4())[:8]
 
-// Helper para convertir a respuesta
-export const toErrorResponse = (error) => {
-  if (error instanceof MCPError) {
+class Errors:
+    """Factory de errores comunes."""
+    
+    @staticmethod
+    def not_found(resource: str, identifier: str) -> MCPError:
+        return MCPError(
+            "NOT_FOUND",
+            f"{resource} no encontrado",
+            {"resource": resource, "identifier": identifier}
+        )
+    
+    @staticmethod
+    def invalid_input(field: str, reason: str) -> MCPError:
+        return MCPError(
+            "INVALID_INPUT",
+            f"Campo {field} inválido: {reason}",
+            {"field": field, "reason": reason}
+        )
+    
+    @staticmethod
+    def unauthorized(action: str) -> MCPError:
+        return MCPError(
+            "UNAUTHORIZED",
+            f"No autorizado para {action}",
+            {"action": action}
+        )
+    
+    @staticmethod
+    def forbidden(
+        permission: str,
+        suggestion: str | None = None
+    ) -> MCPError:
+        return MCPError(
+            "FORBIDDEN",
+            "No tiene permisos para esta operación",
+            {
+                "required_permission": permission,
+                "suggestion": suggestion
+            }
+        )
+    
+    @staticmethod
+    def internal(message: str = "Error interno") -> MCPError:
+        return MCPError("INTERNAL_ERROR", message)
+
+def to_response(error: MCPError) -> dict:
+    """Convierte un MCPError a respuesta JSON."""
     return {
-      success: false,
-      error: {
-        code: error.code,
-        message: error.message,
-        details: error.details
-      }
-    };
-  }
-  return {
-    success: false,
-    error: {
-      code: "INTERNAL_ERROR",
-      message: "Error inesperado"
+        "success": False,
+        "error": {
+            "code": error.code,
+            "message": error.message,
+            "details": error.details,
+            "request_id": error.request_id
+        }
     }
-  };
-};
 ```
 
 ---
 
-# Patrón de Error Handler - Uso
+# Uso del Error Handler
 
 ---
 
-```javascript
-import { Errors, toErrorResponse } from "./errors/index.js";
+```python
+from errors.handlers import Errors, MCPError, to_response
+import logging
 
-async function execute(input) {
-  try {
-    // Validar
-    if (!input.userId) {
-      throw Errors.INVALID_INPUT("userId", "es obligatorio");
-    }
+logger = logging.getLogger(__name__)
+
+@mcp.tool
+def delete_user(user_id: str, context: dict | None = None) -> dict:
+    """Elimina un usuario del sistema."""
+    request_id = str(uuid.uuid4())[:8]
     
-    // Buscar
-    const user = await db.getUser(input.userId);
-    if (!user) {
-      throw Errors.NOT_FOUND("Usuario", input.userId);
-    }
-    
-    // Autorizar
-    if (!user.canAccess(input.resource)) {
-      throw Errors.UNAUTHORIZED("acceder a este recurso");
-    }
-    
-    return { success: true, data: user };
-    
-  } catch (error) {
-    logger.error("Tool execution failed", { error, input });
-    return toErrorResponse(error);
-  }
-}
+    try:
+        # Validar
+        if not user_id:
+            raise Errors.invalid_input("user_id", "es obligatorio")
+        
+        # Verificar permisos
+        if context and not context.get("user", {}).get("is_admin"):
+            raise Errors.forbidden(
+                "users:delete",
+                "Contacte al administrador"
+            )
+        
+        # Buscar usuario
+        user = db.get_user(user_id)
+        if not user:
+            raise Errors.not_found("Usuario", user_id)
+        
+        # Eliminar
+        db.delete_user(user_id)
+        
+        return {"success": True, "data": {"deleted": True}}
+        
+    except MCPError as e:
+        logger.error(f"MCP Error: {e.code}", extra={"request_id": request_id})
+        return to_response(e)
+        
+    except Exception as e:
+        logger.exception("Unexpected error", extra={"request_id": request_id})
+        return to_response(Errors.internal())
 ```
 
 ---
 
 # Patrón de Caché
 
-## Optimizar lecturas frecuentes
+## Sistema de caché simple
 
 ---
 
-```javascript
-// cache/index.js
-export class SimpleCache {
-  constructor(ttlMs = 60000) {
-    this.cache = new Map();
-    this.ttl = ttlMs;
-  }
-  
-  get(key) {
-    const entry = this.cache.get(key);
-    if (!entry) return null;
+```python
+# utils/cache.py
+from typing import Any
+from datetime import datetime, timedelta
+import threading
+
+class SimpleCache:
+    """Caché en memoria con TTL."""
     
-    if (Date.now() > entry.expires) {
-      this.cache.delete(key);
-      return null;
-    }
+    def __init__(self, default_ttl_seconds: int = 60):
+        self._cache: dict[str, tuple[Any, datetime]] = {}
+        self._lock = threading.Lock()
+        self._default_ttl = timedelta(seconds=default_ttl_seconds)
     
-    return entry.value;
-  }
-  
-  set(key, value) {
-    this.cache.set(key, {
-      value,
-      expires: Date.now() + this.ttl
-    });
-  }
-  
-  invalidate(pattern) {
-    for (const key of this.cache.keys()) {
-      if (key.includes(pattern)) {
-        this.cache.delete(key);
-      }
-    }
-  }
-}
+    def get(self, key: str) -> Any | None:
+        """Obtiene un valor del caché."""
+        with self._lock:
+            entry = self._cache.get(key)
+            if not entry:
+                return None
+            
+            value, expires_at = entry
+            if datetime.now() > expires_at:
+                del self._cache[key]
+                return None
+            
+            return value
+    
+    def set(self, key: str, value: Any, ttl_seconds: int | None = None) -> None:
+        """Guarda un valor en el caché."""
+        ttl = timedelta(seconds=ttl_seconds) if ttl_seconds else self._default_ttl
+        
+        with self._lock:
+            self._cache[key] = (value, datetime.now() + ttl)
+    
+    def delete(self, key: str) -> None:
+        """Elimina una entrada del caché."""
+        with self._lock:
+            self._cache.pop(key, None)
+    
+    def invalidate_pattern(self, pattern: str) -> None:
+        """Invalida todas las claves que contengan el patrón."""
+        with self._lock:
+            keys_to_delete = [
+                k for k in self._cache.keys() 
+                if pattern in k
+            ]
+            for key in keys_to_delete:
+                del self._cache[key]
+
+# Instancia global
+cache = SimpleCache(default_ttl_seconds=300)  # 5 minutos
 ```
 
 ---
 
-# Patrón de Caché - Uso
+# Uso del Caché
 
 ---
 
-```javascript
-const cache = new SimpleCache(5 * 60 * 1000); // 5 minutos
+```python
+from utils.cache import cache
 
-async function execute(input) {
-  const cacheKey = `user:${input.userId}`;
-  
-  // Intentar caché
-  const cached = cache.get(cacheKey);
-  if (cached) {
-    return { success: true, data: cached, fromCache: true };
-  }
-  
-  // Buscar en DB
-  const user = await db.getUser(input.userId);
-  
-  if (!user) {
-    return { success: false, error: { code: "NOT_FOUND" } };
-  }
-  
-  // Guardar en caché
-  cache.set(cacheKey, user);
-  
-  return { success: true, data: user, fromCache: false };
-}
+@mcp.tool
+def get_user(
+    user_id: str,
+    use_cache: bool = True
+) -> dict:
+    """Obtiene un usuario con caché opcional."""
+    
+    # Intentar caché
+    if use_cache:
+        cache_key = f"user:{user_id}"
+        cached = cache.get(cache_key)
+        if cached:
+            return {
+                "success": True,
+                "data": cached,
+                "from_cache": True
+            }
+    
+    # Buscar en DB
+    user = db.get_user(user_id)
+    
+    if not user:
+        return {
+            "success": False,
+            "error": {
+                "code": "NOT_FOUND",
+                "message": f"Usuario {user_id} no encontrado"
+            }
+        }
+    
+    # Guardar en caché
+    if use_cache:
+        cache.set(cache_key, user, ttl_seconds=60)
+    
+    return {
+        "success": True,
+        "data": user,
+        "from_cache": False
+    }
+
+# Invalidar cuando cambia
+@mcp.tool
+def update_user(user_id: str, updates: dict) -> dict:
+    """Actualiza un usuario."""
+    result = db.update_user(user_id, updates)
+    
+    # Invalidar caché
+    cache.invalidate_pattern(f"user:{user_id}")
+    
+    return {"success": True, "data": result}
 ```
 
 ---
@@ -955,84 +1168,119 @@ async function execute(input) {
 
 ---
 
-```javascript
-// ratelimit/index.js
-export class RateLimiter {
-  constructor(maxRequests = 100, windowMs = 60000) {
-    this.limits = new Map();
-    this.max = maxRequests;
-    this.window = windowMs;
-  }
-  
-  check(identifier) {
-    const now = Date.now();
-    const entry = this.limits.get(identifier);
+```python
+# utils/rate_limit.py
+from typing import Dict
+from datetime import datetime, timedelta
+import threading
+
+class RateLimiter:
+    """Rate limiter por ventana deslizante."""
     
-    if (!entry) {
-      this.limits.set(identifier, { count: 1, resetAt: now + this.window });
-      return { allowed: true, remaining: this.max - 1 };
-    }
+    def __init__(
+        self,
+        max_requests: int = 100,
+        window_seconds: int = 60
+    ):
+        self._limits: Dict[str, tuple[int, datetime]] = {}
+        self._lock = threading.Lock()
+        self._max = max_requests
+        self._window = timedelta(seconds=window_seconds)
     
-    if (now > entry.resetAt) {
-      entry.count = 1;
-      entry.resetAt = now + this.window;
-      return { allowed: true, remaining: this.max - 1 };
-    }
-    
-    if (entry.count >= this.max) {
-      return { 
-        allowed: false, 
-        remaining: 0,
-        resetAt: entry.resetAt 
-      };
-    }
-    
-    entry.count++;
-    return { allowed: true, remaining: this.max - entry.count };
-  }
-}
+    def check(self, identifier: str) -> dict:
+        """Verifica si una petición está permitida."""
+        now = datetime.now()
+        
+        with self._lock:
+            entry = self._limits.get(identifier)
+            
+            if not entry:
+                self._limits[identifier] = (1, now + self._window)
+                return {
+                    "allowed": True,
+                    "remaining": self._max - 1,
+                    "reset_at": now + self._window
+                }
+            
+            count, reset_at = entry
+            
+            # Ventana expirada - reiniciar
+            if now > reset_at:
+                self._limits[identifier] = (1, now + self._window)
+                return {
+                    "allowed": True,
+                    "remaining": self._max - 1,
+                    "reset_at": now + self._window
+                }
+            
+            # Límite excedido
+            if count >= self._max:
+                return {
+                    "allowed": False,
+                    "remaining": 0,
+                    "reset_at": reset_at
+                }
+            
+            # Incrementar contador
+            self._limits[identifier] = (count + 1, reset_at)
+            return {
+                "allowed": True,
+                "remaining": self._max - count - 1,
+                "reset_at": reset_at
+            }
+
+# Instancia global
+limiter = RateLimiter(max_requests=50, window_seconds=60)
 ```
 
 ---
 
-# Patrón de Rate Limiting - Uso
+# Uso del Rate Limiter
 
 ---
 
-```javascript
-const limiter = new RateLimiter(50, 60000); // 50 peticiones/min
+```python
+from utils.rate_limit import limiter
 
-server.addTool({
-  name: "searchUsers",
-  inputSchema: { ... },
-  execute: async (input, context) => {
-    // Obtener identificador (usuario o IP)
-    const identifier = context.user?.id || context.clientIp;
+@mcp.tool
+def search_users(
+    query: str,
+    limit: int = 20,
+    context: dict | None = None
+) -> dict:
+    """Busca usuarios con rate limiting."""
     
-    // Verificar rate limit
-    const limit = limiter.check(identifier);
+    # Obtener identificador
+    identifier = (
+        context.get("user", {}).get("id", "anonymous")
+        if context else "anonymous"
+    )
     
-    if (!limit.allowed) {
-      return {
-        success: false,
-        error: {
-          code: "RATE_LIMIT_EXCEEDED",
-          message: "Demasiadas peticiones. Inténtelo más tarde.",
-          retryAfter: Math.ceil((limit.resetAt - Date.now()) / 1000)
+    # Verificar rate limit
+    rate = limiter.check(identifier)
+    
+    if not rate["allowed"]:
+        retry_after = int((rate["reset_at"] - datetime.now()).total_seconds())
+        
+        return {
+            "success": False,
+            "error": {
+                "code": "RATE_LIMIT_EXCEEDED",
+                "message": "Demasiadas peticiones. Inténtelo más tarde.",
+                "retry_after": retry_after
+            }
         }
-      };
-    }
     
-    // Procesar normalmente
-    const users = await searchUsers(input);
+    # Procesar normalmente
+    users = db.search_users(query, limit)
     
     return {
-      success: true,
-      data: users,
-      rateLimit: { remaining: limit.remaining }
-    };
-  }
-});
+        "success": True,
+        "data": users,
+        "rate_limit": {
+            "remaining": rate["remaining"]
+        }
+    }
 ```
 
 ---
@@ -1041,32 +1289,62 @@ server.addTool({
 
 ---
 
-# Anatomía de una Tool
+# Anatomía de una Tool en FastMCP
 
 ## Estructura completa
 
 ---
 
-```javascript
-{
-  name: "string",           // Identificador único
-  description: "string",    // Explicación para la IA
-  inputSchema: {            // JSON Schema
-    type: "object",
-    properties: { ... },
-    required: [ ... ]
-  },
-  outputSchema: { ... },    // Opcional pero recomendado
-  annotations: {            // Metadatos
-    readOnlyHint: boolean,
-    destructiveHint: boolean,
-    idempotentHint: boolean,
-    openWorldHint: boolean
-  },
-  execute: async (input, context) => {
-    // Lógica de la herramienta
-  }
-}
+```python
+from fastmcp import FastMCP
+from typing import Annotated
+from pydantic import Field
+
+mcp = FastMCP("mi-servidor")
+
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False
+    }
+)
+def get_user(
+    user_id: Annotated[str, Field(
+        description="ID único del usuario (formato: usr_xxx)",
+        pattern=r"^usr_[a-zA-Z0-9]+$"
+    )],
+    fields: Annotated[list[str] | None, Field(
+        description="Campos a devolver",
+        examples=[["id", "name", "email"]]
+    )] = None
+) -> dict:
+    """
+    Obtiene un usuario por su ID.
+    
+    Busca un usuario en el sistema y devuelve sus datos.
+    Si el usuario no existe, devuelve error NOT_FOUND.
+    
+    Args:
+        user_id: ID del usuario a buscar
+        fields: Lista de campos a incluir (opcional)
+    
+    Returns:
+        Diccionario con success, data y metadata
+    """
+    user = db.get_user(user_id)
+    
+    if not user:
+        return {
+            "success": False,
+            "error": {
+                "code": "NOT_FOUND",
+                "message": f"Usuario {user_id} no encontrado"
+            }
+        }
+    
+    return {"success": True, "data": user}
 ```
 
 ---
@@ -1079,14 +1357,14 @@ server.addTool({
 
 ### Verbos de Acción
 
-| Verbo | Significado | Ejemplo |
-|-------|-------------|---------|
-| `get` | Obtener un recurso por ID | `getUser` |
-| `list` | Obtener múltiples recursos | `listUsers` |
-| `search` | Búsqueda por criterios | `searchUsers` |
-| `create` | Crear nuevo recurso | `createUser` |
-| `update` | Modificar recurso existente | `updateUser` |
-| `delete` | Eliminar recurso | `deleteUser` |
+| Verbo | Significado | Ejemplo FastMCP |
+|-------|-------------|-----------------|
+| `get` | Obtener un recurso por ID | `get_user` |
+| `list` | Obtener múltiples recursos | `list_users` |
+| `search` | Búsqueda por criterios | `search_users` |
+| `create` | Crear nuevo recurso | `create_user` |
+| `update` | Modificar existente | `update_user` |
+| `delete` | Eliminar recurso | `delete_user` |
 
 ---
 
@@ -1094,11 +1372,11 @@ server.addTool({
 
 | Malo | Por qué | Mejor |
 |------|---------|-------|
-| `process` | Vago | `processPayment` |
-| `handle` | Vago | `handleWebhook` |
-| `do` | Sin significado | `executeTask` |
-| `run` | Ambiguo | `runReport` |
-| `manage` | Demasiado amplio | `createUser`, `updateUser`, etc. |
+| `process` | Vago | `process_payment` |
+| `handle` | Vago | `handle_webhook` |
+| `do` | Sin significado | `execute_task` |
+| `run` | Ambiguo | `run_report` |
+| `manage` | Demasiado amplio | `create_user`, `update_user` |
 
 ---
 
@@ -1116,238 +1394,164 @@ server.addTool({
 
 ---
 
-**Ejemplo paso a paso:**
+**Ejemplo completo:**
 
-1. Verbo: "Elimina"
-2. Recurso: "un usuario"
-3. Qué hace: "del sistema permanentemente"
-4. Parámetros: "Requiere el ID del usuario"
-5. Retorno: "Devuelve confirmación o error si no existe"
-6. Efectos: "Esta acción es irreversible"
-
----
-
-**Resultado:**
-
-```json
-{
-  "name": "deleteUser",
-  "description": "Elimina un usuario del sistema permanentemente. Requiere el ID del usuario. Devuelve confirmación de eliminación o error si el usuario no existe. Esta acción es irreversible y no se puede deshacer.",
-  "annotations": { "destructiveHint": true }
-}
+```python
+@mcp.tool(
+    annotations={"destructiveHint": True}
+)
+def delete_user(user_id: str) -> dict:
+    """
+    Elimina un usuario del sistema permanentemente.
+    
+    Requiere el ID del usuario. Devuelve confirmación
+    de eliminación o error si el usuario no existe.
+    
+    Esta acción es irreversible y no se puede deshacer.
+    
+    Args:
+        user_id: ID del usuario a eliminar
+    
+    Returns:
+        Diccionario con success y confirmación
+    """
+    # Implementación
 ```
 
 ---
 
-# inputSchema Detallado
+# Tipos de Datos con Annotated
 
-## Validación y documentación
+## Validación automática con Pydantic
 
 ---
 
-### Tipos de datos comunes
+```python
+from typing import Annotated, Literal
+from pydantic import Field
+from datetime import datetime
 
-```javascript
-// String con restricciones
-{
-  "type": "string",
-  "minLength": 1,
-  "maxLength": 100,
-  "pattern": "^[a-zA-Z0-9_]+$",
-  "description": "Nombre de usuario (solo alfanumérico y _)"
-}
+# String con restricciones
+Username = Annotated[str, Field(
+    min_length=1,
+    max_length=100,
+    pattern=r"^[a-zA-Z0-9_]+$",
+    description="Nombre de usuario (solo alfanumérico y _)"
+)]
 
-// Entero con rango
-{
-  "type": "integer",
-  "minimum": 1,
-  "maximum": 100,
-  "default": 20,
-  "description": "Número de resultados (1-100)"
-}
+# Entero con rango
+Limit = Annotated[int, Field(
+    ge=1,
+    le=100,
+    description="Número de resultados (1-100)"
+)]
 
-// Enum
-{
-  "type": "string",
-  "enum": ["pending", "active", "completed", "cancelled"],
-  "description": "Estado del pedido"
-}
+# Enum
+Status = Literal["pending", "active", "completed", "cancelled"]
 
-// Fecha
-{
-  "type": "string",
-  "format": "date-time",
-  "description": "Fecha en formato ISO 8601"
-}
+# Email
+Email = Annotated[str, Field(
+    pattern=r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
+    description="Email válido"
+)]
+
+# Uso
+@mcp.tool
+def create_user(
+    username: Username,
+    email: Email,
+    status: Status = "pending"
+) -> dict:
+    """Crea un nuevo usuario."""
+    # La validación es automática
 ```
 
 ---
 
-# inputSchema - Objetos Anidados
+# Objetos Anidados con Pydantic
 
 ---
 
-```javascript
-{
-  "type": "object",
-  "properties": {
-    "user": {
-      "type": "object",
-      "description": "Datos del usuario a crear",
-      "properties": {
-        "name": {
-          "type": "string",
-          "minLength": 2,
-          "maxLength": 100
-        },
-        "email": {
-          "type": "string",
-          "format": "email"
-        },
-        "role": {
-          "type": "string",
-          "enum": ["admin", "user", "guest"]
+```python
+from pydantic import BaseModel
+from typing import Literal
+
+class Address(BaseModel):
+    """Dirección del usuario."""
+    street: str
+    city: str
+    postal_code: str
+    country: str
+
+class UserCreate(BaseModel):
+    """Datos para crear un usuario."""
+    name: Annotated[str, Field(min_length=2, max_length=100)]
+    email: Email
+    role: Literal["admin", "user", "guest"] = "user"
+    address: Address | None = None
+
+@mcp.tool
+def create_user(user: UserCreate) -> dict:
+    """Crea un nuevo usuario con datos anidados."""
+    # user ya está validado por Pydantic
+    new_user = db.create_user(user.model_dump())
+    return {"success": True, "data": new_user}
+
+# El schema JSON se genera automáticamente
+```
+
+---
+
+# Arrays y Listas
+
+---
+
+```python
+from typing import Annotated
+from pydantic import Field
+
+@mcp.tool
+def bulk_delete_users(
+    user_ids: Annotated[list[str], Field(
+        min_length=1,
+        max_length=50,
+        description="Lista de IDs de usuarios a eliminar (1-50)"
+    )]
+) -> dict:
+    """Elimina múltiples usuarios en una operación."""
+    deleted = []
+    failed = []
+    
+    for user_id in user_ids:
+        try:
+            db.delete_user(user_id)
+            deleted.append(user_id)
+        except Exception:
+            failed.append(user_id)
+    
+    return {
+        "success": True,
+        "data": {
+            "deleted": deleted,
+            "failed": failed,
+            "total_deleted": len(deleted)
         }
-      },
-      "required": ["name", "email"]
-    },
-    "sendNotification": {
-      "type": "boolean",
-      "default": true,
-      "description": "Enviar email de bienvenida"
     }
-  },
-  "required": ["user"]
-}
+
+@mcp.tool
+def update_user_roles(
+    user_id: str,
+    roles: Annotated[list[Literal["admin", "user", "guest"]], Field(
+        description="Lista de roles a asignar"
+    )]
+) -> dict:
+    """Actualiza los roles de un usuario."""
+    # ...
 ```
 
 ---
 
-# inputSchema - Arrays
-
----
-
-```javascript
-{
-  "type": "object",
-  "properties": {
-    "userIds": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "pattern": "^usr_[a-zA-Z0-9]+$"
-      },
-      "minItems": 1,
-      "maxItems": 50,
-      "description": "Lista de IDs de usuarios (1-50)"
-    },
-    "options": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "key": { "type": "string" },
-          "value": { "type": "string" }
-        },
-        "required": ["key", "value"]
-      },
-      "description": "Opciones adicionales como pares clave-valor"
-    }
-  },
-  "required": ["userIds"]
-}
-```
-
----
-
-# inputSchema - Condicionales
-
-## Lógica compleja con JSON Schema
-
----
-
-```javascript
-{
-  "type": "object",
-  "properties": {
-    "type": {
-      "type": "string",
-      "enum": ["email", "sms", "push"]
-    },
-    "recipient": { "type": "string" },
-    "message": { "type": "string" }
-  },
-  "required": ["type", "recipient", "message"],
-  "allOf": [
-    {
-      "if": { "properties": { "type": { "const": "email" } } },
-      "then": {
-        "properties": {
-          "recipient": { "format": "email" }
-        }
-      }
-    },
-    {
-      "if": { "properties": { "type": { "const": "sms" } } },
-      "then": {
-        "properties": {
-          "recipient": { "pattern": "^\\+?[0-9]{10,15}$" }
-        }
-      }
-    }
-  ]
-}
-```
-
----
-
-# outputSchema
-
-## Documentar lo que devuelve
-
----
-
-**¿Por qué outputSchema?**
-
-- Permite al modelo entender la estructura de respuesta
-- Facilita testing automatizado
-- Mejora la depuración
-- Herramientas pueden generar interfaces
-
----
-
-```javascript
-{
-  "name": "getUser",
-  "inputSchema": { ... },
-  "outputSchema": {
-    "type": "object",
-    "properties": {
-      "success": { "type": "boolean" },
-      "data": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "string" },
-          "name": { "type": "string" },
-          "email": { "type": "string" },
-          "createdAt": { "type": "string", "format": "date-time" }
-        }
-      },
-      "error": {
-        "type": "object",
-        "properties": {
-          "code": { "type": "string" },
-          "message": { "type": "string" }
-        }
-      }
-    }
-  }
-}
-```
-
----
-
-# Annotations
+# Annotations en FastMCP
 
 ## Metadatos importantes
 
@@ -1355,22 +1559,22 @@ server.addTool({
 
 ### readOnlyHint
 
-`true` si la tool no modifica estado.
-
-```json
-{ "name": "getUser", "annotations": { "readOnlyHint": true } }
+```python
+@mcp.tool(annotations={"readOnlyHint": True})
+def get_user(user_id: str) -> dict:
+    """Tool de solo lectura - no modifica datos."""
 ```
 
-**Uso:** Los clientes pueden ejecutar tools de solo lectura sin confirmación.
+**Uso:** Los clientes pueden ejecutar sin confirmación.
 
 ---
 
 ### destructiveHint
 
-`true` si la tool tiene efectos destructivos irreversibles.
-
-```json
-{ "name": "deleteUser", "annotations": { "destructiveHint": true } }
+```python
+@mcp.tool(annotations={"destructiveHint": True})
+def delete_user(user_id: str) -> dict:
+    """Tool destructiva - efectos irreversibles."""
 ```
 
 **Uso:** Los clientes deben mostrar confirmación explícita.
@@ -1379,10 +1583,13 @@ server.addTool({
 
 ### idempotentHint
 
-`true` si llamar múltiples veces tiene el mismo efecto que una vez.
-
-```json
-{ "name": "setConfig", "annotations": { "idempotentHint": true } }
+```python
+@mcp.tool(annotations={"idempotentHint": True})
+def set_user_status(
+    user_id: str,
+    status: str
+) -> dict:
+    """Tool idempotente - mismo resultado si se repite."""
 ```
 
 **Uso:** Los clientes pueden reintentar automáticamente.
@@ -1391,50 +1598,17 @@ server.addTool({
 
 ### openWorldHint
 
-`true` si la tool interactúa con sistemas externos.
-
-```json
-{ "name": "sendEmail", "annotations": { "openWorldHint": true } }
+```python
+@mcp.tool(annotations={"openWorldHint": True})
+def send_email(
+    to: str,
+    subject: str,
+    body: str
+) -> dict:
+    """Tool que interactúa con sistemas externos."""
 ```
 
-**Uso:** Los clientes deben considerar implicaciones de privacidad.
-
----
-
-# Tool: Lectura vs Escritura
-
-## Diferencias de diseño
-
----
-
-### Read Tools (readOnlyHint: true)
-
-**Características:**
-- No modifican datos
-- Seguras de ejecutar sin confirmación
-- Pueden ser cacheadas
-- Pueden ser paralelizadas
-
-**Consideraciones:**
-- Incluir paginación para listas grandes
-- Documentar filtros disponibles
-- Devolver solo datos necesarios (minimizar tokens)
-
----
-
-### Write Tools (readOnlyHint: false)
-
-**Características:**
-- Modifican estado
-- Requieren consideración del usuario
-- No cacheables
-- Deben ser serializadas si dependientes
-
-**Consideraciones:**
-- Incluir validación completa
-- Devolver el estado resultante
-- Documentar efectos secundarios
-- Considerar idempotencia
+**Uso:** Considerar implicaciones de privacidad.
 
 ---
 
@@ -1450,47 +1624,40 @@ Una operación es idempotente si ejecutarla múltiples veces tiene el mismo efec
 
 ---
 
-**¿Por qué importa?**
+```python
+import uuid
 
-- Los clientes pueden reintentar errores de red
-- El usuario puede hacer clic dos veces
-- Sistemas distribuidos pueden duplicar mensajes
-
----
-
-# Idempotencia - Patrón con ID
-
----
-
-```javascript
-{
-  name: "createOrder",
-  inputSchema: {
-    properties: {
-      idempotencyKey: {
-        type: "string",
-        description: "Clave única para evitar duplicados. Genere un UUID para cada operación nueva."
-      },
-      items: {
-        type: "array",
-        items: { ... }
-      }
-    },
-    required: ["idempotencyKey", "items"]
-  },
-  annotations: { "idempotentHint": true },
-  execute: async (input) => {
-    // Verificar si ya existe
-    const existing = await db.getOrderByKey(input.idempotencyKey);
-    if (existing) {
-      return { success: true, data: existing, idempotent: true };
-    }
+@mcp.tool(annotations={"idempotentHint": True})
+def create_order(
+    idempotency_key: Annotated[str, Field(
+        description="Clave única para evitar duplicados. Use UUID."
+    )],
+    items: list[dict]
+) -> dict:
+    """Crea un pedido de forma idempotente."""
     
-    // Crear nuevo
-    const order = await db.createOrder(input);
-    return { success: true, data: order, idempotent: false };
-  }
-}
+    # Verificar si ya existe
+    existing = db.get_order_by_key(idempotency_key)
+    if existing:
+        return {
+            "success": True,
+            "data": existing,
+            "idempotent": True,
+            "message": "Pedido ya existente"
+        }
+    
+    # Crear nuevo
+    order = db.create_order(
+        idempotency_key=idempotency_key,
+        items=items,
+        created_at=datetime.now()
+    )
+    
+    return {
+        "success": True,
+        "data": order,
+        "idempotent": False
+    }
 ```
 
 ---
@@ -1501,78 +1668,72 @@ Una operación es idempotente si ejecutarla múltiples veces tiene el mismo efec
 
 ---
 
-**Problema:**
-
-Devolver 10.000 usuarios consume demasiados tokens y tiempo.
-
----
-
-**Solución:**
-
-Paginación con cursor o desplazamiento.
-
----
-
 ### Paginación por Desplazamiento
 
-```javascript
-{
-  name: "listUsers",
-  inputSchema: {
-    properties: {
-      limit: { type: "integer", minimum: 1, maximum: 100, default: 20 },
-      offset: { type: "integer", minimum: 0, default: 0 }
-    }
-  },
-  execute: async (input) => {
-    const users = await db.getUsers(input.limit, input.offset);
-    const total = await db.countUsers();
+```python
+@mcp.tool(annotations={"readOnlyHint": True})
+def list_users(
+    limit: Annotated[int, Field(ge=1, le=100)] = 20,
+    offset: Annotated[int, Field(ge=0)] = 0
+) -> dict:
+    """Lista usuarios con paginación por desplazamiento."""
+    users = db.get_users(limit=limit, offset=offset)
+    total = db.count_users()
     
     return {
-      success: true,
-      data: {
-        items: users,
-        total,
-        hasMore: (input.offset + input.limit) < total
-      }
-    };
-  }
-}
+        "success": True,
+        "data": {
+            "items": users,
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+            "has_more": (offset + limit) < total
+        }
+    }
 ```
 
 ---
 
 ### Paginación por Cursor
 
-```javascript
-{
-  name: "listUsers",
-  inputSchema: {
-    properties: {
-      limit: { type: "integer", default: 20 },
-      cursor: { type: "string", description: "Token de la página anterior" }
-    }
-  },
-  execute: async (input) => {
-    const decodedCursor = input.cursor 
-      ? JSON.parse(Buffer.from(input.cursor, 'base64').toString())
-      : { lastId: null };
+```python
+import base64
+import json
+
+@mcp.tool(annotations={"readOnlyHint": True})
+def list_users_cursor(
+    limit: Annotated[int, Field(ge=1, le=100)] = 20,
+    cursor: Annotated[str | None, Field(
+        description="Token de la página anterior"
+    )] = None
+) -> dict:
+    """Lista usuarios con paginación por cursor."""
     
-    const users = await db.getUsersAfter(decodedCursor.lastId, input.limit);
+    # Decodificar cursor
+    if cursor:
+        decoded = json.loads(base64.b64decode(cursor).decode())
+        last_id = decoded.get("last_id")
+    else:
+        last_id = None
     
-    const nextCursor = users.length === input.limit
-      ? Buffer.from(JSON.stringify({ lastId: users[users.length - 1].id })).toString('base64')
-      : null;
+    # Obtener usuarios
+    users = db.get_users_after(last_id, limit)
+    
+    # Generar siguiente cursor
+    next_cursor = None
+    if len(users) == limit:
+        next_cursor = base64.b64encode(
+            json.dumps({"last_id": users[-1]["id"]}).encode()
+        ).decode()
     
     return {
-      success: true,
-      data: {
-        items: users,
-        nextCursor
-      }
-    };
-  }
-}
+        "success": True,
+        "data": {
+            "items": users,
+            "next_cursor": next_cursor,
+            "has_more": next_cursor is not None
+        }
+    }
 ```
 
 ---
@@ -1583,65 +1744,75 @@ Paginación con cursor o desplazamiento.
 
 ---
 
-### Patrón de Filtros
+```python
+from datetime import datetime
+from typing import Literal
 
-```javascript
-{
-  name: "searchOrders",
-  inputSchema: {
-    properties: {
-      query: { type: "string", description: "Texto a buscar" },
-      status: {
-        type: "array",
-        items: { "enum": ["pending", "processing", "shipped", "delivered", "cancelled"] },
-        description: "Filtrar por estados (puede ser múltiple)"
-      },
-      dateFrom: { type: "string", "format": "date-time" },
-      dateTo: { type: "string", "format": "date-time" },
-      minAmount: { type: "number", minimum: 0 },
-      maxAmount: { type: "number", minimum: 0 },
-      sortBy: { "enum": ["date", "amount", "status"] },
-      sortOrder: { "enum": ["asc", "desc"] }
-    }
-  }
-}
-```
-
----
-
-### Validación de Filtros
-
-```javascript
-execute: async (input) => {
-  // Validar rangos
-  if (input.minAmount && input.maxAmount && input.minAmount > input.maxAmount) {
-    return {
-      success: false,
-      error: {
-        code: "INVALID_RANGE",
-        message: "minAmount no puede ser mayor que maxAmount"
-      }
-    };
-  }
-  
-  if (input.dateFrom && input.dateTo && new Date(input.dateFrom) > new Date(input.dateTo)) {
-    return {
-      success: false,
-      error: {
-        code: "INVALID_RANGE",
-        message: "dateFrom no puede ser posterior a dateTo"
-      }
-    };
-  }
-  
-  // Construir query
-  const filters = {};
-  if (input.status) filters.status = { $in: input.status };
-  if (input.minAmount) filters.amount = { $gte: input.minAmount };
-  // ...
-  
-  return await searchOrders(filters, input);
-}
+@mcp.tool(annotations={"readOnlyHint": True})
+def search_orders(
+    query: Annotated[str | None, Field(
+        description="Texto a buscar"
+    )] = None,
+    status: Annotated[list[Literal[
+        "pending", "processing", "shipped", "delivered", "cancelled"
+    ]] | None, Field(
+        description="Filtrar por estados (puede ser múltiple)"
+    )] = None,
+    date_from: Annotated[str | None, Field(
+        description="Fecha mínima (ISO 8601)"
+    )] = None,
+    date_to: Annotated[str | None, Field(
+        description="Fecha máxima (ISO 8601)"
+    )] = None,
+    min_amount: Annotated[float | None, Field(ge=0)] = None,
+    max_amount: Annotated[float | None, Field(ge=0)] = None,
+    sort_by: Literal["date", "amount", "status"] = "date",
+    sort_order: Literal["asc", "desc"] = "desc",
+    limit: int = 20,
+    offset: int = 0
+) -> dict:
+    """Busca pedidos con filtros avanzados."""
+    
+    # Validar rangos
+    if min_amount and max_amount and min_amount > max_amount:
+        return {
+            "success": False,
+            "error": {
+                "code": "INVALID_RANGE",
+                "message": "min_amount no puede ser mayor que max_amount"
+            }
+        }
+    
+    if date_from and date_to:
+        if datetime.fromisoformat(date_from) > datetime.fromisoformat(date_to):
+            return {
+                "success": False,
+                "error": {
+                    "code": "INVALID_RANGE",
+                    "message": "date_from no puede ser posterior a date_to"
+                }
+            }
+    
+    # Construir filtros
+    filters = {}
+    if status:
+        filters["status"] = {"$in": status}
+    if min_amount:
+        filters["amount"] = {"$gte": min_amount}
+    if max_amount:
+        filters["amount"] = {**filters.get("amount", {}), "$lte": max_amount}
+    
+    # Buscar
+    orders = db.search_orders(
+        filters=filters,
+        query=query,
+        sort_by=sort_by,
+        sort_order=sort_order,
+        limit=limit,
+        offset=offset
+    )
+    
+    return {"success": True, "data": orders}
 ```
 
 ---
@@ -1682,6 +1853,41 @@ Un resource es un dato que el modelo puede leer para obtener contexto, pero no p
 
 ---
 
+# Resources en FastMCP
+
+## Definición básica
+
+---
+
+```python
+from fastmcp import FastMCP
+
+mcp = FastMCP("mi-servidor")
+
+# Resource estático
+@mcp.resource("config://app/settings")
+def get_app_settings() -> str:
+    """Configuración de la aplicación."""
+    return json.dumps({
+        "app_name": "Mi App",
+        "version": "1.0.0",
+        "features": ["chat", "search"]
+    })
+
+# Resource con parámetros (URI template)
+@mcp.resource("users://{user_id}/profile")
+def get_user_profile(user_id: str) -> str:
+    """Perfil del usuario."""
+    user = db.get_user(user_id)
+    return json.dumps({
+        "id": user.id,
+        "name": user.name,
+        "email": user.email
+    })
+```
+
+---
+
 # Tipos de Resources
 
 ## Categorización por contenido
@@ -1690,34 +1896,46 @@ Un resource es un dato que el modelo puede leer para obtener contexto, pero no p
 
 ### Estáticos
 
-Contenido que no cambia frecuentemente.
+```python
+@mcp.resource("docs://api/schema")
+def get_api_schema() -> str:
+    """Esquema de la API (cambia poco)."""
+    return json.dumps(api_schema)
 
-- Documentación
-- Configuración del sistema
-- Esquemas de base de datos
-- Versiones de API
+@mcp.resource("config://database/tables")
+def get_db_tables() -> str:
+    """Estructura de tablas de la DB."""
+    return json.dumps(db.get_table_schema())
+```
 
 ---
 
 ### Dinámicos
 
-Contenido que cambia con el tiempo.
-
-- Estado actual del sistema
-- Logs recientes
-- Métricas en vivo
-- Contenido del usuario
+```python
+@mcp.resource("system://status/live")
+def get_system_status() -> str:
+    """Estado actual del sistema."""
+    return json.dumps({
+        "cpu_usage": get_cpu_usage(),
+        "memory": get_memory_usage(),
+        "active_connections": get_connections(),
+        "timestamp": datetime.now().isoformat()
+    })
+```
 
 ---
 
 ### Generados
 
-Contenido creado bajo demanda.
-
-- Informes
-- Resúmenes
-- Análisis
-- Consultas complejas
+```python
+@mcp.resource("reports://{report_id}/summary")
+def get_report_summary(report_id: str) -> str:
+    """Resumen generado bajo demanda."""
+    data = db.get_report_data(report_id)
+    summary = generate_summary(data)
+    return summary
+```
 
 ---
 
@@ -1729,97 +1947,90 @@ Contenido creado bajo demanda.
 
 ### Esquemas comunes
 
-```
-file:///path/to/file           - Archivos locales
-postgres://host/db/table       - Tablas de base de datos
-https://api.example.com/data   - APIs externas
-memory://cache/key            - Memoria caché
-app://internal/resource       - Recursos internos
-```
+```python
+# Archivos locales
+@mcp.resource("file://{path}")
+def read_file(path: str) -> str:
+    """Lee un archivo."""
+    with open(path, 'r') as f:
+        return f.read()
 
----
+# Base de datos
+@mcp.resource("db://{table}/schema")
+def get_table_schema(table: str) -> str:
+    """Esquema de una tabla."""
+    return json.dumps(db.get_schema(table))
 
-### URI Templates
+# APIs externas
+@mcp.resource("external://{service}/status")
+def get_external_status(service: str) -> str:
+    """Estado de un servicio externo."""
+    response = requests.get(f"https://{service}/status")
+    return response.text
 
-Permiten parámetros en la URI.
-
-```
-users://{userId}/profile
-repos://{owner}/{repo}/issues
-logs://{service}/{date}
-```
-
----
-
-# Definición de Resource
-
-## Estructura completa
-
----
-
-```javascript
-{
-  uri: "users://{userId}/profile",
-  name: "Perfil de Usuario",
-  description: "Información del perfil del usuario solicitado",
-  mimeType: "application/json",
-  template: {
-    parameters: {
-      userId: {
-        type: "string",
-        description: "ID del usuario",
-        pattern: "^usr_[a-zA-Z0-9]+$"
-      }
-    }
-  }
-}
+# Memoria caché
+@mcp.resource("cache://{key}")
+def get_cached(key: str) -> str:
+    """Valor cacheado."""
+    return cache.get(key) or "null"
 ```
 
 ---
 
-# Resource Handlers
+# URI Templates
 
-## Lectura de recursos
+## Parámetros en la URI
 
 ---
 
-```javascript
-server.addResource({
-  uri: "users://{userId}/profile",
-  name: "Perfil de Usuario",
-  description: "Información del perfil del usuario",
-  mimeType: "application/json",
-  
-  read: async (uri, params, context) => {
-    const { userId } = params;
-    
-    // Validar acceso
-    if (!context.user || context.user.id !== userId) {
-      throw new Error("UNAUTHORIZED");
-    }
-    
-    // Obtener datos
-    const user = await db.getUser(userId);
-    
-    if (!user) {
-      throw new Error("NOT_FOUND");
-    }
-    
-    // Devolver contenido
-    return {
-      contents: [{
-        uri: `users://${userId}/profile`,
-        mimeType: "application/json",
-        text: JSON.stringify({
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          createdAt: user.createdAt
-        })
-      }]
-    };
-  }
-});
+```python
+# Un parámetro
+@mcp.resource("users://{user_id}/profile")
+def get_user_profile(user_id: str) -> str:
+    """Perfil de usuario."""
+    user = db.get_user(user_id)
+    return json.dumps(user)
+
+# Múltiples parámetros
+@mcp.resource("repos://{owner}/{repo}/issues")
+def get_repo_issues(owner: str, repo: str) -> str:
+    """Issues de un repositorio."""
+    issues = github.get_issues(owner, repo)
+    return json.dumps(issues)
+
+# Parámetros anidados
+@mcp.resource("logs://{service}/{date}/{level}")
+def get_logs(service: str, date: str, level: str) -> str:
+    """Logs filtrados."""
+    logs = get_filtered_logs(service, date, level)
+    return "\n".join(logs)
+```
+
+---
+
+# Resources con Tipos MIME
+
+---
+
+```python
+@mcp.resource("users://{user_id}/avatar", 
+              mime_type="image/png")
+def get_user_avatar(user_id: str) -> bytes:
+    """Avatar del usuario como imagen."""
+    return db.get_user_avatar(user_id)
+
+@mcp.resource("docs://{doc_id}/content",
+              mime_type="text/markdown")
+def get_doc_content(doc_id: str) -> str:
+    """Contenido de documento en Markdown."""
+    return db.get_document(doc_id).content
+
+@mcp.resource("data://{dataset}/export",
+              mime_type="application/csv")
+def get_dataset_csv(dataset: str) -> str:
+    """Dataset exportado como CSV."""
+    data = db.get_dataset(dataset)
+    return convert_to_csv(data)
 ```
 
 ---
@@ -1830,97 +2041,73 @@ server.addResource({
 
 ---
 
-**Problema:**
+```python
+from fastmcp import FastMCP
+import asyncio
 
-El modelo lee un resource pero los datos pueden cambiar.
+mcp = FastMCP("mi-servidor")
 
----
+@mcp.resource("logs://system/live")
+async def get_live_logs() -> str:
+    """Logs en tiempo real."""
+    # Retornar últimos logs
+    return "\n".join(get_recent_logs(100))
 
-**Solución:**
-
-Permitir suscripciones a cambios.
-
----
-
-```javascript
-server.addResource({
-  uri: "logs://system/live",
-  name: "Logs del Sistema",
-  description: "Logs en tiempo real",
-  mimeType: "text/plain",
-  
-  read: async (uri) => {
-    return {
-      contents: [{
-        uri,
-        mimeType: "text/plain",
-        text: await getRecentLogs(100)
-      }]
-    };
-  },
-  
-  subscribe: async (uri, context) => {
-    // Enviar actualizaciones cuando hay nuevos logs
-    const interval = setInterval(async () => {
-      const newLogs = await getNewLogs();
-      if (newLogs.length > 0) {
-        context.send({
-          uri,
-          contents: [{
-            uri,
-            mimeType: "text/plain",
-            text: newLogs.join('\n')
-          }]
-        });
-      }
-    }, 1000);
-    
-    return { unsubscribe: () => clearInterval(interval) };
-  }
-});
+@mcp.resource("logs://system/stream")
+async def stream_logs() -> AsyncIterator[str]:
+    """Stream de logs en tiempo real."""
+    while True:
+        new_logs = await get_new_logs()
+        if new_logs:
+            yield "\n".join(new_logs)
+        await asyncio.sleep(1)
 ```
 
 ---
 
 # Resource Caching
 
-## Optimizar lecturas frecuentes
+## Optimizar lecturas
 
 ---
 
-```javascript
-const resourceCache = new Map();
+```python
+from functools import lru_cache
+from datetime import datetime, timedelta
 
-server.addResource({
-  uri: "config://app/settings",
-  name: "Configuración de la Aplicación",
-  
-  read: async (uri) => {
-    // Verificar caché
-    const cached = resourceCache.get(uri);
-    if (cached && Date.now() - cached.timestamp < 60000) {
-      return cached.data;
-    }
-    
-    // Obtener fresco
-    const settings = await db.getSettings();
-    const data = {
-      contents: [{
-        uri,
-        mimeType: "application/json",
-        text: JSON.stringify(settings)
-      }]
-    };
-    
-    // Guardar en caché
-    resourceCache.set(uri, {
-      data,
-      timestamp: Date.now()
-    });
-    
-    return data;
-  }
-});
+# Caché simple con lru_cache
+@lru_cache(maxsize=128)
+@mcp.resource("config://app/settings")
+def get_cached_settings() -> str:
+    """Configuración cacheada."""
+    return json.dumps(db.get_settings())
+
+# Caché con TTL
+cache_store = {}
+
+def cached_resource(ttl_seconds: int = 60):
+    """Decorador de caché con TTL."""
+    def decorator(func):
+        async def wrapper(*args, **kwargs):
+            cache_key = f"{func.__name__}:{args}:{kwargs}"
+            
+            if cache_key in cache_store:
+                cached, timestamp = cache_store[cache_key]
+                if datetime.now() - timestamp < timedelta(seconds=ttl_seconds):
+                    return cached
+            
+            result = await func(*args, **kwargs)
+            cache_store[cache_key] = (result, datetime.now())
+            return result
+        
+        return wrapper
+    return decorator
+
+@mcp.resource("data://{dataset}/summary")
+@cached_resource(ttl_seconds=300)
+async def get_dataset_summary(dataset: str) -> str:
+    """Resumen de dataset con caché de 5 minutos."""
+    return generate_summary(dataset)
 ```
 
 ---
@@ -1953,35 +2140,48 @@ server.addResource({
 
 ---
 
-```javascript
-// Resources - para lectura de contexto
-server.addResource({
-  uri: "docs://{docId}",
-  name: "Documento",
-  read: async (uri, params) => {
-    const doc = await getDocument(params.docId);
-    return { contents: [{ uri, text: doc.content }] };
-  }
-});
+```python
+from fastmcp import FastMCP
 
-// Tools - para acciones
-server.addTool({
-  name: "createDocument",
-  inputSchema: { ... },
-  execute: async (input) => {
-    const doc = await createDocument(input);
-    return { success: true, data: doc };
-  }
-});
+mcp = FastMCP("document-system")
 
-server.addTool({
-  name: "updateDocument",
-  inputSchema: { ... },
-  execute: async (input) => {
-    const doc = await updateDocument(input);
-    return { success: true, data: doc };
-  }
-});
+# Resources - para lectura de contexto
+@mcp.resource("docs://{doc_id}")
+def read_document(doc_id: str) -> str:
+    """Lee el contenido de un documento."""
+    doc = db.get_document(doc_id)
+    return doc.content
+
+@mcp.resource("docs://{doc_id}/metadata")
+def read_doc_metadata(doc_id: str) -> str:
+    """Metadatos del documento."""
+    doc = db.get_document(doc_id)
+    return json.dumps({
+        "id": doc.id,
+        "title": doc.title,
+        "created_at": doc.created_at,
+        "author": doc.author
+    })
+
+# Tools - para acciones
+@mcp.tool
+def create_document(
+    title: str,
+    content: str,
+    author: str
+) -> dict:
+    """Crea un nuevo documento."""
+    doc = db.create_document(title, content, author)
+    return {"success": True, "data": doc}
+
+@mcp.tool
+def update_document(
+    doc_id: str,
+    content: str
+) -> dict:
+    """Actualiza el contenido de un documento."""
+    doc = db.update_document(doc_id, content=content)
+    return {"success": True, "data": doc}
 ```
 
 ---
@@ -2020,131 +2220,93 @@ Un prompt es una plantilla predefinida que el modelo puede usar para establecer 
 
 ---
 
-# Definición de Prompt
+# Prompts en FastMCP
 
-## Estructura completa
+## Definición básica
 
 ---
 
-```javascript
-{
-  name: "code-review",
-  description: "Revisa código fuente buscando errores y mejoras",
-  arguments: [
-    {
-      name: "language",
-      description: "Lenguaje de programación",
-      required: true
-    },
-    {
-      name: "focus",
-      description: "Área de enfoque (security, performance, style)",
-      required: false
-    }
-  ],
-  messages: [
-    {
-      role: "user",
-      content: {
-        type: "text",
-        text: "Por favor, revisa el siguiente código {{language}}:\n\n{{code}}"
-      }
-    }
-  ]
-}
+```python
+from fastmcp import FastMCP
+
+mcp = FastMCP("mi-servidor")
+
+@mcp.prompt
+def code_review(language: str) -> str:
+    """Revisa código fuente buscando errores y mejoras."""
+    return f"""Por favor, revisa el siguiente código {language}:
+
+1. Busca errores de lógica
+2. Identifica problemas de rendimiento
+3. Sugiere mejoras de estilo
+4. Verifica seguridad
+
+Código a revisir:
+```{language}
+{{code}}
+```
+"""
+
+@mcp.prompt
+def analyze_data(data_type: str, depth: str = "basic") -> str:
+    """Analiza datos y genera insights."""
+    return f"""Eres un analista de datos experto. 
+Tu especialidad es {data_type}.
+
+Analiza los siguientes datos con profundidad {depth}:
+
+{data}
+
+Proporciona:
+1. Resumen ejecutivo
+2. Patrones identificados
+3. Anomalías detectadas
+4. Recomendaciones
+"""
 ```
 
 ---
 
-# Prompt Templates
-
-## Parametrización
+# Prompts con Argumentos
 
 ---
 
-### Sintaxis de Template
+```python
+from fastmcp import FastMCP
+from pydantic import BaseModel
 
-```
-{{parametro}}       - Valor del argumento
-{{?parametro}}      - Condicional (solo si existe)
-{{param:default}}    - Con valor por defecto
-```
+class CodeReviewArgs(BaseModel):
+    language: str
+    focus: str = "general"  # security, performance, style
+    severity_threshold: str = "medium"
 
----
-
-### Ejemplo Completo
-
-```javascript
-{
-  name: "analyze-data",
-  description: "Analiza datos y genera insights",
-  arguments: [
-    { name: "dataType", description: "Tipo de datos", required: true },
-    { name: "depth", description: "Profundidad del análisis (basic, detailed)", required: false },
-    { name: "format", description: "Formato de salida", required: false }
-  ],
-  messages: [
-    {
-      role: "system",
-      content: {
-        type: "text",
-        text: "Eres un analista de datos experto. Tu especialidad es {{dataType}}."
-      }
-    },
-    {
-      role: "user",
-      content: {
-        type: "text",
-        text: "Analiza los siguientes datos con profundidad {{depth:basic}}.{{?format}} Presenta los resultados en formato {{format}}.{{/format}}\n\n{{data}}"
-      }
+@mcp.prompt
+def code_review_advanced(args: CodeReviewArgs) -> str:
+    """Revisión de código avanzada."""
+    
+    focus_instructions = {
+        "security": "Prioriza vulnerabilidades OWASP Top 10",
+        "performance": "Busca cuellos de botella y optimizaciones",
+        "style": "Verifica convenciones y legibilidad",
+        "general": "Revisión completa de todos los aspectos"
     }
-  ]
-}
+    
+    return f"""Eres un experto en revisión de código {args.language}.
+
+Enfoque: {focus_instructions.get(args.focus, args.focus)}
+Umbral de severidad: {args.severity_threshold}
+
+Para cada problema encontrado, indica:
+- Tipo de problema
+- Severidad (low, medium, high, critical)
+- Ubicación exacta (línea)
+- Recomendación de corrección
+
+Código a revisar:
+```{args.language}
+{{code}}
 ```
-
----
-
-# Prompts con Resources
-
-## Composición
-
----
-
-```javascript
-{
-  name: "analyze-repository",
-  description: "Analiza un repositorio de código",
-  arguments: [
-    { name: "repo", description: "URL del repositorio", required: true },
-    { name: "branch", description: "Rama a analizar", required: false }
-  ],
-  resources: [
-    {
-      uri: "repo://{{repo}}/structure",
-      description: "Estructura del repositorio"
-    },
-    {
-      uri: "repo://{{repo}}/{{branch:main}}/readme",
-      description: "README del repositorio"
-    }
-  ],
-  messages: [
-    {
-      role: "system",
-      content: {
-        type: "text",
-        text: "Eres un arquitecto de software. Analiza el repositorio y proporciona recomendaciones."
-      }
-    },
-    {
-      role: "user",
-      content: {
-        type: "text",
-        text: "Analiza el repositorio {{repo}} y proporciona:\n1. Resumen de arquitectura\n2. Tecnologías utilizadas\n3. Calidad del código\n4. Recomendaciones"
-      }
-    }
-  ]
-}
+"""
 ```
 
 ---
@@ -2157,51 +2319,91 @@ Un prompt es una plantilla predefinida que el modelo puede usar para establecer 
 
 ### Modo Experto
 
-```javascript
-{
-  name: "security-audit",
-  description: "Auditoría de seguridad de código",
-  arguments: [
-    { name: "severity", description: "Nivel mínimo de severidad (low, medium, high, critical)", required: false }
-  ],
-  messages: [
-    {
-      role: "system",
-      content: {
-        type: "text",
-        text: "Eres un experto en seguridad informática con 20 años de experiencia. Tu especialidad es identificar vulnerabilidades en código. Para cada problema encontrado, indica:\n- Tipo de vulnerabilidad (OWASP Top 10)\n- Severidad (low, medium, high, critical)\n- Ubicación exacta\n- Recomendación de corrección\n- Referencias a CVEs si aplica"
-      }
-    }
-  ]
-}
+```python
+@mcp.prompt
+def security_audit(severity: str = "medium") -> str:
+    """Auditoría de seguridad de código."""
+    return f"""Eres un experto en seguridad informática con 20 años de experiencia.
+
+Tu especialidad es identificar vulnerabilidades en código.
+
+Nivel mínimo de severidad: {severity}
+
+Para cada problema encontrado, indica:
+- Tipo de vulnerabilidad (OWASP Top 10)
+- Severidad (low, medium, high, critical)
+- Ubicación exacta
+- Recomendación de corrección
+- Referencias a CVEs si aplica
+- Explotabilidad potencial
+
+Código a auditar:
+```
+{{code}}
+```
+"""
 ```
 
 ---
 
 ### Modo Flujo de Trabajo
 
-```javascript
-{
-  name: "deployment-workflow",
-  description: "Guía el proceso de despliegue",
-  arguments: [],
-  messages: [
-    {
-      role: "system",
-      content: {
-        type: "text",
-        text: "Eres un ingeniero DevOps. Guía al usuario a través del proceso de despliegue paso a paso. No pases al siguiente paso hasta que el usuario confirme que el paso anterior está completo."
-      }
-    },
-    {
-      role: "user",
-      content: {
-        type: "text",
-        text: "Necesito hacer el despliegue de una aplicación Node.js a AWS. ¿Por dónde empiezo?"
-      }
-    }
-  ]
-}
+```python
+@mcp.prompt
+def deployment_workflow() -> str:
+    """Guía el proceso de despliegue paso a paso."""
+    return """Eres un ingeniero DevOps senior.
+
+Guía al usuario a través del proceso de despliegue paso a paso.
+
+Reglas:
+1. No pases al siguiente paso hasta que el usuario confirme
+2. Verifica cada paso antes de continuar
+3. Si hay errores, ayuda a resolverlos antes de continuar
+4. Proporciona comandos específicos cuando sea posible
+
+Pasos del despliegue:
+1. Preparación del entorno
+2. Configuración de variables
+3. Build de la aplicación
+4. Tests de integración
+5. Despliegue a staging
+6. Verificación en staging
+7. Despliegue a producción
+8. Verificación final
+
+¿Por dónde empezamos?
+"""
+```
+
+---
+
+# Prompts con Recursos Embebidos
+
+---
+
+```python
+@mcp.prompt
+def analyze_repository(repo_url: str, branch: str = "main") -> str:
+    """Analiza un repositorio de código."""
+    return f"""Eres un arquitecto de software.
+
+Analiza el repositorio {repo_url} (rama: {branch}).
+
+Para el análisis, consulta:
+- resource:repo://{repo_url}/structure - Estructura del repositorio
+- resource:repo://{repo_url}/{branch}/readme - README
+
+Proporciona:
+1. Resumen de arquitectura
+2. Tecnologías utilizadas
+3. Calidad del código (1-10)
+4. Deuda técnica detectada
+5. Recomendaciones de mejora
+
+Repositorio: {repo_url}
+Rama: {branch}
+"""
 ```
 
 ---
@@ -2239,21 +2441,47 @@ Los errores no son solo para humanos. El modelo necesita entender qué salió ma
 
 ---
 
-```json
-{
-  "success": false,
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "El campo 'email' no tiene un formato válido",
-    "details": {
-      "field": "email",
-      "value": "not-an-email",
-      "expected": "Formato: usuario@dominio.com"
+```python
+from dataclasses import dataclass
+from typing import Any
+
+@dataclass
+class ErrorResponse:
+    """Respuesta de error estándar."""
+    success: bool = False
+    error: dict[str, Any] = None
+    
+    @classmethod
+    def create(
+        cls,
+        code: str,
+        message: str,
+        details: dict | None = None,
+        suggestion: str | None = None,
+        request_id: str | None = None
+    ) -> dict:
+        return {
+            "success": False,
+            "error": {
+                "code": code,
+                "message": message,
+                "details": details or {},
+                "suggestion": suggestion,
+                "request_id": request_id
+            }
+        }
+
+# Uso
+return ErrorResponse.create(
+    code="VALIDATION_ERROR",
+    message="El campo 'email' no tiene un formato válido",
+    details={
+        "field": "email",
+        "value": "not-an-email",
+        "expected": "Formato: usuario@dominio.com"
     },
-    "suggestion": "Verifique el formato del email e inténtelo de nuevo",
-    "requestId": "req_abc123"
-  }
-}
+    suggestion="Verifique el formato del email"
+)
 ```
 
 ---
@@ -2288,55 +2516,59 @@ Los errores no son solo para humanos. El modelo necesita entender qué salió ma
 
 ---
 
-```javascript
-async function execute(input) {
-  const errors = [];
-  
-  // Validar campos obligatorios
-  if (!input.email) {
-    errors.push({
-      field: "email",
-      code: "MISSING_PARAMETER",
-      message: "email es obligatorio"
-    });
-  }
-  
-  // Validar formato
-  if (input.email && !isValidEmail(input.email)) {
-    errors.push({
-      field: "email",
-      code: "INVALID_FORMAT",
-      message: "email no tiene un formato válido",
-      value: input.email,
-      expected: "usuario@dominio.com"
-    });
-  }
-  
-  // Validar rango
-  if (input.age && (input.age < 0 || input.age > 150)) {
-    errors.push({
-      field: "age",
-      code: "OUT_OF_RANGE",
-      message: "age debe estar entre 0 y 150",
-      value: input.age,
-      min: 0,
-      max: 150
-    });
-  }
-  
-  if (errors.length > 0) {
-    return {
-      success: false,
-      error: {
-        code: "VALIDATION_ERROR",
-        message: "Se encontraron errores de validación",
-        details: errors
-      }
-    };
-  }
-  
-  // Procesar...
-}
+```python
+from typing import Annotated
+from pydantic import Field, ValidationError
+
+@mcp.tool
+def create_user(
+    email: Annotated[str, Field(description="Email del usuario")],
+    name: Annotated[str, Field(min_length=2, max_length=100)],
+    age: Annotated[int | None, Field(ge=0, le=150)] = None
+) -> dict:
+    """Crea un nuevo usuario."""
+    
+    errors = []
+    
+    # Validar email
+    if not email:
+        errors.append({
+            "field": "email",
+            "code": "MISSING_PARAMETER",
+            "message": "email es obligatorio"
+        })
+    elif not is_valid_email(email):
+        errors.append({
+            "field": "email",
+            "code": "INVALID_FORMAT",
+            "message": "email no tiene un formato válido",
+            "value": email,
+            "expected": "usuario@dominio.com"
+        })
+    
+    # Validar edad
+    if age is not None:
+        if age < 0 or age > 150:
+            errors.append({
+                "field": "age",
+                "code": "OUT_OF_RANGE",
+                "message": "age debe estar entre 0 y 150",
+                "value": age,
+                "min": 0,
+                "max": 150
+            })
+    
+    if errors:
+        return {
+            "success": False,
+            "error": {
+                "code": "VALIDATION_ERROR",
+                "message": "Se encontraron errores de validación",
+                "details": errors
+            }
+        }
+    
+    # Crear usuario...
 ```
 
 ---
@@ -2347,48 +2579,56 @@ async function execute(input) {
 
 ---
 
-```javascript
-async function execute(input, context) {
-  // Verificar autenticación
-  if (!context.user) {
-    return {
-      success: false,
-      error: {
-        code: "UNAUTHORIZED",
-        message: "Se requiere autenticación para esta operación",
-        suggestion: "Inicie sesión y vuelva a intentarlo"
-      }
-    };
-  }
-  
-  // Verificar permisos específicos
-  if (!context.user.permissions.includes("users:delete")) {
-    return {
-      success: false,
-      error: {
-        code: "FORBIDDEN",
-        message: "No tiene permisos para eliminar usuarios",
-        requiredPermission: "users:delete",
-        currentPermissions: context.user.permissions,
-        suggestion: "Contacte con el administrador para obtener el permiso necesario"
-      }
-    };
-  }
-  
-  // Verificar ownership
-  if (input.userId !== context.user.id && !context.user.isAdmin) {
-    return {
-      success: false,
-      error: {
-        code: "FORBIDDEN",
-        message: "Solo puede eliminar su propio usuario",
-        suggestion: "Especifique su propio ID de usuario"
-      }
-    };
-  }
-  
-  // Procesar...
-}
+```python
+from typing import Any
+
+@mcp.tool
+def delete_user(
+    user_id: str,
+    context: dict[str, Any] | None = None
+) -> dict:
+    """Elimina un usuario."""
+    
+    # Verificar autenticación
+    if not context or not context.get("user"):
+        return {
+            "success": False,
+            "error": {
+                "code": "UNAUTHORIZED",
+                "message": "Se requiere autenticación para esta operación",
+                "suggestion": "Inicie sesión y vuelva a intentarlo"
+            }
+        }
+    
+    user = context["user"]
+    
+    # Verificar permisos específicos
+    if "users:delete" not in user.get("permissions", []):
+        return {
+            "success": False,
+            "error": {
+                "code": "FORBIDDEN",
+                "message": "No tiene permisos para eliminar usuarios",
+                "details": {
+                    "required_permission": "users:delete",
+                    "current_permissions": user.get("permissions", [])
+                },
+                "suggestion": "Contacte con el administrador"
+            }
+        }
+    
+    # Verificar ownership
+    if user_id != user["id"] and not user.get("is_admin"):
+        return {
+            "success": False,
+            "error": {
+                "code": "FORBIDDEN",
+                "message": "Solo puede eliminar su propio usuario",
+                "suggestion": "Especifique su propio ID de usuario"
+            }
+        }
+    
+    # Procesar eliminación...
 ```
 
 ---
@@ -2401,51 +2641,61 @@ async function execute(input, context) {
 
 ### Not Found
 
-```javascript
-async function execute(input) {
-  const user = await db.getUser(input.userId);
-  
-  if (!user) {
-    return {
-      success: false,
-      error: {
-        code: "NOT_FOUND",
-        message: `Usuario ${input.userId} no encontrado`,
-        resource: "user",
-        identifier: input.userId,
-        suggestion: "Verifique que el ID sea correcto o use listUsers para ver usuarios disponibles"
-      }
-    };
-  }
-  
-  // Procesar...
-}
+```python
+@mcp.tool
+def get_order(order_id: str) -> dict:
+    """Obtiene un pedido por ID."""
+    order = db.get_order(order_id)
+    
+    if not order:
+        return {
+            "success": False,
+            "error": {
+                "code": "NOT_FOUND",
+                "message": f"Pedido {order_id} no encontrado",
+                "details": {
+                    "resource": "order",
+                    "identifier": order_id
+                },
+                "suggestion": (
+                    "Verifique el ID o use list_orders "
+                    "para ver pedidos disponibles"
+                )
+            }
+        }
+    
+    return {"success": True, "data": order}
 ```
 
 ---
 
 ### Already Exists
 
-```javascript
-async function execute(input) {
-  const existing = await db.getUserByEmail(input.email);
-  
-  if (existing) {
-    return {
-      success: false,
-      error: {
-        code: "ALREADY_EXISTS",
-        message: `Ya existe un usuario con el email ${input.email}`,
-        resource: "user",
-        identifier: input.email,
-        existingId: existing.id,
-        suggestion: "Use un email diferente o recupere su cuenta existente"
-      }
-    };
-  }
-  
-  // Crear nuevo...
-}
+```python
+@mcp.tool
+def create_user(email: str, name: str) -> dict:
+    """Crea un nuevo usuario."""
+    existing = db.get_user_by_email(email)
+    
+    if existing:
+        return {
+            "success": False,
+            "error": {
+                "code": "ALREADY_EXISTS",
+                "message": f"Ya existe un usuario con el email {email}",
+                "details": {
+                    "resource": "user",
+                    "identifier": email,
+                    "existing_id": existing.id
+                },
+                "suggestion": (
+                    "Use un email diferente o "
+                    "recupere su cuenta existente"
+                )
+            }
+        }
+    
+    # Crear nuevo usuario...
 ```
 
 ---
@@ -2456,39 +2706,51 @@ async function execute(input) {
 
 ---
 
-```javascript
-async function execute(input) {
-  const order = await db.getOrder(input.orderId);
-  
-  // Verificar estado
-  if (order.status === "cancelled") {
-    return {
-      success: false,
-      error: {
-        code: "CONFLICT",
-        message: "No se puede modificar un pedido cancelado",
-        currentState: order.status,
-        attemptedAction: "update",
-        suggestion: "Cree un nuevo pedido si necesita realizar cambios"
-      }
-    };
-  }
-  
-  if (order.status !== "pending") {
-    return {
-      success: false,
-      error: {
-        code: "PRECONDITION_FAILED",
-        message: "El pedido ya fue procesado",
-        currentState: order.status,
-        expectedState: "pending",
-        suggestion: "Use getOrder para ver el estado actual del pedido"
-      }
-    };
-  }
-  
-  // Procesar...
-}
+```python
+@mcp.tool
+def update_order_status(
+    order_id: str,
+    new_status: str
+) -> dict:
+    """Actualiza el estado de un pedido."""
+    order = db.get_order(order_id)
+    
+    if not order:
+        return {
+            "success": False,
+            "error": {"code": "NOT_FOUND", "message": "Pedido no encontrado"}
+        }
+    
+    # Verificar estado actual
+    if order.status == "cancelled":
+        return {
+            "success": False,
+            "error": {
+                "code": "CONFLICT",
+                "message": "No se puede modificar un pedido cancelado",
+                "details": {
+                    "current_state": order.status,
+                    "attempted_action": "update"
+                },
+                "suggestion": "Cree un nuevo pedido si necesita realizar cambios"
+            }
+        }
+    
+    if order.status == "delivered" and new_status == "pending":
+        return {
+            "success": False,
+            "error": {
+                "code": "PRECONDITION_FAILED",
+                "message": "No se puede revertir un pedido entregado a pendiente",
+                "details": {
+                    "current_state": order.status,
+                    "attempted_state": new_status
+                },
+                "suggestion": "Use get_order para ver el estado actual"
+            }
+        }
+    
+    # Actualizar estado...
 ```
 
 ---
@@ -2499,45 +2761,62 @@ async function execute(input) {
 
 ---
 
-```javascript
-const rateLimiter = new RateLimiter(100, 60000); // 100/min
+```python
+from utils.rate_limit import limiter
 
-async function execute(input, context) {
-  const identifier = context.user?.id || context.ip;
-  const limit = rateLimiter.check(identifier);
-  
-  if (!limit.allowed) {
-    return {
-      success: false,
-      error: {
-        code: "RATE_LIMIT_EXCEEDED",
-        message: "Ha excedido el límite de peticiones",
-        limit: 100,
-        window: "1 minuto",
-        retryAfter: Math.ceil((limit.resetAt - Date.now()) / 1000),
-        suggestion: "Espere antes de realizar más peticiones"
-      }
-    };
-  }
-  
-  // Verificar cuota
-  const quota = await checkQuota(context.user);
-  if (quota.used >= quota.limit) {
-    return {
-      success: false,
-      error: {
-        code: "QUOTA_EXCEEDED",
-        message: "Ha excedido su cuota mensual",
-        quotaUsed: quota.used,
-        quotaLimit: quota.limit,
-        quotaReset: quota.resetDate,
-        suggestion: "Actualice su plan o espere al próximo período"
-      }
-    };
-  }
-  
-  // Procesar...
-}
+@mcp.tool
+def search_users(
+    query: str,
+    context: dict | None = None
+) -> dict:
+    """Busca usuarios con rate limiting."""
+    
+    # Identificador
+    identifier = (
+        context.get("user", {}).get("id", "anonymous")
+        if context else "anonymous"
+    )
+    
+    # Verificar rate limit
+    rate = limiter.check(identifier)
+    
+    if not rate["allowed"]:
+        retry_after = int(
+            (rate["reset_at"] - datetime.now()).total_seconds()
+        )
+        return {
+            "success": False,
+            "error": {
+                "code": "RATE_LIMIT_EXCEEDED",
+                "message": "Ha excedido el límite de peticiones",
+                "details": {
+                    "limit": 50,
+                    "window": "1 minuto",
+                    "retry_after": retry_after
+                },
+                "suggestion": "Espere antes de realizar más peticiones"
+            }
+        }
+    
+    # Verificar cuota
+    if context and context.get("user"):
+        quota = check_quota(context["user"]["id"])
+        if quota["used"] >= quota["limit"]:
+            return {
+                "success": False,
+                "error": {
+                    "code": "QUOTA_EXCEEDED",
+                    "message": "Ha excedido su cuota mensual",
+                    "details": {
+                        "quota_used": quota["used"],
+                        "quota_limit": quota["limit"],
+                        "quota_reset": quota["reset_date"]
+                    },
+                    "suggestion": "Actualice su plan o espere al próximo período"
+                }
+            }
+    
+    # Procesar búsqueda...
 ```
 
 ---
@@ -2548,40 +2827,64 @@ async function execute(input, context) {
 
 ---
 
-```javascript
-async function execute(input, context) {
-  const requestId = generateRequestId();
-  
-  try {
-    // Operación
-    const result = await someOperation(input);
-    return { success: true, data: result };
+```python
+import logging
+import uuid
+
+logger = logging.getLogger(__name__)
+
+@mcp.tool
+def process_payment(
+    amount: float,
+    card_token: str
+) -> dict:
+    """Procesa un pago."""
+    request_id = str(uuid.uuid4())[:8]
     
-  } catch (error) {
-    // Registrar con detalle
-    logger.error("Internal error in execute", {
-      requestId,
-      error: error.message,
-      stack: error.stack,
-      input: sanitizeForLog(input),
-      context: {
-        user: context.user?.id,
-        ip: context.ip
-      }
-    });
-    
-    // Devolver error genérico
-    return {
-      success: false,
-      error: {
-        code: "INTERNAL_ERROR",
-        message: "Ocurrió un error interno. Por favor, inténtelo más tarde.",
-        requestId,
-        suggestion: "Si el problema persiste, contacte con soporte con el ID de solicitud"
-      }
-    };
-  }
-}
+    try:
+        result = payment_service.process(amount, card_token)
+        return {"success": True, "data": result}
+        
+    except PaymentError as e:
+        # Registrar con detalle
+        logger.error(
+            "Payment processing failed",
+            extra={
+                "request_id": request_id,
+                "error": str(e),
+                "amount": amount
+            }
+        )
+        
+        # Devolver error genérico
+        return {
+            "success": False,
+            "error": {
+                "code": "PAYMENT_ERROR",
+                "message": "Error al procesar el pago",
+                "request_id": request_id,
+                "suggestion": (
+                    "Si el problema persiste, contacte "
+                    f"con soporte con el ID: {request_id}"
+                )
+            }
+        }
+        
+    except Exception as e:
+        # Error inesperado
+        logger.exception(
+            "Unexpected error in process_payment",
+            extra={"request_id": request_id}
+        )
+        
+        return {
+            "success": False,
+            "error": {
+                "code": "INTERNAL_ERROR",
+                "message": "Ocurrió un error interno inesperado",
+                "request_id": request_id
+            }
+        }
 ```
 
 ---
@@ -2592,29 +2895,39 @@ async function execute(input, context) {
 
 ---
 
-**Información para recuperación:**
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "SERVICE_UNAVAILABLE",
-    "message": "El servicio de pagos no está disponible",
-    "retryable": true,
-    "retryAfter": 30,
-    "alternativeActions": [
-      {
-        "action": "retry",
-        "description": "Reintentar en 30 segundos"
-      },
-      {
-        "action": "useFallback",
-        "tool": "createOfflineOrder",
-        "description": "Crear pedido pendiente de pago"
-      }
-    ]
-  }
-}
+```python
+@mcp.tool
+def send_notification(
+    user_id: str,
+    message: str
+) -> dict:
+    """Envía una notificación."""
+    
+    try:
+        result = notification_service.send(user_id, message)
+        return {"success": True, "data": result}
+        
+    except ServiceUnavailableError:
+        return {
+            "success": False,
+            "error": {
+                "code": "SERVICE_UNAVAILABLE",
+                "message": "El servicio de notificaciones no está disponible",
+                "retryable": True,
+                "retry_after": 30,
+                "alternative_actions": [
+                    {
+                        "action": "retry",
+                        "description": "Reintentar en 30 segundos"
+                    },
+                    {
+                        "action": "use_fallback",
+                        "tool": "queue_notification",
+                        "description": "Encolar para envío posterior"
+                    }
+                ]
+            }
+        }
 ```
 
 ---
@@ -2651,41 +2964,31 @@ Todo input que viene del modelo es potencialmente malicioso.
 
 ---
 
-**Problema:**
+```python
+import re
 
-El modelo puede enviar datos maliciosos o inesperados.
-
----
-
-**Solución:**
-
-Validación exhaustiva en cada tool.
-
----
-
-```javascript
-// Nunca confiar en el modelo
-async function execute(input) {
-  // ❌ Malo: usar directamente
-  // const user = await db.query(`SELECT * FROM users WHERE id = '${input.userId}'`);
-  
-  // ✅ Bueno: validar primero
-  if (!input.userId.match(/^usr_[a-zA-Z0-9]+$/)) {
-    return {
-      success: false,
-      error: {
-        code: "INVALID_INPUT",
-        message: "userId tiene un formato inválido"
-      }
-    };
-  }
-  
-  // ✅ Mejor: usar parámetros
-  const user = await db.query(
-    "SELECT * FROM users WHERE id = $1",
-    [input.userId]
-  );
-}
+@mcp.tool
+def get_user(user_id: str) -> dict:
+    """Obtiene un usuario por ID."""
+    
+    # ❌ Malo: usar directamente
+    # query = f"SELECT * FROM users WHERE id = '{user_id}'"
+    
+    # ✅ Bueno: validar primero
+    if not re.match(r"^usr_[a-zA-Z0-9]+$", user_id):
+        return {
+            "success": False,
+            "error": {
+                "code": "INVALID_INPUT",
+                "message": "user_id tiene un formato inválido"
+            }
+        }
+    
+    # ✅ Mejor: usar parámetros
+    query = "SELECT * FROM users WHERE id = ?"
+    user = db.execute(query, (user_id,))
+    
+    return {"success": True, "data": user}
 ```
 
 ---
@@ -2700,7 +3003,7 @@ async function execute(input) {
 
 ```json
 {
-  "userId": "usr_123' OR '1'='1"
+  "user_id": "usr_123' OR '1'='1"
 }
 ```
 
@@ -2708,18 +3011,20 @@ async function execute(input) {
 
 **Consulta vulnerable:**
 
-```javascript
-const query = `SELECT * FROM users WHERE id = '${input.userId}'`;
-// SELECT * FROM users WHERE id = 'usr_123' OR '1'='1'
+```python
+# ❌ PELIGROSO
+query = f"SELECT * FROM users WHERE id = '{user_id}'"
+# Resultado: SELECT * FROM users WHERE id = 'usr_123' OR '1'='1'
 ```
 
 ---
 
 **Consulta segura:**
 
-```javascript
-const query = "SELECT * FROM users WHERE id = $1";
-const result = await db.query(query, [input.userId]);
+```python
+# ✅ SEGURO - Usar parámetros
+query = "SELECT * FROM users WHERE id = ?"
+cursor.execute(query, (user_id,))
 ```
 
 ---
@@ -2742,39 +3047,52 @@ const result = await db.query(query, [input.userId]);
 
 **Código vulnerable:**
 
-```javascript
-async function execute(input) {
-  const content = await fs.readFile(`./files/${input.filename}`);
-  return { success: true, data: content };
-}
+```python
+# ❌ PELIGROSO
+@mcp.tool
+def read_file(filename: str) -> dict:
+    with open(f"./files/{filename}") as f:
+        return {"content": f.read()}
 ```
 
 ---
 
 **Código seguro:**
 
-```javascript
-import path from 'path';
+```python
+import os
+from pathlib import Path
 
-async function execute(input) {
-  // Normalizar ruta
-  const basePath = path.resolve('./files');
-  const filePath = path.resolve('./files', input.filename);
-  
-  // Verificar que está dentro del directorio permitido
-  if (!filePath.startsWith(basePath)) {
-    return {
-      success: false,
-      error: {
-        code: "FORBIDDEN",
-        message: "Acceso denegado al archivo"
-      }
-    };
-  }
-  
-  const content = await fs.readFile(filePath);
-  return { success: true, data: content };
-}
+BASE_DIR = Path("./files").resolve()
+
+@mcp.tool
+def read_file(filename: str) -> dict:
+    """Lee un archivo de forma segura."""
+    
+    # Normalizar ruta
+    file_path = (BASE_DIR / filename).resolve()
+    
+    # Verificar que está dentro del directorio permitido
+    if not str(file_path).startswith(str(BASE_DIR)):
+        return {
+            "success": False,
+            "error": {
+                "code": "FORBIDDEN",
+                "message": "Acceso denegado al archivo"
+            }
+        }
+    
+    try:
+        content = file_path.read_text()
+        return {"success": True, "data": {"content": content}}
+    except FileNotFoundError:
+        return {
+            "success": False,
+            "error": {
+                "code": "NOT_FOUND",
+                "message": f"Archivo {filename} no encontrado"
+            }
+        }
 ```
 
 ---
@@ -2797,39 +3115,46 @@ async function execute(input) {
 
 **Código vulnerable:**
 
-```javascript
-async function execute(input) {
-  const result = execSync(`process-file ${input.name}`);
-  return { success: true, data: result };
-}
+```python
+# ❌ PELIGROSO
+import os
+
+@mcp.tool
+def process_file(name: str) -> dict:
+    result = os.popen(f"process-file {name}").read()
+    return {"result": result}
 ```
 
 ---
 
 **Código seguro:**
 
-```javascript
-import { execFile } from 'child_process';
-import { promisify } from 'util';
+```python
+import subprocess
+import re
 
-const execFileAsync = promisify(execFile);
-
-async function execute(input) {
-  // Validar entrada
-  if (!input.name.match(/^[a-zA-Z0-9_-]+$/)) {
-    return {
-      success: false,
-      error: {
-        code: "INVALID_INPUT",
-        message: "name solo puede contener caracteres alfanuméricos"
-      }
-    };
-  }
-  
-  // Usar execFile en lugar de exec
-  const result = await execFileAsync('process-file', [input.name]);
-  return { success: true, data: result.stdout };
-}
+@mcp.tool
+def process_file(name: str) -> dict:
+    """Procesa un archivo de forma segura."""
+    
+    # Validar entrada
+    if not re.match(r"^[a-zA-Z0-9_-]+$", name):
+        return {
+            "success": False,
+            "error": {
+                "code": "INVALID_INPUT",
+                "message": "name solo puede contener caracteres alfanuméricos"
+            }
+        }
+    
+    # Usar subprocess con lista de argumentos
+    result = subprocess.run(
+        ["process-file", name],
+        capture_output=True,
+        text=True
+    )
+    
+    return {"success": True, "data": {"output": result.stdout}}
 ```
 
 ---
@@ -2840,50 +3165,79 @@ async function execute(input) {
 
 ---
 
-```javascript
-async function execute(input, context) {
-  // 1. Verificar autenticación
-  if (!context.user) {
-    return {
-      success: false,
-      error: {
-        code: "UNAUTHORIZED",
-        message: "Requiere autenticación"
-      }
-    };
-  }
-  
-  // 2. Verificar permisos
-  if (!hasPermission(context.user, "users:read")) {
-    return {
-      success: false,
-      error: {
-        code: "FORBIDDEN",
-        message: "No tiene permisos para leer usuarios"
-      }
-    };
-  }
-  
-  // 3. Verificar ownership (si aplica)
-  if (!canAccessResource(context.user, input.resourceId)) {
-    return {
-      success: false,
-      error: {
-        code: "FORBIDDEN",
-        message: "No tiene acceso a este recurso"
-      }
-    };
-  }
-  
-  // 4. Registrar acceso
-  logger.info("Resource accessed", {
-    user: context.user.id,
-    resource: input.resourceId,
-    action: "read"
-  });
-  
-  // Procesar...
-}
+```python
+from typing import Any
+import logging
+
+logger = logging.getLogger(__name__)
+
+def check_auth(context: dict | None) -> dict | None:
+    """Verifica autenticación."""
+    if not context or not context.get("user"):
+        return {
+            "success": False,
+            "error": {
+                "code": "UNAUTHORIZED",
+                "message": "Requiere autenticación"
+            }
+        }
+    return None
+
+def check_permission(
+    context: dict,
+    permission: str
+) -> dict | None:
+    """Verifica permiso específico."""
+    user = context.get("user", {})
+    if permission not in user.get("permissions", []):
+        return {
+            "success": False,
+            "error": {
+                "code": "FORBIDDEN",
+                "message": f"No tiene permiso: {permission}"
+            }
+        }
+    return None
+
+@mcp.tool
+def delete_user(
+    user_id: str,
+    context: dict[str, Any] | None = None
+) -> dict:
+    """Elimina un usuario."""
+    
+    # 1. Verificar autenticación
+    if error := check_auth(context):
+        return error
+    
+    # 2. Verificar permisos
+    if error := check_permission(context, "users:delete"):
+        return error
+    
+    # 3. Verificar ownership
+    user = context["user"]
+    if user_id != user["id"] and not user.get("is_admin"):
+        return {
+            "success": False,
+            "error": {
+                "code": "FORBIDDEN",
+                "message": "Solo puede eliminar su propio usuario"
+            }
+        }
+    
+    # 4. Registrar acceso
+    logger.info(
+        "User deletion",
+        extra={
+            "actor": user["id"],
+            "target": user_id,
+            "action": "delete"
+        }
+    )
+    
+    # 5. Procesar
+    db.delete_user(user_id)
+    return {"success": True}
 ```
 
 ---
@@ -2894,52 +3248,70 @@ async function execute(input, context) {
 
 ---
 
-```javascript
-const auditLogger = {
-  log: (action, context, details) => {
-    logger.info("AUDIT", {
-      timestamp: new Date().toISOString(),
-      action,
-      user: context.user?.id || "anonymous",
-      ip: context.ip,
-      userAgent: context.userAgent,
-      ...details
-    });
-  }
-};
+```python
+import logging
+from datetime import datetime
+from functools import wraps
 
-async function execute(input, context) {
-  // Registrar intento
-  auditLogger.log("DELETE_USER_ATTEMPT", context, {
-    targetUser: input.userId
-  });
-  
-  // Verificar permisos
-  if (!context.user.isAdmin) {
-    auditLogger.log("DELETE_USER_DENIED", context, {
-      targetUser: input.userId,
-      reason: "INSUFFICIENT_PERMISSIONS"
-    });
-    
-    return {
-      success: false,
-      error: {
-        code: "FORBIDDEN",
-        message: "Solo administradores pueden eliminar usuarios"
-      }
-    };
-  }
-  
-  // Ejecutar
-  await db.deleteUser(input.userId);
-  
-  // Registrar éxito
-  auditLogger.log("DELETE_USER_SUCCESS", context, {
-    targetUser: input.userId
-  });
-  
-  return { success: true };
-}
+# Configurar logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+audit_logger = logging.getLogger("audit")
+
+def audit_log(action: str):
+    """Decorador para logging de auditoría."""
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            context = kwargs.get("context", {})
+            user_id = context.get("user", {}).get("id", "anonymous")
+            
+            # Registrar intento
+            audit_logger.info(
+                f"{action}_ATTEMPT",
+                extra={
+                    "user": user_id,
+                    "action": action,
+                    "timestamp": datetime.now().isoformat()
+                }
+            )
+            
+            try:
+                result = func(*args, **kwargs)
+                
+                # Registrar éxito
+                audit_logger.info(
+                    f"{action}_SUCCESS",
+                    extra={
+                        "user": user_id,
+                        "action": action
+                    }
+                )
+                
+                return result
+                
+            except Exception as e:
+                # Registrar error
+                audit_logger.error(
+                    f"{action}_FAILED",
+                    extra={
+                        "user": user_id,
+                        "action": action,
+                        "error": str(e)
+                    }
+                )
+                raise
+        
+        return wrapper
+    return decorator
+
+@mcp.tool
+@audit_log("DELETE_USER")
+def delete_user(user_id: str, context: dict | None = None) -> dict:
+    """Elimina un usuario."""
+    # Implementación...
 ```
 
 ---
@@ -2952,39 +3324,45 @@ async function execute(input, context) {
 
 **❌ Nunca hacer:**
 
-```javascript
-{
-  name: "getDatabaseConfig",
-  execute: async () => {
+```python
+@mcp.tool
+def get_database_config() -> dict:
+    """❌ PELIGROSO - Expone credenciales."""
     return {
-      success: true,
-      data: {
-        host: process.env.DB_HOST,
-        user: process.env.DB_USER,
-        password: process.env.DB_PASSWORD  // NUNCA
-      }
-    };
-  }
-}
+        "success": True,
+        "data": {
+            "host": os.environ["DB_HOST"],
+            "user": os.environ["DB_USER"],
+            "password": os.environ["DB_PASSWORD"]  # NUNCA
+        }
+    }
 ```
 
 ---
 
 **✅ Correcto:**
 
-```javascript
-{
-  name: "testDatabaseConnection",
-  description: "Prueba la conexión a la base de datos",
-  execute: async () => {
-    try {
-      await db.ping();
-      return { success: true, data: { connected: true } };
-    } catch (error) {
-      return { success: false, error: { code: "DB_CONNECTION_ERROR" } };
-    }
-  }
-}
+```python
+@mcp.tool
+def test_database_connection() -> dict:
+    """Prueba la conexión a la base de datos."""
+    try:
+        db.ping()
+        return {
+            "success": True,
+            "data": {
+                "connected": True,
+                "latency_ms": db.latency
+            }
+        }
+    except Exception:
+        return {
+            "success": False,
+            "error": {
+                "code": "DB_CONNECTION_ERROR",
+                "message": "No se pudo conectar a la base de datos"
+            }
+        }
 ```
 
 ---
@@ -3023,55 +3401,47 @@ Cada token consume recursos del modelo. Cada operación añade latencia.
 
 **❌ Innecesariamente verboso:**
 
-```json
-{
-  "success": true,
-  "data": {
-    "user": {
-      "id": "usr_abc123",
-      "name": "Juan García",
-      "email": "juan@example.com",
-      "phone": "+34 123 456 789",
-      "address": "Calle Principal 123",
-      "city": "Madrid",
-      "country": "Spain",
-      "postalCode": "28001",
-      "createdAt": "2024-01-15T10:30:00Z",
-      "updatedAt": "2024-03-20T15:45:00Z",
-      "lastLogin": "2024-04-18T08:00:00Z",
-      "preferences": {
-        "language": "es",
-        "timezone": "Europe/Madrid",
-        "notifications": {
-          "email": true,
-          "push": false,
-          "sms": true
+```python
+@mcp.tool
+def get_user(user_id: str) -> dict:
+    user = db.get_user(user_id)
+    return {
+        "success": True,
+        "data": {
+            "id": user.id,
+            "name": user.name,
+            "email": user.email,
+            "phone": user.phone,
+            "address": user.address,
+            "city": user.city,
+            "country": user.country,
+            "postal_code": user.postal_code,
+            "created_at": user.created_at,
+            "updated_at": user.updated_at,
+            "last_login": user.last_login,
+            "preferences": user.preferences,
+            "subscription": user.subscription
         }
-      },
-      "subscription": {
-        "plan": "premium",
-        "startDate": "2024-02-01",
-        "endDate": "2024-08-01",
-        "autoRenew": true
-      }
     }
-  }
-}
 ```
 
 ---
 
 **✅ Solo lo necesario:**
 
-```json
-{
-  "success": true,
-  "data": {
-    "id": "usr_abc123",
-    "name": "Juan García",
-    "email": "juan@example.com"
-  }
-}
+```python
+@mcp.tool
+def get_user(user_id: str) -> dict:
+    """Obtiene un usuario."""
+    user = db.get_user(user_id)
+    return {
+        "success": True,
+        "data": {
+            "id": user.id,
+            "name": user.name,
+            "email": user.email
+        }
+    }
 ```
 
 ---
@@ -3082,157 +3452,140 @@ Cada token consume recursos del modelo. Cada operación añade latencia.
 
 ---
 
-```javascript
-{
-  name: "getUser",
-  inputSchema: {
-    properties: {
-      userId: { type: "string" },
-      fields: {
-        type: "array",
-        items: { "enum": ["id", "name", "email", "phone", "address"] },
-        description: "Campos a devolver (por defecto: id, name, email)"
-      }
-    }
-  },
-  execute: async (input) => {
-    const user = await db.getUser(input.userId);
+```python
+from typing import Literal
+
+@mcp.tool
+def get_user(
+    user_id: str,
+    fields: list[Literal[
+        "id", "name", "email", "phone", "address"
+    ]] | None = None
+) -> dict:
+    """Obtiene un usuario con campos opcionales."""
+    user = db.get_user(user_id)
     
-    const defaultFields = ["id", "name", "email"];
-    const fields = input.fields || defaultFields;
+    # Campos por defecto
+    default_fields = ["id", "name", "email"]
+    selected_fields = fields or default_fields
     
-    const result = {};
-    for (const field of fields) {
-      if (user[field] !== undefined) {
-        result[field] = user[field];
-      }
+    # Filtrar campos
+    result = {
+        field: getattr(user, field)
+        for field in selected_fields
+        if hasattr(user, field)
     }
     
-    return { success: true, data: result };
-  }
-}
+    return {"success": True, "data": result}
 ```
 
 ---
 
 # Caché Estratégico
 
-## Qué cachear
+## Implementación
 
 ---
 
-**Cacheable:**
+```python
+from functools import lru_cache
+from datetime import datetime, timedelta
+import hashlib
 
-- Datos estáticos (configuración)
-- Datos que cambian poco (perfiles de usuario)
-- Resultados de cálculos costosos
-- Listas con baja frecuencia de actualización
+# Caché simple
+@lru_cache(maxsize=128)
+def get_cached_user(user_id: str) -> dict:
+    """Usuario cacheado."""
+    return db.get_user(user_id)
 
----
+# Caché con TTL
+cache_store: dict[str, tuple[any, datetime]] = {}
 
-**No cacheable:**
+def get_with_ttl(key: str, ttl_seconds: int = 60):
+    """Obtiene valor del caché con TTL."""
+    if key in cache_store:
+        value, timestamp = cache_store[key]
+        if datetime.now() - timestamp < timedelta(seconds=ttl_seconds):
+            return value
+        del cache_store[key]
+    return None
 
-- Datos sensibles (tokens, sesiones)
-- Datos que cambian frecuentemente (logs, métricas)
-- Resultados de operaciones de escritura
+def set_with_ttl(key: str, value: any, ttl_seconds: int = 60):
+    """Guarda valor en caché con TTL."""
+    cache_store[key] = (value, datetime.now())
 
----
-
-**TTL recomendados:**
-
-| Tipo de dato | TTL |
-|--------------|-----|
-| Configuración | 5-15 min |
-| Perfil de usuario | 1-5 min |
-| Listas | 30s - 2 min |
-| Búsquedas | 30s - 1 min |
-
----
-
-# Caché - Implementación
-
----
-
-```javascript
-import NodeCache from 'node-cache';
-
-const cache = new NodeCache({ stdTTL: 60, checkperiod: 120 });
-
-async function execute(input) {
-  const cacheKey = `user:${input.userId}:${input.fields?.join(',') || 'default'}`;
-  
-  // Intentar caché
-  const cached = cache.get(cacheKey);
-  if (cached) {
-    return { success: true, data: cached, cached: true };
-  }
-  
-  // Obtener de DB
-  const user = await db.getUser(input.userId);
-  
-  // Filtrar campos
-  const fields = input.fields || ["id", "name", "email"];
-  const result = {};
-  for (const field of fields) {
-    if (user[field] !== undefined) {
-      result[field] = user[field];
+@mcp.tool
+def get_user_cached(user_id: str) -> dict:
+    """Obtiene usuario con caché."""
+    cache_key = f"user:{user_id}"
+    
+    # Intentar caché
+    cached = get_with_ttl(cache_key, ttl_seconds=60)
+    if cached:
+        return {
+            "success": True,
+            "data": cached,
+            "from_cache": True
+        }
+    
+    # Buscar en DB
+    user = db.get_user(user_id)
+    set_with_ttl(cache_key, user, ttl_seconds=60)
+    
+    return {
+        "success": True,
+        "data": user,
+        "from_cache": False
     }
-  }
-  
-  // Guardar en caché
-  cache.set(cacheKey, result);
-  
-  return { success: true, data: result, cached: false };
-}
-
-// Invalidar caché cuando el usuario cambia
-function invalidateUserCache(userId) {
-  cache.delByPattern(`user:${userId}:*`);
-}
 ```
 
 ---
 
 # Paralelización
 
-## Ejecutar en paralelo cuando sea posible
+## asyncio para operaciones paralelas
 
 ---
 
 **Secuencial (lento):**
 
-```javascript
-async function execute(input) {
-  const user = await db.getUser(input.userId);
-  const orders = await db.getOrders(input.userId);
-  const payments = await db.getPayments(input.userId);
-  
-  return {
-    success: true,
-    data: { user, orders, payments }
-  };
-}
-// Tiempo: t1 + t2 + t3
+```python
+@mcp.tool
+def get_user_dashboard(user_id: str) -> dict:
+    """Dashboard del usuario - secuencial."""
+    user = db.get_user(user_id)        # 100ms
+    orders = db.get_orders(user_id)    # 150ms
+    payments = db.get_payments(user_id) # 100ms
+    
+    return {
+        "success": True,
+        "data": {"user": user, "orders": orders, "payments": payments}
+    }
+# Total: 350ms
 ```
 
 ---
 
 **Paralelo (rápido):**
 
-```javascript
-async function execute(input) {
-  const [user, orders, payments] = await Promise.all([
-    db.getUser(input.userId),
-    db.getOrders(input.userId),
-    db.getPayments(input.userId)
-  ]);
-  
-  return {
-    success: true,
-    data: { user, orders, payments }
-  };
-}
-// Tiempo: max(t1, t2, t3)
+```python
+import asyncio
+
+@mcp.tool
+async def get_user_dashboard_async(user_id: str) -> dict:
+    """Dashboard del usuario - paralelo."""
+    # Ejecutar en paralelo
+    user, orders, payments = await asyncio.gather(
+        db.get_user_async(user_id),
+        db.get_orders_async(user_id),
+        db.get_payments_async(user_id)
+    )
+    
+    return {
+        "success": True,
+        "data": {"user": user, "orders": orders, "payments": payments}
+    }
+# Total: max(100, 150, 100) = 150ms
 ```
 
 ---
@@ -3245,26 +3598,27 @@ async function execute(input) {
 
 **Sin batching:**
 
-```javascript
-async function execute(input) {
-  const results = [];
-  for (const id of input.userIds) {
-    const user = await db.getUser(id);  // N llamadas
-    results.push(user);
-  }
-  return { success: true, data: results };
-}
+```python
+@mcp.tool
+def get_users_one_by_one(user_ids: list[str]) -> dict:
+    """❌ Ineficiente - N consultas."""
+    users = []
+    for user_id in user_ids:
+        user = db.get_user(user_id)  # 1 consulta por usuario
+        users.append(user)
+    return {"success": True, "data": users}
 ```
 
 ---
 
 **Con batching:**
 
-```javascript
-async function execute(input) {
-  const users = await db.getUsers(input.userIds);  // 1 llamada
-  return { success: true, data: users };
-}
+```python
+@mcp.tool
+def get_users_batch(user_ids: list[str]) -> dict:
+    """✅ Eficiente - 1 consulta."""
+    users = db.get_users(user_ids)  # 1 consulta para todos
+    return {"success": True, "data": users}
 ```
 
 ---
@@ -3309,33 +3663,52 @@ async function execute(input) {
 
 ---
 
-```javascript
-import { describe, it, expect } from 'vitest';
-import { getUser } from './tools/users.js';
+```python
+# tests/test_tools.py
+import pytest
+from unittest.mock import Mock, patch
+from tools.users import get_user, create_user
 
-describe('getUser', () => {
-  it('should return user when found', async () => {
-    const result = await getUser({ userId: 'usr_123' });
+class TestGetUser:
+    """Tests para get_user."""
     
-    expect(result.success).toBe(true);
-    expect(result.data.id).toBe('usr_123');
-    expect(result.data.name).toBeDefined();
-  });
-  
-  it('should return error when user not found', async () => {
-    const result = await getUser({ userId: 'usr_nonexistent' });
+    @pytest.fixture
+    def mock_db(self):
+        with patch("tools.users.db") as mock:
+            yield mock
     
-    expect(result.success).toBe(false);
-    expect(result.error.code).toBe('NOT_FOUND');
-  });
-  
-  it('should return error for invalid userId format', async () => {
-    const result = await getUser({ userId: 'invalid' });
+    @pytest.mark.asyncio
+    async def test_get_user_success(self, mock_db):
+        """Debe retornar usuario cuando existe."""
+        mock_db.get_user.return_value = {
+            "id": "usr_123",
+            "name": "Juan García",
+            "email": "juan@example.com"
+        }
+        
+        result = await get_user(user_id="usr_123")
+        
+        assert result["success"] is True
+        assert result["data"]["id"] == "usr_123"
+        assert result["data"]["name"] == "Juan García"
     
-    expect(result.success).toBe(false);
-    expect(result.error.code).toBe('VALIDATION_ERROR');
-  });
-});
+    @pytest.mark.asyncio
+    async def test_get_user_not_found(self, mock_db):
+        """Debe retornar error cuando no existe."""
+        mock_db.get_user.return_value = None
+        
+        result = await get_user(user_id="usr_nonexistent")
+        
+        assert result["success"] is False
+        assert result["error"]["code"] == "NOT_FOUND"
+    
+    @pytest.mark.asyncio
+    async def test_get_user_invalid_id(self, mock_db):
+        """Debe retornar error para ID inválido."""
+        result = await get_user(user_id="invalid!")
+        
+        assert result["success"] is False
+        assert result["error"]["code"] == "VALIDATION_ERROR"
 ```
 
 ---
@@ -3344,33 +3717,44 @@ describe('getUser', () => {
 
 ---
 
-```javascript
-describe('inputSchema validation', () => {
-  const schema = getUserTool.inputSchema;
-  
-  it('should require userId', () => {
-    const valid = validate(schema, {});
-    expect(valid).toBe(false);
-  });
-  
-  it('should accept valid userId', () => {
-    const valid = validate(schema, { userId: 'usr_abc123' });
-    expect(valid).toBe(true);
-  });
-  
-  it('should reject invalid userId format', () => {
-    const valid = validate(schema, { userId: 'invalid!' });
-    expect(valid).toBe(false);
-  });
-  
-  it('should accept optional fields parameter', () => {
-    const valid = validate(schema, { 
-      userId: 'usr_abc123',
-      fields: ['id', 'name']
-    });
-    expect(valid).toBe(true);
-  });
-});
+```python
+# tests/test_validation.py
+import pytest
+from pydantic import ValidationError
+from models.user import UserCreate, UserUpdate
+
+class TestUserValidation:
+    """Tests de validación de usuario."""
+    
+    def test_valid_user_create(self):
+        """Usuario válido debe pasar validación."""
+        user = UserCreate(
+            name="Juan García",
+            email="juan@example.com"
+        )
+        assert user.name == "Juan García"
+        assert user.email == "juan@example.com"
+    
+    def test_invalid_email(self):
+        """Email inválido debe fallar."""
+        with pytest.raises(ValidationError) as exc:
+            UserCreate(name="Juan", email="not-an-email")
+        
+        errors = exc.value.errors()
+        assert any("email" in str(e) for e in errors)
+    
+    def test_name_too_short(self):
+        """Nombre muy corto debe fallar."""
+        with pytest.raises(ValidationError) as exc:
+            UserCreate(name="J", email="juan@example.com")
+        
+        errors = exc.value.errors()
+        assert any("name" in str(e) for e in errors)
+    
+    def test_role_must_be_valid(self):
+        """Rol debe ser válido."""
+        with pytest.raises(ValidationError):
+            UserCreate(name="Juan", email="juan@example.com", role="invalid")
 ```
 
 ---
@@ -3379,148 +3763,124 @@ describe('inputSchema validation', () => {
 
 ---
 
-```javascript
-describe('error handling', () => {
-  it('should handle database errors gracefully', async () => {
-    // Mock DB error
-    vi.spyOn(db, 'getUser').mockRejectedValue(new Error('Connection refused'));
+```python
+# tests/test_errors.py
+import pytest
+from unittest.mock import Mock, patch
+from tools.users import delete_user
+from errors.handlers import Errors, to_response
+
+class TestErrorHandling:
+    """Tests de manejo de errores."""
     
-    const result = await getUser({ userId: 'usr_123' });
+    @pytest.mark.asyncio
+    async def test_database_error_graceful(self):
+        """Error de DB debe ser manejado graciosamente."""
+        with patch("tools.users.db") as mock_db:
+            mock_db.get_user.side_effect = Exception("Connection refused")
+            
+            result = await get_user(user_id="usr_123")
+            
+            assert result["success"] is False
+            assert result["error"]["code"] == "INTERNAL_ERROR"
+            # No exponer detalles internos
+            assert "Connection refused" not in str(result)
+            # Incluir request_id para depuración
+            assert result["error"].get("request_id") is not None
     
-    expect(result.success).toBe(false);
-    expect(result.error.code).toBe('INTERNAL_ERROR');
-    expect(result.error.message).not.toContain('Connection refused'); // No exponer detalles
-    expect(result.error.requestId).toBeDefined(); // Para depuración
-  });
-  
-  it('should handle authorization errors', async () => {
-    const context = { user: { id: 'usr_456', role: 'user' } };
-    
-    const result = await deleteUser({ userId: 'usr_123' }, context);
-    
-    expect(result.success).toBe(false);
-    expect(result.error.code).toBe('FORBIDDEN');
-  });
-});
+    @pytest.mark.asyncio
+    async def test_authorization_error(self):
+        """Error de autorización debe ser claro."""
+        context = {
+            "user": {
+                "id": "usr_456",
+                "role": "user"
+            }
+        }
+        
+        result = await delete_user(
+            user_id="usr_123",
+            context=context
+        )
+        
+        assert result["success"] is False
+        assert result["error"]["code"] == "FORBIDDEN"
 ```
 
 ---
 
 # Integration Tests
 
-## Probar con MCP SDK
+## Probar con MCP Inspector
 
 ---
 
-```javascript
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { MCPServer } from '@modelcontextprotocol/sdk';
-import { createServer } from './server.js';
+```python
+# tests/test_integration.py
+import pytest
+import subprocess
+import json
+import time
 
-describe('MCP Server Integration', () => {
-  let server;
-  let client;
-  
-  beforeAll(async () => {
-    server = await createServer();
-    await server.start();
-    client = await server.connect();
-  });
-  
-  afterAll(async () => {
-    await server.stop();
-  });
-  
-  it('should list tools', async () => {
-    const tools = await client.listTools();
+class TestMCPIntegration:
+    """Tests de integración con MCP."""
     
-    expect(tools).toContainEqual(
-      expect.objectContaining({ name: 'getUser' })
-    );
-  });
-  
-  it('should execute getUser tool', async () => {
-    const result = await client.callTool('getUser', { userId: 'usr_123' });
+    @pytest.fixture(scope="class")
+    def server_process(self):
+        """Inicia servidor MCP para tests."""
+        proc = subprocess.Popen(
+            ["python", "-m", "my_mcp_server"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        time.sleep(2)  # Esperar inicio
+        yield proc
+        proc.terminate()
     
-    expect(result.success).toBe(true);
-    expect(result.data.id).toBe('usr_123');
-  });
-  
-  it('should list resources', async () => {
-    const resources = await client.listResources();
+    def test_list_tools(self, server_process):
+        """Debe listar tools disponibles."""
+        request = {
+            "jsonrpc": "2.0",
+            "method": "tools/list",
+            "id": 1
+        }
+        
+        server_process.stdin.write(
+            (json.dumps(request) + "\n").encode()
+        )
+        server_process.stdin.flush()
+        
+        response = server_process.stdout.readline()
+        result = json.loads(response)
+        
+        assert "result" in result
+        assert "tools" in result["result"]
+        tool_names = [t["name"] for t in result["result"]["tools"]]
+        assert "get_user" in tool_names
     
-    expect(resources).toContainEqual(
-      expect.objectContaining({ uri: expect.stringContaining('users://') })
-    );
-  });
-});
-```
-
----
-
-# Probando Recursos
-
----
-
-```javascript
-describe('resources', () => {
-  it('should read user profile resource', async () => {
-    const result = await client.readResource('users://usr_123/profile');
-    
-    expect(result.contents).toHaveLength(1);
-    expect(result.contents[0].mimeType).toBe('application/json');
-    
-    const data = JSON.parse(result.contents[0].text);
-    expect(data.id).toBe('usr_123');
-  });
-  
-  it('should return error for non-existent resource', async () => {
-    await expect(
-      client.readResource('users://usr_nonexistent/profile')
-    ).rejects.toThrow('NOT_FOUND');
-  });
-  
-  it('should deny access to other users resources', async () => {
-    const context = { user: { id: 'usr_456' } };
-    
-    await expect(
-      client.readResource('users://usr_123/profile', context)
-    ).rejects.toThrow('FORBIDDEN');
-  });
-});
-```
-
----
-
-# Probando Prompts
-
----
-
-```javascript
-describe('prompts', () => {
-  it('should list available prompts', async () => {
-    const prompts = await client.listPrompts();
-    
-    expect(prompts).toContainEqual(
-      expect.objectContaining({ name: 'code-review' })
-    );
-  });
-  
-  it('should get prompt with arguments', async () => {
-    const result = await client.getPrompt('code-review', {
-      language: 'javascript'
-    });
-    
-    expect(result.messages).toBeDefined();
-    expect(result.messages[0].content.text).toContain('javascript');
-  });
-  
-  it('should validate required arguments', async () => {
-    await expect(
-      client.getPrompt('code-review', {})
-    ).rejects.toThrow('Falta argumento obligatorio');
-  });
-});
+    def test_call_tool(self, server_process):
+        """Debe ejecutar tool correctamente."""
+        request = {
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {
+                "name": "get_user",
+                "arguments": {"user_id": "usr_123"}
+            },
+            "id": 2
+        }
+        
+        server_process.stdin.write(
+            (json.dumps(request) + "\n").encode()
+        )
+        server_process.stdin.flush()
+        
+        response = server_process.stdout.readline()
+        result = json.loads(response)
+        
+        assert "result" in result
+        assert result["result"]["success"] is True
 ```
 
 ---
@@ -3541,89 +3901,117 @@ Servidor MCP que permite leer y escribir archivos en un directorio específico.
 
 ---
 
-**Decisiones de diseño:**
+```python
+# file_server.py
+from fastmcp import FastMCP
+from pathlib import Path
+import re
 
-1. **Seguridad:** Prevención de path traversal
-2. **Validación:** Nombres de archivo seguros
-3. **Autorización:** Directorio base restringido
-4. **Errores:** Mensajes claros pero sin exponer rutas internas
+mcp = FastMCP("file-server")
+BASE_DIR = Path("./data").resolve()
 
----
-
-```javascript
-import path from 'path';
-import fs from 'fs/promises';
-
-const BASE_DIR = path.resolve('./data');
-
-server.addTool({
-  name: "readFile",
-  description: "Lee el contenido de un archivo del directorio de datos",
-  inputSchema: {
-    properties: {
-      filename: {
-        type: "string",
-        pattern: "^[a-zA-Z0-9_.-]+$",
-        description: "Nombre del archivo (solo alfanuméricos, _, ., -)"
-      }
-    },
-    required: ["filename"]
-  },
-  annotations: { readOnlyHint: true },
-  
-  execute: async (input) => {
-    // Validar nombre
-    if (!input.filename.match(/^[a-zA-Z0-9_.-]+$/)) {
-      return {
-        success: false,
-        error: {
-          code: "INVALID_INPUT",
-          message: "Nombre de archivo inválido"
-        }
-      };
-    }
+@mcp.tool(annotations={"readOnlyHint": True})
+def read_file(
+    filename: Annotated[str, Field(
+        pattern=r"^[a-zA-Z0-9_.-]+$",
+        description="Nombre del archivo (solo alfanuméricos, _, ., -)"
+    )]
+) -> dict:
+    """Lee el contenido de un archivo del directorio de datos."""
     
-    // Resolver ruta de forma segura
-    const filePath = path.resolve(BASE_DIR, input.filename);
+    # Resolver ruta de forma segura
+    file_path = (BASE_DIR / filename).resolve()
     
-    // Verificar que está dentro del directorio permitido
-    if (!filePath.startsWith(BASE_DIR)) {
-      return {
-        success: false,
-        error: {
-          code: "FORBIDDEN",
-          message: "Acceso denegado"
-        }
-      };
-    }
-    
-    try {
-      const content = await fs.readFile(filePath, 'utf-8');
-      return {
-        success: true,
-        data: { content, filename: input.filename }
-      };
-    } catch (error) {
-      if (error.code === 'ENOENT') {
+    # Verificar que está dentro del directorio permitido
+    if not str(file_path).startswith(str(BASE_DIR)):
         return {
-          success: false,
-          error: {
-            code: "NOT_FOUND",
-            message: `Archivo ${input.filename} no encontrado`
-          }
-        };
-      }
-      
-      return {
-        success: false,
-        error: {
-          code: "INTERNAL_ERROR",
-          message: "Error al leer el archivo"
+            "success": False,
+            "error": {
+                "code": "FORBIDDEN",
+                "message": "Acceso denegado"
+            }
         }
-      };
-    }
-  }
-});
+    
+    try:
+        content = file_path.read_text(encoding="utf-8")
+        return {
+            "success": True,
+            "data": {
+                "content": content,
+                "filename": filename,
+                "size": len(content)
+            }
+        }
+    except FileNotFoundError:
+        return {
+            "success": False,
+            "error": {
+                "code": "NOT_FOUND",
+                "message": f"Archivo {filename} no encontrado"
+            }
+        }
+    except PermissionError:
+        return {
+            "success": False,
+            "error": {
+                "code": "FORBIDDEN",
+                "message": "Sin permisos para leer el archivo"
+            }
+        }
+
+@mcp.tool(annotations={"destructiveHint": False})
+def write_file(
+    filename: str,
+    content: str,
+    mode: Literal["write", "append"] = "write"
+) -> dict:
+    """Escribe contenido en un archivo."""
+    
+    # Validar nombre
+    if not re.match(r"^[a-zA-Z0-9_.-]+$", filename):
+        return {
+            "success": False,
+            "error": {
+                "code": "INVALID_INPUT",
+                "message": "Nombre de archivo inválido"
+            }
+        }
+    
+    # Resolver ruta de forma segura
+    file_path = (BASE_DIR / filename).resolve()
+    
+    if not str(file_path).startswith(str(BASE_DIR)):
+        return {
+            "success": False,
+            "error": {"code": "FORBIDDEN", "message": "Acceso denegado"}
+        }
+    
+    try:
+        if mode == "append":
+            with open(file_path, "a", encoding="utf-8") as f:
+                f.write(content)
+        else:
+            file_path.write_text(content, encoding="utf-8")
+        
+        return {
+            "success": True,
+            "data": {
+                "filename": filename,
+                "size": len(content),
+                "mode": mode
+            }
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": {
+                "code": "INTERNAL_ERROR",
+                "message": f"Error al escribir: {str(e)}"
+            }
+        }
+
+if __name__ == "__main__":
+    mcp.run()
 ```
 
 ---
@@ -3634,83 +4022,77 @@ server.addTool({
 
 ---
 
-**Requisito:**
+```python
+# db_server.py
+from fastmcp import FastMCP
+from typing import Literal
+from datetime import datetime
 
-Permitir consultas a base de datos con validación y paginación.
+mcp = FastMCP("database-server")
 
----
-
-```javascript
-server.addTool({
-  name: "queryUsers",
-  description: "Busca usuarios con filtros y paginación",
-  inputSchema: {
-    properties: {
-      filters: {
-        type: "object",
-        properties: {
-          status: { "enum": ["active", "inactive", "pending"] },
-          role: { "enum": ["admin", "user", "guest"] },
-          createdAfter: { type: "string", format: "date-time" },
-          createdBefore: { type: "string", format: "date-time" }
-        }
-      },
-      sort: {
-        type: "object",
-        properties: {
-          field: { "enum": ["createdAt", "name", "email"] },
-          order: { "enum": ["asc", "desc"] }
-        }
-      },
-      limit: { type: "integer", minimum: 1, maximum: 100, default: 20 },
-      offset: { type: "integer", minimum: 0, default: 0 }
-    }
-  },
-  annotations: { readOnlyHint: true },
-  
-  execute: async (input) => {
-    // Construir consulta segura
-    const query = db('users');
+@mcp.tool(annotations={"readOnlyHint": True})
+def query_users(
+    filters: dict | None = None,
+    sort_by: Literal["created_at", "name", "email"] = "created_at",
+    sort_order: Literal["asc", "desc"] = "desc",
+    limit: int = 20,
+    offset: int = 0
+) -> dict:
+    """Busca usuarios con filtros y paginación."""
     
-    // Aplicar filtros con whitelist
-    if (input.filters?.status) {
-      query.where('status', input.filters.status);
-    }
-    if (input.filters?.role) {
-      query.where('role', input.filters.role);
-    }
-    if (input.filters?.createdAfter) {
-      query.where('createdAt', '>=', new Date(input.filters.createdAfter));
-    }
+    # Construir query con filtros whitelist
+    query = db.query("users")
     
-    // Aplicar ordenamiento con whitelist
-    if (input.sort) {
-      query.orderBy(input.sort.field, input.sort.order || 'asc');
-    }
+    if filters:
+        # Solo permitir campos específicos
+        allowed_filters = ["status", "role", "created_after", "created_before"]
+        
+        for key, value in filters.items():
+            if key not in allowed_filters:
+                continue
+            
+            if key == "status" and value in ["active", "inactive", "pending"]:
+                query = query.where("status", value)
+            
+            elif key == "role" and value in ["admin", "user", "guest"]:
+                query = query.where("role", value)
+            
+            elif key == "created_after":
+                query = query.where("created_at", ">=", value)
+            
+            elif key == "created_before":
+                query = query.where("created_at", "<=", value)
     
-    // Aplicar paginación
-    query.limit(input.limit).offset(input.offset);
+    # Ordenamiento con whitelist
+    query = query.order_by(sort_by, sort_order)
     
-    // Ejecutar
-    const users = await query;
-    const total = await db('users').count('* as count').first();
+    # Paginación
+    query = query.limit(limit).offset(offset)
     
+    # Ejecutar
+    users = query.execute()
+    total = db.count("users")
+    
+    # Devolver solo campos necesarios
     return {
-      success: true,
-      data: {
-        items: users.map(u => ({
-          id: u.id,
-          name: u.name,
-          email: u.email,
-          status: u.status,
-          role: u.role
-        })),
-        total: total.count,
-        hasMore: (input.offset + input.limit) < total.count
-      }
-    };
-  }
-});
+        "success": True,
+        "data": {
+            "items": [
+                {
+                    "id": u.id,
+                    "name": u.name,
+                    "email": u.email,
+                    "status": u.status,
+                    "role": u.role
+                }
+                for u in users
+            ],
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+            "has_more": (offset + limit) < total
+        }
+    }
 ```
 
 ---
@@ -3721,83 +4103,95 @@ server.addTool({
 
 ---
 
-```javascript
-import axios from 'axios';
+```python
+# api_gateway.py
+from fastmcp import FastMCP
+import httpx
+import asyncio
 
-const api = axios.create({
-  baseURL: 'https://api.example.com',
-  timeout: 10000
-});
+mcp = FastMCP("api-gateway")
 
-server.addTool({
-  name: "getWeather",
-  description: "Obtiene el clima actual para una ciudad",
-  inputSchema: {
-    properties: {
-      city: {
-        type: "string",
-        description: "Nombre de la ciudad"
-      },
-      units: {
-        type: "string",
-        "enum": ["celsius", "fahrenheit"],
-        default: "celsius"
-      }
-    },
-    required: ["city"]
-  },
-  annotations: { readOnlyHint: true, openWorldHint: true },
-  
-  execute: async (input, context) => {
-    try {
-      const response = await api.get('/weather', {
-        params: {
-          city: input.city,
-          units: input.units
-        }
-      });
-      
-      return {
-        success: true,
-        data: {
-          temperature: response.data.temp,
-          conditions: response.data.conditions,
-          humidity: response.data.humidity
-        }
-      };
-      
-    } catch (error) {
-      if (error.response?.status === 404) {
+# Cliente HTTP con timeout
+client = httpx.AsyncClient(timeout=10.0)
+
+@mcp.tool(annotations={
+    "readOnlyHint": True,
+    "openWorldHint": True
+})
+async def get_weather(
+    city: str,
+    units: Literal["celsius", "fahrenheit"] = "celsius"
+) -> dict:
+    """Obtiene el clima actual para una ciudad."""
+    
+    try:
+        response = await client.get(
+            "https://api.weather.com/current",
+            params={"city": city, "units": units}
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            return {
+                "success": True,
+                "data": {
+                    "temperature": data["temp"],
+                    "conditions": data["conditions"],
+                    "humidity": data["humidity"],
+                    "city": city
+                }
+            }
+        
+        if response.status_code == 404:
+            return {
+                "success": False,
+                "error": {
+                    "code": "NOT_FOUND",
+                    "message": f"Ciudad '{city}' no encontrada"
+                }
+            }
+        
+        if response.status_code == 429:
+            retry_after = response.headers.get("retry-after", "60")
+            return {
+                "success": False,
+                "error": {
+                    "code": "RATE_LIMIT_EXCEEDED",
+                    "message": "Límite de peticiones excedido",
+                    "retry_after": int(retry_after)
+                }
+            }
+        
         return {
-          success: false,
-          error: {
-            code: "NOT_FOUND",
-            message: `Ciudad "${input.city}" no encontrada`
-          }
-        };
-      }
-      
-      if (error.response?.status === 429) {
-        return {
-          success: false,
-          error: {
-            code: "RATE_LIMIT_EXCEEDED",
-            message: "Límite de peticiones excedido",
-            retryAfter: error.response.headers['retry-after']
-          }
-        };
-      }
-      
-      return {
-        success: false,
-        error: {
-          code: "EXTERNAL_SERVICE_ERROR",
-          message: "Error al obtener información del clima"
+            "success": False,
+            "error": {
+                "code": "EXTERNAL_SERVICE_ERROR",
+                "message": f"Error del servicio: {response.status_code}"
+            }
         }
-      };
-    }
-  }
-});
+        
+    except httpx.TimeoutException:
+        return {
+            "success": False,
+            "error": {
+                "code": "TIMEOUT",
+                "message": "Tiempo de espera agotado",
+                "suggestion": "Inténtelo más tarde"
+            }
+        }
+    
+    except httpx.RequestError as e:
+        return {
+            "success": False,
+            "error": {
+                "code": "CONNECTION_ERROR",
+                "message": "Error de conexión",
+                "details": {"error": str(e)}
+            }
+        }
+
+if __name__ == "__main__":
+    mcp.run()
 ```
 
 ---
@@ -3810,8 +4204,8 @@ server.addTool({
 
 ### Descripciones
 
-- [ ] Todas las tools tienen descripciones claras
-- [ ] Todos los parámetros tienen descripción
+- [ ] Todas las tools tienen docstrings claros
+- [ ] Todos los parámetros tienen descripción con Field()
 - [ ] Los valores de enum están documentados
 - [ ] Se incluyen ejemplos para casos complejos
 
@@ -3819,18 +4213,18 @@ server.addTool({
 
 ### Validación
 
-- [ ] Todas las entradas se validan contra el esquema
-- [ ] Se validan rangos (min/max)
-- [ ] Se validan formatos (email, fecha, etc.)
+- [ ] Se usan tipos Annotated con Field para validación
+- [ ] Se validan rangos (ge, le)
+- [ ] Se validan formatos (pattern, email)
 - [ ] Se sanitizan strings antes de usar en consultas
 
 ---
 
 ### Seguridad
 
-- [ ] No se exponen credenciales
-- [ ] Se previene path traversal
-- [ ] Se previene SQL injection
+- [ ] No se exponen credenciales ni secrets
+- [ ] Se previene path traversal con Path.resolve()
+- [ ] Se previene SQL injection con parámetros
 - [ ] Se verifican permisos en cada operación
 
 ---
@@ -3840,7 +4234,7 @@ server.addTool({
 - [ ] Todos los errores tienen código
 - [ ] Los errores incluyen sugerencias
 - [ ] No se exponen detalles internos
-- [ ] Se genera requestId para depuración
+- [ ] Se genera request_id para depuración
 
 ---
 
@@ -3849,16 +4243,16 @@ server.addTool({
 - [ ] Se usa paginación para listas grandes
 - [ ] Se implementan cachés donde aplica
 - [ ] Se minimizan los tokens en respuestas
-- [ ] Se paralelizan operaciones independientes
+- [ ] Se usa asyncio para operaciones paralelas
 
 ---
 
 ### Testing
 
-- [ ] Unit tests para cada tool
+- [ ] Unit tests para cada tool con pytest
 - [ ] Tests de validación de entrada
 - [ ] Tests de manejo de errores
-- [ ] Integration tests con el protocolo
+- [ ] Integration tests con MCP Inspector
 
 ---
 
@@ -3882,7 +4276,7 @@ Usa los mismos nombres, estructuras y convenciones en todas las tools.
 
 ### 3. Validación exhaustiva
 
-Nunca confíes en la entrada. Valida todo.
+Nunca confíes en la entrada. Valida todo con Pydantic.
 
 ---
 
@@ -3941,17 +4335,17 @@ Un servicio sin tests no está completo.
 **Recursos:**
 
 - Documentación MCP: https://modelcontextprotocol.io/
-- SDK TypeScript: https://github.com/modelcontextprotocol/typescript-sdk
+- FastMCP: https://gofastmcp.com/
 - SDK Python: https://github.com/modelcontextprotocol/python-sdk
 
 ---
 
 **Próximos pasos:**
 
-1. Diseña tu primer servicio MCP
-2. Implementa las validaciones
+1. Diseña tu primer servicio MCP con FastMCP
+2. Implementa las validaciones con Pydantic
 3. Añade manejo de errores estructurado
-4. Escribe tests
+4. Escribe tests con pytest
 5. Despliega y monitorea
 
 ---
