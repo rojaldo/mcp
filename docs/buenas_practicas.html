@@ -4021,57 +4021,964 @@ client = httpx.AsyncClient(timeout=<span class="hljs-number">10.0</span>)
 </ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="237" lang="en-US">
+<h1 id="parte-11-sampling">PARTE 11: SAMPLING</h1>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="238" lang="en-US">
+<h1 id="%C2%BFqu%C3%A9-es-sampling">¿Qué es Sampling?</h1>
+<h2 id="solicitar-generaciones-de-llm-desde-el-servidor">Solicitar generaciones de LLM desde el servidor</h2>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="239" lang="en-US">
+<p><strong>Definición:</strong></p>
+<p><strong>Sampling</strong> es una característica de MCP que permite a un servidor solicitar al cliente que genere texto usando su modelo de lenguaje. Esto permite flujos de trabajo donde el servidor puede pedir al LLM que procese datos, genere contenido o tome decisiones.</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="240" lang="en-US">
+<p><strong>Casos de uso:</strong></p>
+<ul>
+<li>Generación de texto bajo demanda</li>
+<li>Análisis de contenido</li>
+<li>Resúmenes automáticos</li>
+<li>Traducción de textos</li>
+<li>Clasificación inteligente</li>
+<li>Toma de decisiones asistida por LLM</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="241" lang="en-US">
+<h1 id="sampling-en-fastmcp">Sampling en FastMCP</h1>
+<h2 id="conceptos-b%C3%A1sicos">Conceptos básicos</h2>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="242" lang="en-US">
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-keyword">from</span> fastmcp <span class="hljs-keyword">import</span> FastMCP
+<span class="hljs-keyword">from</span> fastmcp.server.sampling <span class="hljs-keyword">import</span> SampleRequest, SampleResult
+
+mcp = FastMCP(<span class="hljs-string">&quot;mi-servidor&quot;</span>)
+
+<span class="hljs-meta">@mcp.tool</span>
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">analyze_sentiment</span>(<span class="hljs-params">text: <span class="hljs-built_in">str</span></span>) -&gt; <span class="hljs-built_in">dict</span>:
+ <span class="hljs-string">&quot;&quot;&quot;Analiza el sentimiento de un texto usando el LLM del cliente.&quot;&quot;&quot;</span>
+ 
+ <span class="hljs-comment"># Crear solicitud de sampling</span>
+ request = SampleRequest(
+ messages=[
+ {<span class="hljs-string">&quot;role&quot;</span>: <span class="hljs-string">&quot;user&quot;</span>, <span class="hljs-string">&quot;content&quot;</span>: <span class="hljs-string">f&quot;Analiza el sentimiento del siguiente texto. Responde SOLO con: positivo, negativo o neutral.\n\nTexto: <span class="hljs-subst">{text}</span>&quot;</span>}
+ ],
+ max_tokens=<span class="hljs-number">10</span>,
+ temperature=<span class="hljs-number">0.0</span>  <span class="hljs-comment"># Determinístico</span>
+ )
+ 
+ <span class="hljs-comment"># Solicitar sampling al cliente</span>
+ result: SampleResult = <span class="hljs-keyword">await</span> mcp.sample(request)
+ 
+ sentiment = result.content.strip().lower()
+ 
+ <span class="hljs-keyword">return</span> {
+ <span class="hljs-string">&quot;success&quot;</span>: <span class="hljs-literal">True</span>,
+ <span class="hljs-string">&quot;data&quot;</span>: {
+ <span class="hljs-string">&quot;sentiment&quot;</span>: sentiment,
+ <span class="hljs-string">&quot;confidence&quot;</span>: result.model.get(<span class="hljs-string">&quot;confidence&quot;</span>, <span class="hljs-string">&quot;unknown&quot;</span>)
+ }
+ }
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="243" lang="en-US">
+<h1 id="par%C3%A1metros-de-samplerequest">Parámetros de SampleRequest</h1>
+<h2 id="configuraci%C3%B3n-de-la-generaci%C3%B3n">Configuración de la generación</h2>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="244" lang="en-US">
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-keyword">from</span> fastmcp.server.sampling <span class="hljs-keyword">import</span> SampleRequest
+<span class="hljs-keyword">from</span> typing <span class="hljs-keyword">import</span> <span class="hljs-type">Literal</span>
+
+request = SampleRequest(
+ <span class="hljs-comment"># Mensajes para el LLM (formato OpenAI-like)</span>
+ messages=[
+ {<span class="hljs-string">&quot;role&quot;</span>: <span class="hljs-string">&quot;system&quot;</span>, <span class="hljs-string">&quot;content&quot;</span>: <span class="hljs-string">&quot;Eres un asistente especializado en clasificación.&quot;</span>},
+ {<span class="hljs-string">&quot;role&quot;</span>: <span class="hljs-string">&quot;user&quot;</span>, <span class="hljs-string">&quot;content&quot;</span>: <span class="hljs-string">&quot;Clasifica este texto...&quot;</span>}
+ ],
+ 
+ <span class="hljs-comment"># Límite de tokens</span>
+ max_tokens=<span class="hljs-number">100</span>,
+ 
+ <span class="hljs-comment"># Temperatura (0.0 = determinístico, 1.0 = creativo)</span>
+ temperature=<span class="hljs-number">0.3</span>,
+ 
+ <span class="hljs-comment"># Modelo preferido (opcional)</span>
+ model_preferences=[<span class="hljs-string">&quot;claude-3-sonnet&quot;</span>, <span class="hljs-string">&quot;gpt-4o&quot;</span>],
+ 
+ <span class="hljs-comment"># Stop tokens (opcional)</span>
+ stop=[<span class="hljs-string">&quot;\n&quot;</span>, <span class="hljs-string">&quot;END&quot;</span>],
+ 
+ <span class="hljs-comment"># Top-p sampling (opcional)</span>
+ top_p=<span class="hljs-number">0.9</span>,
+ 
+ <span class="hljs-comment"># Top-k sampling (opcional)</span>
+ top_k=<span class="hljs-number">50</span>
+)
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="245" lang="en-US">
+<h1 id="ejemplo-generaci%C3%B3n-de-res%C3%BAmenes">Ejemplo: Generación de Resúmenes</h1>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="246" lang="en-US">
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-keyword">from</span> fastmcp <span class="hljs-keyword">import</span> FastMCP
+<span class="hljs-keyword">from</span> fastmcp.server.sampling <span class="hljs-keyword">import</span> SampleRequest
+
+mcp = FastMCP(<span class="hljs-string">&quot;document-server&quot;</span>)
+
+<span class="hljs-meta">@mcp.tool</span>
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">summarize_document</span>(<span class="hljs-params">
+ doc_id: <span class="hljs-built_in">str</span>,
+ max_length: <span class="hljs-built_in">int</span> = <span class="hljs-number">200</span>
+</span>) -&gt; <span class="hljs-built_in">dict</span>:
+ <span class="hljs-string">&quot;&quot;&quot;Genera un resumen de un documento usando el LLM del cliente.&quot;&quot;&quot;</span>
+ 
+ <span class="hljs-comment"># Obtener documento</span>
+ doc = db.get_document(doc_id)
+ <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> doc:
+ <span class="hljs-keyword">return</span> {<span class="hljs-string">&quot;success&quot;</span>: <span class="hljs-literal">False</span>, <span class="hljs-string">&quot;error&quot;</span>: {<span class="hljs-string">&quot;code&quot;</span>: <span class="hljs-string">&quot;NOT_FOUND&quot;</span>}}
+ 
+ <span class="hljs-comment"># Verificar longitud</span>
+ <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(doc.content) &lt; <span class="hljs-number">100</span>:
+ <span class="hljs-keyword">return</span> {
+ <span class="hljs-string">&quot;success&quot;</span>: <span class="hljs-literal">True</span>,
+ <span class="hljs-string">&quot;data&quot;</span>: {
+ <span class="hljs-string">&quot;summary&quot;</span>: doc.content,
+ <span class="hljs-string">&quot;method&quot;</span>: <span class="hljs-string">&quot;original_too_short&quot;</span>
+ }
+ }
+ 
+ <span class="hljs-comment"># Solicitar resumen al LLM</span>
+ request = SampleRequest(
+ messages=[
+ {
+ <span class="hljs-string">&quot;role&quot;</span>: <span class="hljs-string">&quot;system&quot;</span>,
+ <span class="hljs-string">&quot;content&quot;</span>: <span class="hljs-string">&quot;Eres un experto en resumir documentos. &quot;</span>
+ <span class="hljs-string">&quot;Genera resúmenes concisos y precisos.&quot;</span>
+ },
+ {
+ <span class="hljs-string">&quot;role&quot;</span>: <span class="hljs-string">&quot;user&quot;</span>,
+ <span class="hljs-string">&quot;content&quot;</span>: <span class="hljs-string">f&quot;Resume el siguiente documento en máximo <span class="hljs-subst">{max_length}</span> palabras:\n\n<span class="hljs-subst">{doc.content[:<span class="hljs-number">5000</span>]}</span>&quot;</span>
+ }
+ ],
+ max_tokens=max_length * <span class="hljs-number">4</span>, <span class="hljs-comment"># ~4 tokens por palabra</span>
+ temperature=<span class="hljs-number">0.3</span>
+ )
+ 
+ result = <span class="hljs-keyword">await</span> mcp.sample(request)
+ 
+ <span class="hljs-keyword">return</span> {
+ <span class="hljs-string">&quot;success&quot;</span>: <span class="hljs-literal">True</span>,
+ <span class="hljs-string">&quot;data&quot;</span>: {
+ <span class="hljs-string">&quot;summary&quot;</span>: result.content,
+ <span class="hljs-string">&quot;original_length&quot;</span>: <span class="hljs-built_in">len</span>(doc.content),
+ <span class="hljs-string">&quot;summary_length&quot;</span>: <span class="hljs-built_in">len</span>(result.content),
+ <span class="hljs-string">&quot;doc_id&quot;</span>: doc_id
+ }
+ }
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="247" lang="en-US">
+<h1 id="ejemplo-clasificaci%C3%B3n-inteligente">Ejemplo: Clasificación Inteligente</h1>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="248" lang="en-US">
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-keyword">from</span> fastmcp <span class="hljs-keyword">import</span> FastMCP
+<span class="hljs-keyword">from</span> fastmcp.server.sampling <span class="hljs-keyword">import</span> SampleRequest
+<span class="hljs-keyword">import</span> json
+
+mcp = FastMCP(<span class="hljs-string">&quot;classifier-server&quot;</span>)
+
+<span class="hljs-meta">@mcp.tool</span>
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">classify_ticket</span>(<span class="hljs-params">
+ ticket_id: <span class="hljs-built_in">str</span>,
+ categories: <span class="hljs-built_in">list</span>[<span class="hljs-built_in">str</span>] = <span class="hljs-literal">None</span>
+</span>) -&gt; <span class="hljs-built_in">dict</span>:
+ <span class="hljs-string">&quot;&quot;&quot;Clasifica un ticket de soporte usando el LLM.&quot;&quot;&quot;</span>
+ 
+ <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> categories:
+ categories = [<span class="hljs-string">&quot;technical&quot;</span>, <span class="hljs-string">&quot;billing&quot;</span>, <span class="hljs-string">&quot;general&quot;</span>, <span class="hljs-string">&quot;urgent&quot;</span>, <span class="hljs-string">&quot;feature_request&quot;</span>]
+ 
+ ticket = db.get_ticket(ticket_id)
+ <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> ticket:
+ <span class="hljs-keyword">return</span> {<span class="hljs-string">&quot;success&quot;</span>: <span class="hljs-literal">False</span>, <span class="hljs-string">&quot;error&quot;</span>: {<span class="hljs-string">&quot;code&quot;</span>: <span class="hljs-string">&quot;NOT_FOUND&quot;</span>}}
+ 
+ <span class="hljs-comment"># Prompt de clasificación</span>
+ prompt = <span class="hljs-string">f&quot;&quot;&quot;Clasifica el siguiente ticket de soporte.
+
+Categorías disponibles: <span class="hljs-subst">{<span class="hljs-string">&#x27;, &#x27;</span>.join(categories)}</span>
+
+Responde SOLO con un JSON válido:
+{{&quot;category&quot;: &quot;categoria&quot;, &quot;confidence&quot;: 0.95, &quot;reason&quot;: &quot;breve explicación&quot;}}
+
+Ticket:
+Asunto: <span class="hljs-subst">{ticket.subject}</span>
+Descripción: <span class="hljs-subst">{ticket.description}</span>
+&quot;&quot;&quot;</span>
+
+ request = SampleRequest(
+ messages=[{<span class="hljs-string">&quot;role&quot;</span>: <span class="hljs-string">&quot;user&quot;</span>, <span class="hljs-string">&quot;content&quot;</span>: prompt}],
+ max_tokens=<span class="hljs-number">150</span>,
+ temperature=<span class="hljs-number">0.0</span> <span class="hljs-comment"># Determinístico</span>
+ )
+ 
+ result = <span class="hljs-keyword">await</span> mcp.sample(request)
+ 
+ <span class="hljs-comment"># Parsear respuesta</span>
+ <span class="hljs-keyword">try</span>:
+ classification = json.loads(result.content)
+ <span class="hljs-keyword">return</span> {
+ <span class="hljs-string">&quot;success&quot;</span>: <span class="hljs-literal">True</span>,
+ <span class="hljs-string">&quot;data&quot;</span>: {
+ <span class="hljs-string">&quot;ticket_id&quot;</span>: ticket_id,
+ <span class="hljs-string">&quot;category&quot;</span>: classification.get(<span class="hljs-string">&quot;category&quot;</span>),
+ <span class="hljs-string">&quot;confidence&quot;</span>: classification.get(<span class="hljs-string">&quot;confidence&quot;</span>),
+ <span class="hljs-string">&quot;reason&quot;</span>: classification.get(<span class="hljs-string">&quot;reason&quot;</span>)
+ }
+ }
+ <span class="hljs-keyword">except</span> json.JSONDecodeError:
+ <span class="hljs-keyword">return</span> {
+ <span class="hljs-string">&quot;success&quot;</span>: <span class="hljs-literal">False</span>,
+ <span class="hljs-string">&quot;error&quot;</span>: {
+ <span class="hljs-string">&quot;code&quot;</span>: <span class="hljs-string">&quot;PARSE_ERROR&quot;</span>,
+ <span class="hljs-string">&quot;message&quot;</span>: <span class="hljs-string">&quot;No se pudo parsear la clasificación&quot;</span>
+ }
+ }
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="249" lang="en-US">
+<h1 id="sampling-con-contexto-de-conversaci%C3%B3n">Sampling con Contexto de Conversación</h1>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="250" lang="en-US">
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-keyword">from</span> fastmcp <span class="hljs-keyword">import</span> FastMCP
+<span class="hljs-keyword">from</span> fastmcp.server.sampling <span class="hljs-keyword">import</span> SampleRequest
+
+mcp = FastMCP(<span class="hljs-string">&quot;chat-server&quot;</span>)
+
+<span class="hljs-meta">@mcp.tool</span>
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">suggest_response</span>(<span class="hljs-params">
+ conversation_id: <span class="hljs-built_in">str</span>,
+ context: <span class="hljs-built_in">str</span> = <span class="hljs-string">&quot;&quot;</span>
+</span>) -&gt; <span class="hljs-built_in">dict</span>:
+ <span class="hljs-string">&quot;&quot;&quot;Sugiere una respuesta para una conversación.&quot;&quot;&quot;</span>
+ 
+ <span class="hljs-comment"># Obtener historial</span>
+ messages = db.get_conversation_messages(conversation_id)
+ 
+ <span class="hljs-comment"># Construir contexto para el LLM</span>
+ llm_messages = [
+ {
+ <span class="hljs-string">&quot;role&quot;</span>: <span class="hljs-string">&quot;system&quot;</span>,
+ <span class="hljs-string">&quot;content&quot;</span>: <span class="hljs-string">f&quot;Eres un asistente útil. <span class="hljs-subst">{context}</span>&quot;</span>
+ }
+ ]
+ 
+ <span class="hljs-comment"># Añadir historial</span>
+ <span class="hljs-keyword">for</span> msg <span class="hljs-keyword">in</span> messages[-<span class="hljs-number">10</span>:]: <span class="hljs-comment"># Últimos 10 mensajes</span>
+ llm_messages.append({
+ <span class="hljs-string">&quot;role&quot;</span>: msg.role,
+ <span class="hljs-string">&quot;content&quot;</span>: msg.content
+ })
+ 
+ <span class="hljs-comment"># Solicitar sugerencia</span>
+ llm_messages.append({
+ <span class="hljs-string">&quot;role&quot;</span>: <span class="hljs-string">&quot;user&quot;</span>,
+ <span class="hljs-string">&quot;content&quot;</span>: <span class="hljs-string">&quot;Sugiere la próxima respuesta:&quot;</span>
+ })
+ 
+ request = SampleRequest(
+ messages=llm_messages,
+ max_tokens=<span class="hljs-number">500</span>,
+ temperature=<span class="hljs-number">0.7</span>
+ )
+ 
+ result = <span class="hljs-keyword">await</span> mcp.sample(request)
+ 
+ <span class="hljs-keyword">return</span> {
+ <span class="hljs-string">&quot;success&quot;</span>: <span class="hljs-literal">True</span>,
+ <span class="hljs-string">&quot;data&quot;</span>: {
+ <span class="hljs-string">&quot;suggestion&quot;</span>: result.content,
+ <span class="hljs-string">&quot;conversation_id&quot;</span>: conversation_id
+ }
+ }
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="251" lang="en-US">
+<h1 id="buenas-pr%C3%A1cticas-para-sampling">Buenas Prácticas para Sampling</h1>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="252" lang="en-US">
+<h3 id="1-usar-temperaturas-bajas-para-tareas-determin%C3%ADsticas">1. Usar temperaturas bajas para tareas determinísticas</h3>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-comment"># Clasificación, extracción, parsing</span>
+request = SampleRequest(temperature=<span class="hljs-number">0.0</span>)
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="253" lang="en-US">
+<h3 id="2-limitar-tokens-apropiadamente">2. Limitar tokens apropiadamente</h3>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-comment"># Solo lo necesario</span>
+request = SampleRequest(max_tokens=<span class="hljs-number">50</span>) <span class="hljs-comment"># Para respuestas cortas</span>
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="254" lang="en-US">
+<h3 id="3-proporcionar-contexto-claro">3. Proporcionar contexto claro</h3>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">messages=[
+ {<span class="hljs-string">&quot;role&quot;</span>: <span class="hljs-string">&quot;system&quot;</span>, <span class="hljs-string">&quot;content&quot;</span>: <span class="hljs-string">&quot;Eres un experto en...&quot;</span>},
+ {<span class="hljs-string">&quot;role&quot;</span>: <span class="hljs-string">&quot;user&quot;</span>, <span class="hljs-string">&quot;content&quot;</span>: <span class="hljs-string">&quot;Instrucción específica...&quot;</span>}
+]
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="255" lang="en-US">
+<h3 id="4-manejar-errores-de-conexi%C3%B3n">4. Manejar errores de conexión</h3>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-keyword">try</span>:
+ result = <span class="hljs-keyword">await</span> mcp.sample(request)
+<span class="hljs-keyword">except</span> SamplingError <span class="hljs-keyword">as</span> e:
+ <span class="hljs-keyword">return</span> {
+ <span class="hljs-string">&quot;success&quot;</span>: <span class="hljs-literal">False</span>,
+ <span class="hljs-string">&quot;error&quot;</span>: {
+ <span class="hljs-string">&quot;code&quot;</span>: <span class="hljs-string">&quot;SAMPLING_UNAVAILABLE&quot;</span>,
+ <span class="hljs-string">&quot;message&quot;</span>: <span class="hljs-string">&quot;El cliente no soporta sampling&quot;</span>
+ }
+ }
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="256" lang="en-US">
+<h1 id="parte-12-elicitation">PARTE 12: ELICITATION</h1>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="257" lang="en-US">
+<h1 id="%C2%BFqu%C3%A9-es-elicitation">¿Qué es Elicitation?</h1>
+<h2 id="solicitar-informaci%C3%B3n-al-usuario-desde-el-servidor">Solicitar información al usuario desde el servidor</h2>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="258" lang="en-US">
+<p><strong>Definición:</strong></p>
+<p><strong>Elicitation</strong> es una característica de MCP que permite al servidor solicitar información adicional al usuario durante la ejecución de una tool. Esto es útil cuando faltan parámetros o se necesita confirmación.</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="259" lang="en-US">
+<p><strong>Casos de uso:</strong></p>
+<ul>
+<li>Solicitar parámetros faltantes</li>
+<li>Pedir confirmación antes de acciones destructivas</li>
+<li>Clarificar ambigüedades</li>
+<li>Obtener preferencias del usuario</li>
+<li>Autenticación interactiva</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="260" lang="en-US">
+<h1 id="elicitation-en-fastmcp">Elicitation en FastMCP</h1>
+<h2 id="conceptos-b%C3%A1sicos-1">Conceptos básicos</h2>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="261" lang="en-US">
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-keyword">from</span> fastmcp <span class="hljs-keyword">import</span> FastMCP
+<span class="hljs-keyword">from</span> fastmcp.server.elicitation <span class="hljs-keyword">import</span> ElicitRequest, ElicitResult
+
+mcp = FastMCP(<span class="hljs-string">&quot;mi-servidor&quot;</span>)
+
+<span class="hljs-meta">@mcp.tool</span>
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">delete_user</span>(<span class="hljs-params">user_id: <span class="hljs-built_in">str</span></span>) -&gt; <span class="hljs-built_in">dict</span>:
+ <span class="hljs-string">&quot;&quot;&quot;Elimina un usuario con confirmación.&quot;&quot;&quot;</span>
+ 
+ <span class="hljs-comment"># Verificar que existe</span>
+ user = db.get_user(user_id)
+ <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> user:
+ <span class="hljs-keyword">return</span> {<span class="hljs-string">&quot;success&quot;</span>: <span class="hljs-literal">False</span>, <span class="hljs-string">&quot;error&quot;</span>: {<span class="hljs-string">&quot;code&quot;</span>: <span class="hljs-string">&quot;NOT_FOUND&quot;</span>}}
+ 
+ <span class="hljs-comment"># Solicitar confirmación</span>
+ request = ElicitRequest(
+ message=<span class="hljs-string">f&quot;¿Estás seguro de que deseas eliminar al usuario &#x27;<span class="hljs-subst">{user.name}</span>&#x27; (<span class="hljs-subst">{user.email}</span>)? Esta acción es irreversible.&quot;</span>,
+ 
+ <span class="hljs-comment"># Campos a solicitar</span>
+ fields={
+ <span class="hljs-string">&quot;confirm&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;boolean&quot;</span>,
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;Confirmar eliminación&quot;</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">True</span>
+ },
+ <span class="hljs-string">&quot;reason&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;Razón de la eliminación (opcional)&quot;</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">False</span>
+ }
+ }
+ )
+ 
+ <span class="hljs-comment"># Solicitar input al usuario</span>
+ result: ElicitResult = <span class="hljs-keyword">await</span> mcp.elicit(request)
+ 
+ <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> result.values.get(<span class="hljs-string">&quot;confirm&quot;</span>):
+ <span class="hljs-keyword">return</span> {
+ <span class="hljs-string">&quot;success&quot;</span>: <span class="hljs-literal">False</span>,
+ <span class="hljs-string">&quot;error&quot;</span>: {
+ <span class="hljs-string">&quot;code&quot;</span>: <span class="hljs-string">&quot;CANCELLED&quot;</span>,
+ <span class="hljs-string">&quot;message&quot;</span>: <span class="hljs-string">&quot;Eliminación cancelada por el usuario&quot;</span>
+ }
+ }
+ 
+ <span class="hljs-comment"># Proceder con eliminación</span>
+ db.delete_user(user_id)
+ 
+ <span class="hljs-keyword">return</span> {
+ <span class="hljs-string">&quot;success&quot;</span>: <span class="hljs-literal">True</span>,
+ <span class="hljs-string">&quot;data&quot;</span>: {
+ <span class="hljs-string">&quot;deleted&quot;</span>: <span class="hljs-literal">True</span>,
+ <span class="hljs-string">&quot;reason&quot;</span>: result.values.get(<span class="hljs-string">&quot;reason&quot;</span>, <span class="hljs-string">&quot;No especificada&quot;</span>)
+ }
+ }
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="262" lang="en-US">
+<h1 id="tipos-de-campos-en-elicitation">Tipos de Campos en Elicitation</h1>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="263" lang="en-US">
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-keyword">from</span> fastmcp.server.elicitation <span class="hljs-keyword">import</span> ElicitRequest
+
+request = ElicitRequest(
+ message=<span class="hljs-string">&quot;Proporciona la información necesaria:&quot;</span>,
+ 
+ fields={
+ <span class="hljs-comment"># String simple</span>
+ <span class="hljs-string">&quot;name&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;Nombre del usuario&quot;</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">True</span>
+ },
+ 
+ <span class="hljs-comment"># Email con validación</span>
+ <span class="hljs-string">&quot;email&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+ <span class="hljs-string">&quot;format&quot;</span>: <span class="hljs-string">&quot;email&quot;</span>,
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;Email del usuario&quot;</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">True</span>
+ },
+ 
+ <span class="hljs-comment"># Número con restricciones</span>
+ <span class="hljs-string">&quot;age&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;integer&quot;</span>,
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;Edad del usuario&quot;</span>,
+ <span class="hljs-string">&quot;minimum&quot;</span>: <span class="hljs-number">0</span>,
+ <span class="hljs-string">&quot;maximum&quot;</span>: <span class="hljs-number">150</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">False</span>
+ },
+ 
+ <span class="hljs-comment"># Booleano</span>
+ <span class="hljs-string">&quot;newsletter&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;boolean&quot;</span>,
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;¿Suscribirse al newsletter?&quot;</span>,
+ <span class="hljs-string">&quot;default&quot;</span>: <span class="hljs-literal">False</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">False</span>
+ },
+ 
+ <span class="hljs-comment"># Selección (enum)</span>
+ <span class="hljs-string">&quot;role&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+ <span class="hljs-string">&quot;enum&quot;</span>: [<span class="hljs-string">&quot;admin&quot;</span>, <span class="hljs-string">&quot;user&quot;</span>, <span class="hljs-string">&quot;guest&quot;</span>],
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;Rol del usuario&quot;</span>,
+ <span class="hljs-string">&quot;default&quot;</span>: <span class="hljs-string">&quot;user&quot;</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">True</span>
+ },
+ 
+ <span class="hljs-comment"># Texto largo</span>
+ <span class="hljs-string">&quot;bio&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+ <span class="hljs-string">&quot;format&quot;</span>: <span class="hljs-string">&quot;textarea&quot;</span>,
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;Biografía del usuario&quot;</span>,
+ <span class="hljs-string">&quot;maxLength&quot;</span>: <span class="hljs-number">500</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">False</span>
+ }
+ }
+)
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="264" lang="en-US">
+<h1 id="ejemplo-formulario-de-usuario">Ejemplo: Formulario de Usuario</h1>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="265" lang="en-US">
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-keyword">from</span> fastmcp <span class="hljs-keyword">import</span> FastMCP
+<span class="hljs-keyword">from</span> fastmcp.server.elicitation <span class="hljs-keyword">import</span> ElicitRequest, ElicitResult
+
+mcp = FastMCP(<span class="hljs-string">&quot;user-management&quot;</span>)
+
+<span class="hljs-meta">@mcp.tool</span>
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">create_user_interactive</span>() -&gt; <span class="hljs-built_in">dict</span>:
+ <span class="hljs-string">&quot;&quot;&quot;Crea un usuario interactuando con el usuario.&quot;&quot;&quot;</span>
+ 
+ <span class="hljs-comment"># Solicitar información</span>
+ request = ElicitRequest(
+ message=<span class="hljs-string">&quot;Proporciona los datos del nuevo usuario:&quot;</span>,
+ 
+ fields={
+ <span class="hljs-string">&quot;name&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;Nombre completo del usuario&quot;</span>,
+ <span class="hljs-string">&quot;minLength&quot;</span>: <span class="hljs-number">2</span>,
+ <span class="hljs-string">&quot;maxLength&quot;</span>: <span class="hljs-number">100</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">True</span>
+ },
+ 
+ <span class="hljs-string">&quot;email&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+ <span class="hljs-string">&quot;format&quot;</span>: <span class="hljs-string">&quot;email&quot;</span>,
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;Email del usuario&quot;</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">True</span>
+ },
+ 
+ <span class="hljs-string">&quot;role&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+ <span class="hljs-string">&quot;enum&quot;</span>: [<span class="hljs-string">&quot;admin&quot;</span>, <span class="hljs-string">&quot;user&quot;</span>, <span class="hljs-string">&quot;guest&quot;</span>],
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;Rol del usuario&quot;</span>,
+ <span class="hljs-string">&quot;default&quot;</span>: <span class="hljs-string">&quot;user&quot;</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">True</span>
+ },
+ 
+ <span class="hljs-string">&quot;department&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;Departamento (opcional)&quot;</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">False</span>
+ },
+ 
+ <span class="hljs-string">&quot;send_welcome&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;boolean&quot;</span>,
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;¿Enviar email de bienvenida?&quot;</span>,
+ <span class="hljs-string">&quot;default&quot;</span>: <span class="hljs-literal">True</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">False</span>
+ }
+ }
+ )
+ 
+ result: ElicitResult = <span class="hljs-keyword">await</span> mcp.elicit(request)
+ 
+ <span class="hljs-comment"># Validar email</span>
+ <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> is_valid_email(result.values.get(<span class="hljs-string">&quot;email&quot;</span>)):
+ <span class="hljs-keyword">return</span> {
+ <span class="hljs-string">&quot;success&quot;</span>: <span class="hljs-literal">False</span>,
+ <span class="hljs-string">&quot;error&quot;</span>: {
+ <span class="hljs-string">&quot;code&quot;</span>: <span class="hljs-string">&quot;INVALID_EMAIL&quot;</span>,
+ <span class="hljs-string">&quot;message&quot;</span>: <span class="hljs-string">&quot;El email proporcionado no es válido&quot;</span>
+ }
+ }
+ 
+ <span class="hljs-comment"># Crear usuario</span>
+ user = db.create_user(
+ name=result.values[<span class="hljs-string">&quot;name&quot;</span>],
+ email=result.values[<span class="hljs-string">&quot;email&quot;</span>],
+ role=result.values[<span class="hljs-string">&quot;role&quot;</span>],
+ department=result.values.get(<span class="hljs-string">&quot;department&quot;</span>),
+ send_welcome=result.values.get(<span class="hljs-string">&quot;send_welcome&quot;</span>, <span class="hljs-literal">True</span>)
+ )
+ 
+ <span class="hljs-keyword">return</span> {
+ <span class="hljs-string">&quot;success&quot;</span>: <span class="hljs-literal">True</span>,
+ <span class="hljs-string">&quot;data&quot;</span>: {
+ <span class="hljs-string">&quot;user_id&quot;</span>: user.<span class="hljs-built_in">id</span>,
+ <span class="hljs-string">&quot;name&quot;</span>: user.name,
+ <span class="hljs-string">&quot;email&quot;</span>: user.email,
+ <span class="hljs-string">&quot;role&quot;</span>: user.role
+ }
+ }
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="266" lang="en-US">
+<h1 id="ejemplo-confirmaci%C3%B3n-de-pago">Ejemplo: Confirmación de Pago</h1>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="267" lang="en-US">
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-keyword">from</span> fastmcp <span class="hljs-keyword">import</span> FastMCP
+<span class="hljs-keyword">from</span> fastmcp.server.elicitation <span class="hljs-keyword">import</span> ElicitRequest
+
+mcp = FastMCP(<span class="hljs-string">&quot;payment-server&quot;</span>)
+
+<span class="hljs-meta">@mcp.tool</span>
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">process_payment</span>(<span class="hljs-params">
+ amount: <span class="hljs-built_in">float</span>,
+ currency: <span class="hljs-built_in">str</span> = <span class="hljs-string">&quot;EUR&quot;</span>
+</span>) -&gt; <span class="hljs-built_in">dict</span>:
+ <span class="hljs-string">&quot;&quot;&quot;Procesa un pago con confirmación del usuario.&quot;&quot;&quot;</span>
+ 
+ <span class="hljs-comment"># Validar monto</span>
+ <span class="hljs-keyword">if</span> amount &lt;= <span class="hljs-number">0</span>:
+ <span class="hljs-keyword">return</span> {
+ <span class="hljs-string">&quot;success&quot;</span>: <span class="hljs-literal">False</span>,
+ <span class="hljs-string">&quot;error&quot;</span>: {
+ <span class="hljs-string">&quot;code&quot;</span>: <span class="hljs-string">&quot;INVALID_AMOUNT&quot;</span>,
+ <span class="hljs-string">&quot;message&quot;</span>: <span class="hljs-string">&quot;El monto debe ser mayor que 0&quot;</span>
+ }
+ }
+ 
+ <span class="hljs-comment"># Solicitar confirmación</span>
+ request = ElicitRequest(
+ message=<span class="hljs-string">f&quot;Confirma el pago de <span class="hljs-subst">{amount:<span class="hljs-number">.2</span>f}</span> <span class="hljs-subst">{currency}</span>&quot;</span>,
+ 
+ fields={
+ <span class="hljs-string">&quot;confirm&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;boolean&quot;</span>,
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;¿Confirmar el pago?&quot;</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">True</span>
+ },
+ 
+ <span class="hljs-string">&quot;payment_method&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+ <span class="hljs-string">&quot;enum&quot;</span>: [<span class="hljs-string">&quot;card&quot;</span>, <span class="hljs-string">&quot;bank_transfer&quot;</span>, <span class="hljs-string">&quot;paypal&quot;</span>],
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;Método de pago&quot;</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">True</span>
+ },
+ 
+ <span class="hljs-string">&quot;save_method&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;boolean&quot;</span>,
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;¿Guardar método para futuros pagos?&quot;</span>,
+ <span class="hljs-string">&quot;default&quot;</span>: <span class="hljs-literal">False</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">False</span>
+ },
+ 
+ <span class="hljs-string">&quot;notes&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;Notas (opcional)&quot;</span>,
+ <span class="hljs-string">&quot;maxLength&quot;</span>: <span class="hljs-number">200</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">False</span>
+ }
+ }
+ )
+ 
+ result = <span class="hljs-keyword">await</span> mcp.elicit(request)
+ 
+ <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> result.values.get(<span class="hljs-string">&quot;confirm&quot;</span>):
+ <span class="hljs-keyword">return</span> {
+ <span class="hljs-string">&quot;success&quot;</span>: <span class="hljs-literal">False</span>,
+ <span class="hljs-string">&quot;error&quot;</span>: {
+ <span class="hljs-string">&quot;code&quot;</span>: <span class="hljs-string">&quot;PAYMENT_CANCELLED&quot;</span>,
+ <span class="hljs-string">&quot;message&quot;</span>: <span class="hljs-string">&quot;El usuario canceló el pago&quot;</span>
+ }
+ }
+ 
+ <span class="hljs-comment"># Procesar pago</span>
+ payment = payment_service.process(
+ amount=amount,
+ currency=currency,
+ method=result.values[<span class="hljs-string">&quot;payment_method&quot;</span>],
+ save_method=result.values.get(<span class="hljs-string">&quot;save_method&quot;</span>, <span class="hljs-literal">False</span>),
+ notes=result.values.get(<span class="hljs-string">&quot;notes&quot;</span>)
+ )
+ 
+ <span class="hljs-keyword">return</span> {
+ <span class="hljs-string">&quot;success&quot;</span>: <span class="hljs-literal">True</span>,
+ <span class="hljs-string">&quot;data&quot;</span>: {
+ <span class="hljs-string">&quot;payment_id&quot;</span>: payment.<span class="hljs-built_in">id</span>,
+ <span class="hljs-string">&quot;amount&quot;</span>: amount,
+ <span class="hljs-string">&quot;currency&quot;</span>: currency,
+ <span class="hljs-string">&quot;method&quot;</span>: result.values[<span class="hljs-string">&quot;payment_method&quot;</span>],
+ <span class="hljs-string">&quot;status&quot;</span>: payment.status
+ }
+ }
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="268" lang="en-US">
+<h1 id="elicitation-m%C3%BAltiple-wizard">Elicitation Múltiple (Wizard)</h1>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="269" lang="en-US">
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-keyword">from</span> fastmcp <span class="hljs-keyword">import</span> FastMCP
+<span class="hljs-keyword">from</span> fastmcp.server.elicitation <span class="hljs-keyword">import</span> ElicitRequest
+
+mcp = FastMCP(<span class="hljs-string">&quot;setup-wizard&quot;</span>)
+
+<span class="hljs-meta">@mcp.tool</span>
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">setup_project</span>() -&gt; <span class="hljs-built_in">dict</span>:
+ <span class="hljs-string">&quot;&quot;&quot;Asistente de configuración de proyecto paso a paso.&quot;&quot;&quot;</span>
+ 
+ <span class="hljs-comment"># Paso 1: Información básica</span>
+ step1 = ElicitRequest(
+ message=<span class="hljs-string">&quot;Paso 1/3: Información básica del proyecto&quot;</span>,
+ 
+ fields={
+ <span class="hljs-string">&quot;project_name&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;Nombre del proyecto&quot;</span>,
+ <span class="hljs-string">&quot;minLength&quot;</span>: <span class="hljs-number">3</span>,
+ <span class="hljs-string">&quot;maxLength&quot;</span>: <span class="hljs-number">50</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">True</span>
+ },
+ 
+ <span class="hljs-string">&quot;description&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+ <span class="hljs-string">&quot;format&quot;</span>: <span class="hljs-string">&quot;textarea&quot;</span>,
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;Descripción del proyecto&quot;</span>,
+ <span class="hljs-string">&quot;maxLength&quot;</span>: <span class="hljs-number">500</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">False</span>
+ }
+ }
+ )
+ 
+ result1 = <span class="hljs-keyword">await</span> mcp.elicit(step1)
+ 
+ <span class="hljs-comment"># Paso 2: Tecnologías</span>
+ step2 = ElicitRequest(
+ message=<span class="hljs-string">f&quot;Paso 2/3: Tecnologías para &#x27;<span class="hljs-subst">{result1.values[<span class="hljs-string">&#x27;project_name&#x27;</span>]}</span>&#x27;&quot;</span>,
+ 
+ fields={
+ <span class="hljs-string">&quot;language&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+ <span class="hljs-string">&quot;enum&quot;</span>: [<span class="hljs-string">&quot;python&quot;</span>, <span class="hljs-string">&quot;javascript&quot;</span>, <span class="hljs-string">&quot;typescript&quot;</span>, <span class="hljs-string">&quot;go&quot;</span>, <span class="hljs-string">&quot;rust&quot;</span>],
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;Lenguaje principal&quot;</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">True</span>
+ },
+ 
+ <span class="hljs-string">&quot;framework&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;Framework (opcional)&quot;</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">False</span>
+ },
+ 
+ <span class="hljs-string">&quot;database&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+ <span class="hljs-string">&quot;enum&quot;</span>: [<span class="hljs-string">&quot;postgresql&quot;</span>, <span class="hljs-string">&quot;mysql&quot;</span>, <span class="hljs-string">&quot;mongodb&quot;</span>, <span class="hljs-string">&quot;sqlite&quot;</span>, <span class="hljs-string">&quot;none&quot;</span>],
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;Base de datos&quot;</span>,
+ <span class="hljs-string">&quot;default&quot;</span>: <span class="hljs-string">&quot;postgresql&quot;</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">True</span>
+ }
+ }
+ )
+ 
+ result2 = <span class="hljs-keyword">await</span> mcp.elicit(step2)
+ 
+ <span class="hljs-comment"># Paso 3: Confirmación</span>
+ step3 = ElicitRequest(
+ message=<span class="hljs-string">f&quot;Paso 3/3: Confirmar configuración&quot;</span>,
+ 
+ fields={
+ <span class="hljs-string">&quot;create_repo&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;boolean&quot;</span>,
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;¿Crear repositorio Git?&quot;</span>,
+ <span class="hljs-string">&quot;default&quot;</span>: <span class="hljs-literal">True</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">True</span>
+ },
+ 
+ <span class="hljs-string">&quot;add_ci&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;boolean&quot;</span>,
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;¿Añadir CI/CD?&quot;</span>,
+ <span class="hljs-string">&quot;default&quot;</span>: <span class="hljs-literal">False</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">False</span>
+ },
+ 
+ <span class="hljs-string">&quot;proceed&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;boolean&quot;</span>,
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;¿Crear proyecto?&quot;</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">True</span>
+ }
+ }
+ )
+ 
+ result3 = <span class="hljs-keyword">await</span> mcp.elicit(step3)
+ 
+ <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> result3.values.get(<span class="hljs-string">&quot;proceed&quot;</span>):
+ <span class="hljs-keyword">return</span> {
+ <span class="hljs-string">&quot;success&quot;</span>: <span class="hljs-literal">False</span>,
+ <span class="hljs-string">&quot;error&quot;</span>: {
+ <span class="hljs-string">&quot;code&quot;</span>: <span class="hljs-string">&quot;CANCELLED&quot;</span>,
+ <span class="hljs-string">&quot;message&quot;</span>: <span class="hljs-string">&quot;Configuración cancelada&quot;</span>
+ }
+ }
+ 
+ <span class="hljs-comment"># Crear proyecto</span>
+ project = create_project(
+ name=result1.values[<span class="hljs-string">&quot;project_name&quot;</span>],
+ description=result1.values.get(<span class="hljs-string">&quot;description&quot;</span>),
+ language=result2.values[<span class="hljs-string">&quot;language&quot;</span>],
+ framework=result2.values.get(<span class="hljs-string">&quot;framework&quot;</span>),
+ database=result2.values[<span class="hljs-string">&quot;database&quot;</span>],
+ create_repo=result3.values.get(<span class="hljs-string">&quot;create_repo&quot;</span>, <span class="hljs-literal">True</span>),
+ add_ci=result3.values.get(<span class="hljs-string">&quot;add_ci&quot;</span>, <span class="hljs-literal">False</span>)
+ )
+ 
+ <span class="hljs-keyword">return</span> {
+ <span class="hljs-string">&quot;success&quot;</span>: <span class="hljs-literal">True</span>,
+ <span class="hljs-string">&quot;data&quot;</span>: {
+ <span class="hljs-string">&quot;project_id&quot;</span>: project.<span class="hljs-built_in">id</span>,
+ <span class="hljs-string">&quot;name&quot;</span>: project.name,
+ <span class="hljs-string">&quot;path&quot;</span>: project.path,
+ <span class="hljs-string">&quot;steps_completed&quot;</span>: <span class="hljs-number">3</span>
+ }
+ }
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="270" lang="en-US">
+<h1 id="combinar-sampling-y-elicitation">Combinar Sampling y Elicitation</h1>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="271" lang="en-US">
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-keyword">from</span> fastmcp <span class="hljs-keyword">import</span> FastMCP
+<span class="hljs-keyword">from</span> fastmcp.server.sampling <span class="hljs-keyword">import</span> SampleRequest
+<span class="hljs-keyword">from</span> fastmcp.server.elicitation <span class="hljs-keyword">import</span> ElicitRequest
+
+mcp = FastMCP(<span class="hljs-string">&quot;smart-assistant&quot;</span>)
+
+<span class="hljs-meta">@mcp.tool</span>
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">smart_search</span>(<span class="hljs-params">query: <span class="hljs-built_in">str</span></span>) -&gt; <span class="hljs-built_in">dict</span>:
+ <span class="hljs-string">&quot;&quot;&quot;Búsqueda inteligente con clarificación.&quot;&quot;&quot;</span>
+ 
+ <span class="hljs-comment"># Usar sampling para entender la intención</span>
+ sample_req = SampleRequest(
+ messages=[{
+ <span class="hljs-string">&quot;role&quot;</span>: <span class="hljs-string">&quot;user&quot;</span>,
+ <span class="hljs-string">&quot;content&quot;</span>: <span class="hljs-string">f&quot;El usuario busca: &#x27;<span class="hljs-subst">{query}</span>&#x27;. ¿Qué tipo de búsqueda es? Responde SOLO: users, products, orders o unknown&quot;</span>
+ }],
+ max_tokens=<span class="hljs-number">10</span>,
+ temperature=<span class="hljs-number">0.0</span>
+ )
+ 
+ sample_result = <span class="hljs-keyword">await</span> mcp.sample(sample_req)
+ intent = sample_result.content.strip().lower()
+ 
+ <span class="hljs-keyword">if</span> intent == <span class="hljs-string">&quot;unknown&quot;</span>:
+ <span class="hljs-comment"># Usar elicitation para clarificar</span>
+ elicit_req = ElicitRequest(
+ message=<span class="hljs-string">&quot;No entendí tu búsqueda. ¿Qué buscas?&quot;</span>,
+ 
+ fields={
+ <span class="hljs-string">&quot;search_type&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+ <span class="hljs-string">&quot;enum&quot;</span>: [<span class="hljs-string">&quot;users&quot;</span>, <span class="hljs-string">&quot;products&quot;</span>, <span class="hljs-string">&quot;orders&quot;</span>],
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;Tipo de búsqueda&quot;</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">True</span>
+ },
+ 
+ <span class="hljs-string">&quot;search_term&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>,
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;Término de búsqueda&quot;</span>,
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">True</span>
+ }
+ }
+ )
+ 
+ elicit_result = <span class="hljs-keyword">await</span> mcp.elicit(elicit_req)
+ 
+ intent = elicit_result.values[<span class="hljs-string">&quot;search_type&quot;</span>]
+ query = elicit_result.values[<span class="hljs-string">&quot;search_term&quot;</span>]
+ 
+ <span class="hljs-comment"># Realizar búsqueda</span>
+ <span class="hljs-keyword">if</span> intent == <span class="hljs-string">&quot;users&quot;</span>:
+ results = db.search_users(query)
+ <span class="hljs-keyword">elif</span> intent == <span class="hljs-string">&quot;products&quot;</span>:
+ results = db.search_products(query)
+ <span class="hljs-keyword">else</span>:
+ results = db.search_orders(query)
+ 
+ <span class="hljs-keyword">return</span> {
+ <span class="hljs-string">&quot;success&quot;</span>: <span class="hljs-literal">True</span>,
+ <span class="hljs-string">&quot;data&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: intent,
+ <span class="hljs-string">&quot;query&quot;</span>: query,
+ <span class="hljs-string">&quot;results&quot;</span>: results
+ }
+ }
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="272" lang="en-US">
+<h1 id="buenas-pr%C3%A1cticas-para-elicitation">Buenas Prácticas para Elicitation</h1>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="273" lang="en-US">
+<h3 id="1-usar-para-interacciones-necesarias-no-opcionales">1. Usar para interacciones necesarias, no opcionales</h3>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-comment"># Correcto: Confirmar antes de eliminar</span>
+<span class="hljs-keyword">if</span> is_destructive:
+ <span class="hljs-keyword">await</span> mcp.elicit(confirm_request)
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="274" lang="en-US">
+<h3 id="2-proporcionar-defaults-sensatos">2. Proporcionar defaults sensatos</h3>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-string">&quot;newsletter&quot;</span>: {
+ <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;boolean&quot;</span>,
+ <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;¿Suscribirse al newsletter?&quot;</span>,
+ <span class="hljs-string">&quot;default&quot;</span>: <span class="hljs-literal">False</span>, <span class="hljs-comment"># Default razonable</span>
+ <span class="hljs-string">&quot;required&quot;</span>: <span class="hljs-literal">False</span>
+}
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="275" lang="en-US">
+<h3 id="3-validar-despu%C3%A9s-de-recibir">3. Validar después de recibir</h3>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">result = <span class="hljs-keyword">await</span> mcp.elicit(request)
+
+<span class="hljs-comment"># Validar</span>
+<span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> is_valid_email(result.values.get(<span class="hljs-string">&quot;email&quot;</span>)):
+ <span class="hljs-keyword">return</span> {<span class="hljs-string">&quot;success&quot;</span>: <span class="hljs-literal">False</span>, <span class="hljs-string">&quot;error&quot;</span>: {...}}
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="276" lang="en-US">
+<h3 id="4-manejar-cancelaciones">4. Manejar cancelaciones</h3>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">result = <span class="hljs-keyword">await</span> mcp.elicit(request)
+
+<span class="hljs-keyword">if</span> result.cancelled:
+ <span class="hljs-keyword">return</span> {
+ <span class="hljs-string">&quot;success&quot;</span>: <span class="hljs-literal">False</span>,
+ <span class="hljs-string">&quot;error&quot;</span>: {
+ <span class="hljs-string">&quot;code&quot;</span>: <span class="hljs-string">&quot;CANCELLED&quot;</span>,
+ <span class="hljs-string">&quot;message&quot;</span>: <span class="hljs-string">&quot;Operación cancelada por el usuario&quot;</span>
+ }
+ }
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="277" lang="en-US">
+<h1 id="checklist-de-sampling-y-elicitation">Checklist de Sampling y Elicitation</h1>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="278" lang="en-US">
+<h3 id="sampling">Sampling</h3>
+<ul>
+<li>[ ] Usar temperatura baja para tareas determinísticas</li>
+<li>[ ] Limitar max_tokens apropiadamente</li>
+<li>[ ] Proporcionar contexto claro en system prompt</li>
+<li>[ ] Manejar errores de conexión</li>
+<li>[ ] Parsear respuestas con try/except</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="279" lang="en-US">
+<h3 id="elicitation">Elicitation</h3>
+<ul>
+<li>[ ] Usar para interacciones necesarias</li>
+<li>[ ] Proporcionar defaults sensatos</li>
+<li>[ ] Validar inputs después de recibir</li>
+<li>[ ] Manejar cancelaciones</li>
+<li>[ ] Limitar número de pasos en wizards</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="280" lang="en-US">
 <h1 id="resumen-final">Resumen Final</h1>
 <h2 id="los-10-mandamientos-del-dise%C3%B1o-mcp">Los 10 mandamientos del diseño MCP</h2>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="238" lang="en-US">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="281" lang="en-US">
 <h3 id="1-claridad-ante-todo">1. Claridad ante todo</h3>
 <p>Las descripciones son tu API. Hazlas claras y completas.</p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="239" lang="en-US">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="282" lang="en-US">
 <h3 id="2-consistencia-en-patrones">2. Consistencia en patrones</h3>
 <p>Usa los mismos nombres, estructuras y convenciones en todas las tools.</p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="240" lang="en-US">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="283" lang="en-US">
 <h3 id="3-validaci%C3%B3n-exhaustiva">3. Validación exhaustiva</h3>
 <p>Nunca confíes en la entrada. Valida todo con Pydantic.</p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="241" lang="en-US">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="284" lang="en-US">
 <h3 id="4-errores-informativos">4. Errores informativos</h3>
 <p>Los errores deben ayudar al modelo a recuperarse.</p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="242" lang="en-US">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="285" lang="en-US">
 <h3 id="5-seguridad-por-defecto">5. Seguridad por defecto</h3>
 <p>Toda entrada es potencialmente maliciosa.</p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="243" lang="en-US">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="286" lang="en-US">
 <h3 id="6-tokens-m%C3%ADnimos">6. Tokens mínimos</h3>
 <p>Devuelve solo lo necesario.</p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="244" lang="en-US">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="287" lang="en-US">
 <h3 id="7-paginaci%C3%B3n-obligatoria">7. Paginación obligatoria</h3>
 <p>Las listas grandes deben paginarse.</p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="245" lang="en-US">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="288" lang="en-US">
 <h3 id="8-cach%C3%A9-estrat%C3%A9gico">8. Caché estratégico</h3>
 <p>Cachea lo que cambia poco.</p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="246" lang="en-US">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="289" lang="en-US">
 <h3 id="9-logging-completo">9. Logging completo</h3>
 <p>Registra todo para poder depurar.</p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="247" lang="en-US">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="290" lang="en-US">
 <h3 id="10-tests-exhaustivos">10. Tests exhaustivos</h3>
 <p>Un servicio sin tests no está completo.</p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="248" lang="en-US">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="291" lang="en-US">
 <h1 id="cierre">Cierre</h1>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="249" lang="en-US">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="292" lang="en-US">
 <h2 id="dise%C3%B1o-de-servicios-mcp-buenas-pr%C3%A1cticas-1">Diseño de Servicios MCP: Buenas Prácticas</h2>
 <h3 id="de-los-fundamentos-a-la-implementaci%C3%B3n-profesional">De los fundamentos a la implementación profesional</h3>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="250" lang="en-US">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="293" lang="en-US">
 <p><strong>Recursos:</strong></p>
 <ul>
 <li>Documentación MCP: <a href="https://modelcontextprotocol.io/">https://modelcontextprotocol.io/</a></li>
@@ -4079,7 +4986,7 @@ client = httpx.AsyncClient(timeout=<span class="hljs-number">10.0</span>)
 <li>SDK Python: <a href="https://github.com/modelcontextprotocol/python-sdk">https://github.com/modelcontextprotocol/python-sdk</a></li>
 </ul>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="251" lang="en-US">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="294" lang="en-US">
 <p><strong>Próximos pasos:</strong></p>
 <ol>
 <li>Diseña tu primer servicio MCP con FastMCP</li>
@@ -4089,7 +4996,7 @@ client = httpx.AsyncClient(timeout=<span class="hljs-number">10.0</span>)
 <li>Despliega y monitorea</li>
 </ol>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="252" lang="en-US">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="295" lang="en-US">
 <p><strong>Preguntas y práctica:</strong> ¡Ahora es tu turno!</p>
 </section>
 <script>!function(){"use strict";const t={h1:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"1"},style:"display: block; font-size: 2em; margin-block-start: 0.67em; margin-block-end: 0.67em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},h2:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"2"},style:"display: block; font-size: 1.5em; margin-block-start: 0.83em; margin-block-end: 0.83em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},h3:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"3"},style:"display: block; font-size: 1.17em; margin-block-start: 1em; margin-block-end: 1em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},h4:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"4"},style:"display: block; margin-block-start: 1.33em; margin-block-end: 1.33em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},h5:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"5"},style:"display: block; font-size: 0.83em; margin-block-start: 1.67em; margin-block-end: 1.67em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},h6:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"6"},style:"display: block; font-size: 0.67em; margin-block-start: 2.33em; margin-block-end: 2.33em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},span:{proto:()=>HTMLSpanElement},pre:{proto:()=>HTMLElement,style:"display: block; font-family: monospace; white-space: pre; margin: 1em 0; --marp-auto-scaling-white-space: pre;"}},e="data-marp-auto-scaling-wrapper",i="data-marp-auto-scaling-svg",n="data-marp-auto-scaling-container";class s extends HTMLElement{container;containerSize;containerObserver;svg;svgComputedStyle;svgPreserveAspectRatio="xMinYMid meet";wrapper;wrapperSize;wrapperObserver;constructor(){super();const t=t=>([e])=>{const{width:i,height:n}=e.contentRect;this[t]={width:i,height:n},this.updateSVGRect()};this.attachShadow({mode:"open"}),this.containerObserver=new ResizeObserver(t("containerSize")),this.wrapperObserver=new ResizeObserver((...e)=>{t("wrapperSize")(...e),this.flushSvgDisplay()})}static get observedAttributes(){return["data-downscale-only"]}connectedCallback(){this.shadowRoot.innerHTML=`\n<style>\n  svg[${i}] { display: block; width: 100%; height: auto; vertical-align: top; }\n  span[${n}] { display: table; white-space: var(--marp-auto-scaling-white-space, nowrap); width: max-content; }\n</style>\n<div ${e}>\n  <svg part="svg" ${i}>\n    <foreignObject><span ${n}><slot></slot></span></foreignObject>\n  </svg>\n</div>\n    `.split(/\n\s*/).join(""),this.wrapper=this.shadowRoot.querySelector(`div[${e}]`)??void 0;const t=this.svg;this.svg=this.wrapper?.querySelector(`svg[${i}]`)??void 0,this.svg!==t&&(this.svgComputedStyle=this.svg?window.getComputedStyle(this.svg):void 0),this.container=this.svg?.querySelector(`span[${n}]`)??void 0,this.observe()}disconnectedCallback(){this.svg=void 0,this.svgComputedStyle=void 0,this.wrapper=void 0,this.container=void 0,this.observe()}attributeChangedCallback(){this.observe()}flushSvgDisplay(){const{svg:t}=this;t&&(t.style.display="inline",requestAnimationFrame(()=>{t.style.display=""}))}observe(){this.containerObserver.disconnect(),this.wrapperObserver.disconnect(),this.wrapper&&this.wrapperObserver.observe(this.wrapper),this.container&&this.containerObserver.observe(this.container),this.svgComputedStyle&&this.observeSVGStyle(this.svgComputedStyle)}observeSVGStyle(t){const e=()=>{const i=(()=>{const e=t.getPropertyValue("--preserve-aspect-ratio");if(e)return e.trim();return`x${(({textAlign:t,direction:e})=>{if(t.endsWith("left"))return"Min";if(t.endsWith("right"))return"Max";if("start"===t||"end"===t){let i="rtl"===e;return"end"===t&&(i=!i),i?"Max":"Min"}return"Mid"})(t)}YMid meet`})();i!==this.svgPreserveAspectRatio&&(this.svgPreserveAspectRatio=i,this.updateSVGRect()),t===this.svgComputedStyle&&requestAnimationFrame(e)};e()}updateSVGRect(){let t=Math.ceil(this.containerSize?.width??0);const e=Math.ceil(this.containerSize?.height??0);void 0!==this.dataset.downscaleOnly&&(t=Math.max(t,this.wrapperSize?.width??0));const i=this.svg?.querySelector(":scope > foreignObject");if(i?.setAttribute("width",`${t}`),i?.setAttribute("height",`${e}`),this.svg&&(this.svg.setAttribute("viewBox",`0 0 ${t} ${e}`),this.svg.setAttribute("preserveAspectRatio",this.svgPreserveAspectRatio),this.svg.style.height=t<=0||e<=0?"0":""),this.container){const t=this.svgPreserveAspectRatio.toLowerCase();this.container.style.marginLeft=t.startsWith("xmid")||t.startsWith("xmax")?"auto":"0",this.container.style.marginRight=t.startsWith("xmi")?"auto":"0"}}}const r=(t,{attrs:e={},style:i})=>class extends t{constructor(...t){super(...t);for(const[t,i]of Object.entries(e))this.hasAttribute(t)||this.setAttribute(t,i);this._shadow()}static get observedAttributes(){return["data-auto-scaling"]}connectedCallback(){this._update()}attributeChangedCallback(){this._update()}_shadow(){if(!this.shadowRoot)try{this.attachShadow({mode:"open"})}catch(t){if(!(t instanceof Error&&"NotSupportedError"===t.name))throw t}return this.shadowRoot}_update(){const t=this._shadow();if(t){const e=i?`<style>:host { ${i} }</style>`:"";let n="<slot></slot>";const{autoScaling:s}=this.dataset;if(void 0!==s){n=`<marp-auto-scaling exportparts="svg:auto-scaling" ${"downscale-only"===s?"data-downscale-only":""}>${n}</marp-auto-scaling>`}t.innerHTML=e+n}}};let o;const a=Symbol(),l=()=>o??(o=!!document.createElement("div",{is:"marp-auto-scaling"}).outerHTML.startsWith("<div is"),o);let c;const d="marpitSVGPolyfill:setZoomFactor,",h=Symbol(),g=Symbol();const p=()=>{const t="Apple Computer, Inc."===navigator.vendor,e=t?[v]:[],i={then:e=>(t?(async()=>{if(void 0===c){const t=document.createElement("canvas");t.width=10,t.height=10;const e=t.getContext("2d"),i=new Image(10,10),n=new Promise(t=>{i.addEventListener("load",()=>t())});i.crossOrigin="anonymous",i.src="data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2210%22%20height%3D%2210%22%20viewBox%3D%220%200%201%201%22%3E%3CforeignObject%20width%3D%221%22%20height%3D%221%22%20requiredExtensions%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxhtml%22%3E%3Cdiv%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxhtml%22%20style%3D%22width%3A%201px%3B%20height%3A%201px%3B%20background%3A%20red%3B%20position%3A%20relative%22%3E%3C%2Fdiv%3E%3C%2FforeignObject%3E%3C%2Fsvg%3E",await n,e.drawImage(i,0,0),c=e.getImageData(5,5,1,1).data[3]<128}return c})().then(t=>{null==e||e(t?[v]:[])}):null==e||e([]),i)};return Object.assign(e,i)};let m,u;function v(t){const e="object"==typeof t&&t.target||document,i="object"==typeof t?t.zoom:t;window[g]||(Object.defineProperty(window,g,{configurable:!0,value:!0}),document.body.style.zoom=1.0001,document.body.offsetHeight,document.body.style.zoom=1,window.addEventListener("message",({data:t,origin:e})=>{if(e===window.origin)try{if(t&&"string"==typeof t&&t.startsWith(d)){const[,e]=t.split(","),i=Number.parseFloat(e);Number.isNaN(i)||(u=i)}}catch(t){console.error(t)}}));let n=!1;Array.from(e.querySelectorAll("svg[data-marpit-svg]"),t=>{var e,s,r,o;t.style.transform||(t.style.transform="translateZ(0)");const a=i||u||t.currentScale||1;m!==a&&(m=a,n=a);const l=t.getBoundingClientRect(),{length:c}=t.children;for(let i=0;i<c;i+=1){const n=t.children[i];if(n.getScreenCTM){const t=n.getScreenCTM();if(t){const i=null!==(s=null===(e=n.x)||void 0===e?void 0:e.baseVal.value)&&void 0!==s?s:0,c=null!==(o=null===(r=n.y)||void 0===r?void 0:r.baseVal.value)&&void 0!==o?o:0,d=n.children.length;for(let e=0;e<d;e+=1){const s=n.children[e];if("SECTION"===s.tagName){const{style:e}=s;e.transformOrigin||(e.transformOrigin=`${-i}px ${-c}px`),e.transform=`scale(${a}) matrix(${t.a}, ${t.b}, ${t.c}, ${t.d}, ${t.e-l.left}, ${t.f-l.top}) translateZ(0.0001px)`;break}}}}}}),!1!==n&&Array.from(e.querySelectorAll("iframe"),({contentWindow:t})=>{null==t||t.postMessage(`${d}${n}`,"null"===window.origin?"*":window.origin)})}function w({once:t=!1,target:e=document}={}){const i=function(t=document){if(t[h])return t[h];let e=!0;const i=()=>{e=!1,delete t[h]};Object.defineProperty(t,h,{configurable:!0,value:i});let n=[],s=!1;(async()=>{try{n=await p()}finally{s=!0}})();const r=()=>{for(const e of n)e({target:t});s&&0===n.length||e&&window.requestAnimationFrame(r)};return r(),i}(e);return t?(i(),()=>{}):i}m=1,u=void 0;const b=Symbol(),y=(e=document)=>{if("undefined"==typeof window)throw new Error("Marp Core's browser script is valid only in browser context.");if(((e=document)=>{const i=window[a];i||customElements.define("marp-auto-scaling",s);for(const n of Object.keys(t)){const s=`marp-${n}`,o=t[n].proto();l()&&o!==HTMLElement?i||customElements.define(s,r(o,{style:t[n].style}),{extends:n}):(i||customElements.define(s,r(HTMLElement,t[n])),e.querySelectorAll(`${n}[is="${s}"]`).forEach(t=>{t.outerHTML=t.outerHTML.replace(new RegExp(`^<${n}`,"i"),`<${s}`).replace(new RegExp(`</${n}>$`,"i"),`</${s}>`)}))}window[a]=!0})(e),e[b])return e[b];const i=w({target:e}),n=()=>{i(),delete e[b]},o=Object.assign(n,{cleanup:n,update:()=>y(e)});return Object.defineProperty(e,b,{configurable:!0,value:o}),o},f=document.currentScript;y(f?f.getRootNode():document)}();

@@ -1,0 +1,3993 @@
+= Desarrollo de Clientes MCP con Python y FastMCP
+:author: AI Generated
+:version: 1.0
+:toc: left
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+:rouge-style: github
+
+== Introducción a MCP y Clientes
+
+=== ¿Qué es MCP?
+
+**Model Context Protocol (MCP)** es un protocolo abierto que estandariza cómo los modelos de lenguaje (LLMs) se conectan con fuentes de datos y herramientas externas. Proporciona una forma unificada de:
+
+* Exponer **herramientas** (tools) que los LLMs pueden invocar
+* Proporcionar **recursos** (resources) con datos contextuales
+* Ofrecer **prompts** predefinidos para tareas comunes
+
+=== Arquitectura MCP
+
+La arquitectura MCP sigue un modelo cliente-servidor:
+
+----
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Cliente MCP   │◄───►│    Transporte   │◄───►│  Servidor MCP   │
+│   (FastMCP)     │     │   (stdio/HTTP)  │     │   (FastMCP)     │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+         │                                              │
+         │                                              │
+         ▼                                              ▼
+┌─────────────────┐                           ┌─────────────────┐
+│   Aplicación    │                           │   Herramientas  │
+│   (LLM/Agente)  │                           │   Recursos       │
+└─────────────────┘                           │   Prompts        │
+                                              └─────────────────┘
+----
+
+=== Componentes Principales
+
+[cols="1,3"]
+|===
+| Componente | Descripción
+
+| **Servidor MCP**
+| Expone capacidades: tools, resources, prompts. Implementado con FastMCP usando decoradores.
+
+| **Cliente MCP**
+| Consume las capacidades del servidor. Puede ser una aplicación, un agente, o una CLI.
+
+| **Transporte**
+| Canal de comunicación. Opciones: stdio (más común), HTTP/SSE, WebSocket.
+
+| **Tool**
+| Función invocable que realiza una acción. Puede modificar estado, hacer llamadas API, etc.
+
+| **Resource**
+| Datos contextuales de solo lectura. Archivos, configuraciones, datos de BD.
+
+| **Prompt**
+| Plantilla de prompt predefinida. Ayuda a guiar al LLM en tareas específicas.
+|===
+
+=== Tipos de Cliente MCP
+
+[cols="1,2,2"]
+|===
+| Tipo | Descripción | Caso de uso
+
+| **CLI Client**
+| Cliente de línea de comandos para pruebas y scripts rápidos
+| Testing, automatización simple
+
+| **Library Client**
+| Biblioteca integrable en aplicaciones Python
+| APIs, servicios web
+
+| **Agent Client**
+| Cliente con agente de IA que toma decisiones
+| Automatización inteligente
+
+| **Web Client**
+| Cliente HTTP/WebSocket para APIs
+| Integraciones web, microservicios
+|===
+
+=== ¿Por qué FastMCP?
+
+FastMCP simplifica enormemente el desarrollo de servidores y clientes MCP:
+
+[cols="1,1,1"]
+|===
+| Característica | SDK Oficial | FastMCP
+
+| Decoradores
+| Manual
+| `@mcp.tool`, `@mcp.resource`, `@mcp.prompt`
+
+| Tipado
+| Básico
+| Annotated + Field con Pydantic
+
+| Validación
+| Manual
+| Automática con Pydantic
+
+| Server + Client
+| Separados
+| Integrados en una API
+
+| Documentación
+| Externa
+| Auto-generada desde docstrings
+
+| Testing
+| Manual
+| Fixtures incluidos
+
+| Ejemplos
+| Limitados
+| Extensa documentación
+|===
+
+== FastMCP: Framework para Desarrollo
+
+=== Instalación
+
+[source,bash]
+----
+# Instalación básica
+pip install fastmcp
+
+# Con todas las dependencias
+pip install "fastmcp[all]"
+
+# Para desarrollo
+pip install "fastmcp[dev]"
+
+# Con soporte HTTP
+pip install "fastmcp[http]"
+----
+
+=== Estructura de un Proyecto FastMCP
+
+----
+mi-proyecto-mcp/
+├── src/
+│   ├── __init__.py
+│   ├── server.py          # Servidor MCP
+│   ├── client.py          # Cliente MCP
+│   ├── tools/
+│   │   ├── __init__.py
+│   │   ├── database.py    # Herramientas de BD
+│   │   └── filesystem.py  # Herramientas de archivos
+│   └── resources/
+│       ├── __init__.py
+│       └── config.py      # Recursos de configuración
+├── tests/
+│   ├── __init__.py
+│   ├── test_server.py
+│   └── test_client.py
+├── pyproject.toml
+└── README.md
+----
+
+=== Servidor MCP Completo
+
+[source,python]
+----
+# server.py
+from fastmcp import FastMCP
+from typing import Annotated
+from pydantic import Field
+import json
+
+# Crear servidor
+mcp = FastMCP("mi-servidor", version="1.0.0")
+
+# =====================
+# HERRAMIENTAS (TOOLS)
+# =====================
+
+@mcp.tool
+def calcular_suma(
+    a: Annotated[int, Field(description="Primer número", ge=0)],
+    b: Annotated[int, Field(description="Segundo número", ge=0)]
+) -> dict:
+    """
+    Calcula la suma de dos números.
+    
+    Args:
+        a: Primer número (entero no negativo)
+        b: Segundo número (entero no negativo)
+    
+    Returns:
+        dict con el resultado de la operación
+    """
+    return {
+        "operacion": "suma",
+        "a": a,
+        "b": b,
+        "resultado": a + b
+    }
+
+@mcp.tool
+def buscar_usuario(
+    email: Annotated[str, Field(description="Email del usuario")]
+) -> dict:
+    """
+    Busca un usuario por email.
+    
+    Args:
+        email: Email del usuario a buscar
+    
+    Returns:
+        dict con información del usuario o error si no existe
+    """
+    # Simulación de base de datos
+    usuarios = {
+        "juan@example.com": {"id": 1, "nombre": "Juan", "activo": True},
+        "maria@example.com": {"id": 2, "nombre": "María", "activo": True},
+    }
+    
+    if email in usuarios:
+        return {"success": True, "usuario": usuarios[email]}
+    return {"success": False, "error": "Usuario no encontrado"}
+
+@mcp.tool
+def crear_reporte(
+    titulo: Annotated[str, Field(description="Título del reporte")],
+    contenido: Annotated[str, Field(description="Contenido del reporte")],
+    formato: Annotated[str, Field(description="Formato: markdown, html, pdf")] = "markdown"
+) -> dict:
+    """
+    Crea un reporte con el contenido especificado.
+    
+    Args:
+        titulo: Título del reporte
+        contenido: Contenido del reporte
+        formato: Formato de salida (markdown, html, pdf)
+    
+    Returns:
+        dict con el reporte generado
+    """
+    reportes = {
+        "markdown": f"# {titulo}\n\n{contenido}",
+        "html": f"<h1>{titulo}</h1><p>{contenido}</p>",
+        "pdf": f"[PDF] {titulo}: {contenido}"
+    }
+    
+    return {
+        "success": True,
+        "formato": formato,
+        "reporte": reportes.get(formato, reportes["markdown"])
+    }
+
+# =====================
+# RECURSOS (RESOURCES)
+# =====================
+
+@mcp.resource("config://database")
+def obtener_config_database() -> dict:
+    """
+    Obtiene la configuración de base de datos.
+    
+    Returns:
+        dict con configuración de conexión
+    """
+    return {
+        "host": "localhost",
+        "port": 5432,
+        "database": "mi_app",
+        "max_connections": 10
+    }
+
+@mcp.resource("config://{seccion}")
+def obtener_config_seccion(seccion: str) -> dict:
+    """
+    Obtiene configuración de una sección específica.
+    
+    Args:
+        seccion: Nombre de la sección (database, api, cache)
+    
+    Returns:
+        dict con configuración de la sección
+    """
+    configs = {
+        "database": {
+            "host": "localhost",
+            "port": 5432,
+            "database": "mi_app"
+        },
+        "api": {
+            "host": "0.0.0.0",
+            "port": 8080,
+            "debug": False
+        },
+        "cache": {
+            "backend": "redis",
+            "host": "localhost",
+            "port": 6379,
+            "ttl": 3600
+        }
+    }
+    return configs.get(seccion, {"error": f"Sección '{seccion}' no encontrada"})
+
+@mcp.resource("data://usuarios/{user_id}")
+def obtener_usuario_por_id(user_id: int) -> dict:
+    """
+    Obtiene datos de un usuario por ID.
+    
+    Args:
+        user_id: ID del usuario
+    
+    Returns:
+        dict con datos del usuario
+    """
+    # Simulación de datos
+    usuarios = {
+        1: {"id": 1, "nombre": "Juan", "email": "juan@example.com"},
+        2: {"id": 2, "nombre": "María", "email": "maria@example.com"},
+    }
+    return usuarios.get(user_id, {"error": "Usuario no encontrado"})
+
+@mcp.resource("data://productos")
+def listar_productos() -> list:
+    """
+    Lista todos los productos disponibles.
+    
+    Returns:
+        list de productos
+    """
+    return [
+        {"id": 1, "nombre": "Producto A", "precio": 100},
+        {"id": 2, "nombre": "Producto B", "precio": 200},
+        {"id": 3, "nombre": "Producto C", "precio": 300}
+    ]
+
+# =====================
+# PROMPTS
+# =====================
+
+@mcp.prompt
+def prompt_analisis_datos(datos: str) -> str:
+    """
+    Prompt para análisis de datos.
+    
+    Args:
+        datos: Datos a analizar
+    
+    Returns:
+        str con el prompt formateado
+    """
+    return f"""
+Analiza los siguientes datos y proporciona un resumen estructurado:
+
+{datos}
+
+Tu análisis debe incluir:
+1. Resumen ejecutivo
+2. Puntos clave identificados
+3. Tendencias observadas
+4. Recomendaciones
+5. Conclusiones
+"""
+
+@mcp.prompt
+def prompt_revision_codigo(codigo: str, lenguaje: str) -> str:
+    """
+    Prompt para revisión de código.
+    
+    Args:
+        codigo: Código a revisar
+        lenguaje: Lenguaje de programación
+    
+    Returns:
+        str con el prompt formateado
+    """
+    return f"""
+Revisa el siguiente código {lenguaje} y proporciona feedback:
+
+```{lenguaje}
+{codigo}
+```
+
+Tu revisión debe incluir:
+1. Calidad del código
+2. Posibles bugs
+3. Mejoras de rendimiento
+4. Mejoras de legibilidad
+5. Seguridad
+"""
+
+@mcp.prompt
+def prompt_generar_documentacion(
+    funcion: str,
+    descripcion: str,
+    parametros: list
+) -> str:
+    """
+    Prompt para generar documentación.
+    
+    Args:
+        funcion: Nombre de la función
+        descripcion: Descripción breve
+        parametros: Lista de parámetros
+    
+    Returns:
+        str con el prompt formateado
+    """
+    params_str = "\n".join([f"  - {p}" for p in parametros])
+    
+    return f"""
+Genera documentación completa para la siguiente función:
+
+Función: {funcion}
+Descripción: {descripcion}
+Parámetros:
+{params_str}
+
+La documentación debe incluir:
+1. Descripción detallada
+2. Parámetros con tipos y descripciones
+3. Valor de retorno
+4. Ejemplos de uso
+5. Excepciones posibles
+6. Notas adicionales
+"""
+
+if __name__ == "__main__":
+    mcp.run()
+----
+
+=== Ejecutar el Servidor
+
+[source,bash]
+----
+# Modo stdio (por defecto)
+python server.py
+
+# Modo SSE (Server-Sent Events)
+fastmcp run server.py:mcp --transport sse --port 8080
+
+# Con Inspector (debugging)
+npx @modelcontextprotocol/inspector python server.py
+----
+
+== Clientes MCP: Casos de Uso por Tipo
+
+=== Clientes que Utilizan TOOLS
+
+Las **herramientas (tools)** son funciones que el cliente puede invocar para realizar acciones. Son ideales para operaciones que modifican estado, hacen llamadas a APIs externas, o realizan cálculos.
+
+==== Caso de Uso 1: Automatización de Tareas
+
+[source,python]
+----
+# client_tools_automation.py
+"""
+Cliente MCP para automatización de tareas usando tools.
+
+Caso de uso: Automatizar operaciones de CRM como crear contactos,
+enviar emails y registrar actividades.
+"""
+from fastmcp import Client
+from fastmcp.client.stdio import StdioServerParameters
+from fastmcp.client.transports import StdioTransport
+import asyncio
+from typing import List, Dict, Any
+
+class CRMAutomationClient:
+    """Cliente para automatizar operaciones de CRM."""
+    
+    def __init__(self, server_path: str):
+        self.server_path = server_path
+        self._client: Client = None
+    
+    async def conectar(self):
+        """Conecta al servidor MCP."""
+        server_params = StdioServerParameters(
+            command="python",
+            args=[self.server_path]
+        )
+        self._client = Client(StdioTransport(server_params))
+        await self._client.connect()
+        
+        # Verificar herramientas disponibles
+        tools = await self._client.list_tools()
+        print(f"Conectado. {len(tools)} herramientas disponibles.")
+        for tool in tools:
+            print(f"  - {tool.name}: {tool.description}")
+    
+    async def crear_contacto(
+        self,
+        nombre: str,
+        email: str,
+        empresa: str = None,
+        telefono: str = None
+    ) -> Dict[str, Any]:
+        """
+        Crea un nuevo contacto en el CRM.
+        
+        Args:
+            nombre: Nombre completo del contacto
+            email: Email del contacto
+            empresa: Empresa (opcional)
+            telefono: Teléfono (opcional)
+        
+        Returns:
+            dict con el contacto creado
+        """
+        args = {"nombre": nombre, "email": email}
+        if empresa:
+            args["empresa"] = empresa
+        if telefono:
+            args["telefono"] = telefono
+        
+        resultado = await self._client.call_tool("crear_contacto", args)
+        return resultado
+    
+    async def enviar_email(
+        self,
+        destinatario: str,
+        asunto: str,
+        cuerpo: str,
+        template: str = None
+    ) -> Dict[str, Any]:
+        """
+        Envía un email usando una plantilla.
+        
+        Args:
+            destinatario: Email del destinatario
+            asunto: Asunto del email
+            cuerpo: Cuerpo del mensaje
+            template: Plantilla a usar (opcional)
+        
+        Returns:
+            dict con el resultado del envío
+        """
+        args = {
+            "destinatario": destinatario,
+            "asunto": asunto,
+            "cuerpo": cuerpo
+        }
+        if template:
+            args["template"] = template
+        
+        resultado = await self._client.call_tool("enviar_email", args)
+        return resultado
+    
+    async def registrar_actividad(
+        self,
+        contacto_id: int,
+        tipo: str,
+        descripcion: str,
+        fecha: str = None
+    ) -> Dict[str, Any]:
+        """
+        Registra una actividad para un contacto.
+        
+        Args:
+            contacto_id: ID del contacto
+            tipo: Tipo de actividad (llamada, email, reunion)
+            descripcion: Descripción de la actividad
+            fecha: Fecha de la actividad (opcional)
+        
+        Returns:
+            dict con la actividad registrada
+        """
+        args = {
+            "contacto_id": contacto_id,
+            "tipo": tipo,
+            "descripcion": descripcion
+        }
+        if fecha:
+            args["fecha"] = fecha
+        
+        resultado = await self._client.call_tool("registrar_actividad", args)
+        return resultado
+    
+    async def buscar_contactos(self, query: str) -> List[Dict[str, Any]]:
+        """
+        Busca contactos que coincidan con la query.
+        
+        Args:
+            query: Término de búsqueda
+        
+        Returns:
+            list de contactos encontrados
+        """
+        resultado = await self._client.call_tool(
+            "buscar_contactos",
+            {"query": query}
+        )
+        return resultado.get("contactos", [])
+    
+    async def crear_campana(
+        self,
+        nombre: str,
+        descripcion: str,
+        contactos: List[int]
+    ) -> Dict[str, Any]:
+        """
+        Crea una campaña de marketing.
+        
+        Args:
+            nombre: Nombre de la campaña
+            descripcion: Descripción
+            contactos: Lista de IDs de contactos
+        
+        Returns:
+            dict con la campaña creada
+        """
+        resultado = await self._client.call_tool(
+            "crear_campana",
+            {
+                "nombre": nombre,
+                "descripcion": descripcion,
+                "contactos": contactos
+            }
+        )
+        return resultado
+    
+    async def ejecutar_campana(
+        self,
+        campana_id: int,
+        plantilla_email: str
+    ) -> Dict[str, Any]:
+        """
+        Ejecuta una campaña enviando emails a todos los contactos.
+        
+        Args:
+            campana_id: ID de la campaña
+            plantilla_email: Plantilla del email
+        
+        Returns:
+            dict con estadísticas de la campaña
+        """
+        # Obtener campaña
+        campana = await self._client.call_tool(
+            "obtener_campana",
+            {"id": campana_id}
+        )
+        
+        # Obtener contactos de la campaña
+        contactos = campana.get("contactos", [])
+        
+        # Enviar emails
+        resultados = []
+        for contacto_id in contactos:
+            contacto = await self._client.call_tool(
+                "obtener_contacto",
+                {"id": contacto_id}
+            )
+            
+            resultado = await self.enviar_email(
+                destinatario=contacto["email"],
+                asunto=campana["nombre"],
+                cuerpo=campana["descripcion"],
+                template=plantilla_email
+            )
+            resultados.append(resultado)
+            
+            # Registrar actividad
+            await self.registrar_actividad(
+                contacto_id=contacto_id,
+                tipo="email",
+                descripcion=f"Email enviado: {campana['nombre']}"
+            )
+        
+        return {
+            "campana_id": campana_id,
+            "total_enviados": len(resultados),
+            "exitosos": sum(1 for r in resultados if r.get("success")),
+            "fallidos": sum(1 for r in resultados if not r.get("success"))
+        }
+    
+    async def desconectar(self):
+        """Desconecta del servidor."""
+        if self._client:
+            await self._client.disconnect()
+
+
+# Ejemplo de uso
+async def main():
+    cliente = CRMAutomationClient("crm_server.py")
+    
+    try:
+        await cliente.conectar()
+        
+        # Crear contacto
+        contacto = await cliente.crear_contacto(
+            nombre="Juan Pérez",
+            email="juan@empresa.com",
+            empresa="Tech Corp"
+        )
+        print(f"Contacto creado: {contacto}")
+        
+        # Enviar email
+        email_result = await cliente.enviar_email(
+            destinatario="juan@empresa.com",
+            asunto="Bienvenido",
+            cuerpo="Gracias por registrarte..."
+        )
+        print(f"Email enviado: {email_result}")
+        
+        # Registrar actividad
+        actividad = await cliente.registrar_actividad(
+            contacto_id=contacto["id"],
+            tipo="email",
+            descripcion="Email de bienvenida enviado"
+        )
+        print(f"Actividad registrada: {actividad}")
+        
+    finally:
+        await cliente.desconectar()
+
+asyncio.run(main())
+----
+
+==== Caso de Uso 2: Procesamiento de Datos
+
+[source,python]
+----
+# client_tools_processing.py
+"""
+Cliente MCP para procesamiento de datos usando tools.
+
+Caso de uso: Pipeline de ETL (Extract, Transform, Load) que
+procesa archivos de datos y los carga en una base de datos.
+"""
+from fastmcp import Client
+from fastmcp.client.stdio import StdioServerParameters
+from fastmcp.client.transports import StdioTransport
+import asyncio
+from typing import List, Dict, Any, Optional
+from pathlib import Path
+
+class ETLClient:
+    """Cliente para pipeline de ETL."""
+    
+    def __init__(self, server_path: str):
+        self.server_path = server_path
+        self._client: Client = None
+    
+    async def conectar(self):
+        """Conecta al servidor MCP."""
+        server_params = StdioServerParameters(
+            command="python",
+            args=[self.server_path]
+        )
+        self._client = Client(StdioTransport(server_params))
+        await self._client.connect()
+    
+    async def extraer_datos(
+        self,
+        fuente: str,
+        formato: str = "csv",
+        opciones: dict = None
+    ) -> Dict[str, Any]:
+        """
+        Extrae datos de una fuente.
+        
+        Args:
+            fuente: Ruta al archivo o conexión a BD
+            formato: Formato de los datos (csv, json, excel)
+            opciones: Opciones adicionales
+        
+        Returns:
+            dict con los datos extraídos
+        """
+        args = {
+            "fuente": fuente,
+            "formato": formato
+        }
+        if opciones:
+            args["opciones"] = opciones
+        
+        return await self._client.call_tool("extraer_datos", args)
+    
+    async def transformar_datos(
+        self,
+        datos: List[Dict],
+        transformaciones: List[Dict[str, Any]]
+    ) -> List[Dict]:
+        """
+        Aplica transformaciones a los datos.
+        
+        Args:
+            datos: Lista de registros a transformar
+            transformaciones: Lista de transformaciones a aplicar
+        
+        Returns:
+            list con los datos transformados
+        """
+        return await self._client.call_tool(
+            "transformar_datos",
+            {
+                "datos": datos,
+                "transformaciones": transformaciones
+            }
+        )
+    
+    async def validar_datos(
+        self,
+        datos: List[Dict],
+        reglas: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
+        """
+        Valida datos según reglas.
+        
+        Args:
+            datos: Lista de registros a validar
+            reglas: Lista de reglas de validación
+        
+        Returns:
+            dict con resultado de validación
+        """
+        return await self._client.call_tool(
+            "validar_datos",
+            {
+                "datos": datos,
+                "reglas": reglas
+            }
+        )
+    
+    async def cargar_datos(
+        self,
+        datos: List[Dict],
+        destino: str,
+        tabla: str,
+        modo: str = "insert"
+    ) -> Dict[str, Any]:
+        """
+        Carga datos en el destino.
+        
+        Args:
+            datos: Lista de registros a cargar
+            destino: Conexión a la base de datos
+            tabla: Nombre de la tabla
+            modo: Modo de carga (insert, upsert, replace)
+        
+        Returns:
+            dict con estadísticas de carga
+        """
+        return await self._client.call_tool(
+            "cargar_datos",
+            {
+                "datos": datos,
+                "destino": destino,
+                "tabla": tabla,
+                "modo": modo
+            }
+        )
+    
+    async def ejecutar_pipeline(
+        self,
+        config: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Ejecuta un pipeline completo de ETL.
+        
+        Args:
+            config: Configuración del pipeline
+        
+        Returns:
+            dict con resultados del pipeline
+        """
+        resultados = {
+            "extraccion": None,
+            "transformacion": None,
+            "validacion": None,
+            "carga": None,
+            "estadisticas": {}
+        }
+        
+        # Extraer
+        print(f"Extrayendo datos de {config['fuente']}...")
+        datos_extraidos = await self.extraer_datos(
+            fuente=config["fuente"],
+            formato=config.get("formato", "csv"),
+            opciones=config.get("opciones_extraccion")
+        )
+        resultados["extraccion"] = datos_extraidos
+        
+        # Transformar
+        print("Aplicando transformaciones...")
+        datos_transformados = await self.transformar_datos(
+            datos=datos_extraidos["datos"],
+            transformaciones=config.get("transformaciones", [])
+        )
+        resultados["transformacion"] = datos_transformados
+        
+        # Validar
+        print("Validando datos...")
+        validacion = await self.validar_datos(
+            datos=datos_transformados,
+            reglas=config.get("reglas_validacion", [])
+        )
+        resultados["validacion"] = validacion
+        
+        if not validacion.get("valid", True):
+            print("Validación fallida:")
+            for error in validacion.get("errores", []):
+                print(f"  - {error}")
+            return resultados
+        
+        # Cargar
+        print(f"Cargando datos en {config['destino']}.{config['tabla']}...")
+        carga = await self.cargar_datos(
+            datos=datos_transformados,
+            destino=config["destino"],
+            tabla=config["tabla"],
+            modo=config.get("modo_carga", "insert")
+        )
+        resultados["carga"] = carga
+        
+        # Estadísticas
+        resultados["estadisticas"] = {
+            "registros_extraidos": len(datos_extraidos.get("datos", [])),
+            "registros_transformados": len(datos_transformados),
+            "registros_cargados": carga.get("registros_insertados", 0),
+            "errores": len(validacion.get("errores", []))
+        }
+        
+        return resultados
+    
+    async def desconectar(self):
+        """Desconecta del servidor."""
+        if self._client:
+            await self._client.disconnect()
+
+
+# Ejemplo de uso
+async def main():
+    cliente = ETLClient("etl_server.py")
+    
+    try:
+        await cliente.conectar()
+        
+        # Configuración del pipeline
+        config = {
+            "fuente": "/data/ventas_2024.csv",
+            "formato": "csv",
+            "destino": "postgresql://user:pass@localhost/db",
+            "tabla": "ventas",
+            "modo_carga": "upsert",
+            "transformaciones": [
+                {"tipo": "filtrar", "campo": "activo", "valor": True},
+                {"tipo": "mapear", "campo": "precio", "operacion": "float"},
+                {"tipo": "agregar", "campo": "procesado_en", "valor": "now()"}
+            ],
+            "reglas_validacion": [
+                {"campo": "id", "regla": "not_null"},
+                {"campo": "precio", "regla": "positivo"},
+                {"campo": "fecha", "regla": "fecha_valida"}
+            ]
+        }
+        
+        # Ejecutar pipeline
+        resultado = await cliente.ejecutar_pipeline(config)
+        
+        print("\n=== Resultado del Pipeline ===")
+        print(f"Registros extraídos: {resultado['estadisticas']['registros_extraidos']}")
+        print(f"Registros transformados: {resultado['estadisticas']['registros_transformados']}")
+        print(f"Registros cargados: {resultado['estadisticas']['registros_cargados']}")
+        print(f"Errores: {resultado['estadisticas']['errores']}")
+        
+    finally:
+        await cliente.desconectar()
+
+asyncio.run(main())
+----
+
+=== Clientes que Utilizan RESOURCES
+
+Los **recursos (resources)** son datos de solo lectura que el cliente puede consultar. Son ideales para obtener configuraciones, datos de referencia, o información contextual.
+
+==== Caso de Uso 1: Cliente de Configuración Dinámica
+
+[source,python]
+----
+# client_resources_config.py
+"""
+Cliente MCP para gestión de configuración usando resources.
+
+Caso de uso: Aplicación que lee configuraciones dinámicamente
+del servidor MCP sin necesidad de reiniciar.
+"""
+from fastmcp import Client
+from fastmcp.client.stdio import StdioServerParameters
+from fastmcp.client.transports import StdioTransport
+import asyncio
+from typing import Dict, Any, Optional
+import json
+
+class ConfigurationClient:
+    """Cliente para gestión de configuración dinámica."""
+    
+    def __init__(self, server_path: str):
+        self.server_path = server_path
+        self._client: Client = None
+        self._cache: Dict[str, Any] = {}
+    
+    async def conectar(self):
+        """Conecta al servidor MCP."""
+        server_params = StdioServerParameters(
+            command="python",
+            args=[self.server_path]
+        )
+        self._client = Client(StdioTransport(server_params))
+        await self._client.connect()
+        
+        # Listar recursos disponibles
+        resources = await self._client.list_resources()
+        print(f"Conectado. {len(resources)} recursos disponibles.")
+        for resource in resources:
+            print(f"  - {resource.uri}")
+    
+    async def obtener_config(
+        self,
+        seccion: str,
+        usar_cache: bool = True
+    ) -> Dict[str, Any]:
+        """
+        Obtiene configuración de una sección.
+        
+        Args:
+            seccion: Nombre de la sección (database, api, cache, etc.)
+            usar_cache: Si usar caché local
+        
+        Returns:
+            dict con la configuración
+        """
+        cache_key = f"config://{seccion}"
+        
+        # Verificar caché
+        if usar_cache and cache_key in self._cache:
+            return self._cache[cache_key]
+        
+        # Leer recurso
+        config = await self._client.read_resource(cache_key)
+        
+        # Guardar en caché
+        if usar_cache:
+            self._cache[cache_key] = config
+        
+        return config
+    
+    async def obtener_database_config(self) -> Dict[str, Any]:
+        """Obtiene configuración de base de datos."""
+        return await self.obtener_config("database")
+    
+    async def obtener_api_config(self) -> Dict[str, Any]:
+        """Obtiene configuración de API."""
+        return await self.obtener_config("api")
+    
+    async def obtener_cache_config(self) -> Dict[str, Any]:
+        """Obtiene configuración de caché."""
+        return await self.obtener_config("cache")
+    
+    async def obtener_todas_configs(self) -> Dict[str, Dict[str, Any]]:
+        """Obtiene todas las configuraciones."""
+        secciones = ["database", "api", "cache", "logging", "security"]
+        configs = {}
+        
+        for seccion in secciones:
+            try:
+                configs[seccion] = await self.obtener_config(seccion)
+            except Exception as e:
+                print(f"Error obteniendo config {seccion}: {e}")
+                configs[seccion] = None
+        
+        return configs
+    
+    def invalidar_cache(self, seccion: str = None):
+        """
+        Invalida la caché de configuración.
+        
+        Args:
+            seccion: Sección específica o None para invalidar todo
+        """
+        if seccion is None:
+            self._cache.clear()
+        else:
+            cache_key = f"config://{seccion}"
+            self._cache.pop(cache_key, None)
+    
+    async def recargar_config(self, seccion: str) -> Dict[str, Any]:
+        """
+        Fuerza recarga de configuración.
+        
+        Args:
+            seccion: Sección a recargar
+        
+        Returns:
+            dict con la nueva configuración
+        """
+        self.invalidar_cache(seccion)
+        return await self.obtener_config(seccion, usar_cache=False)
+    
+    async def observar_cambios(
+        self,
+        seccion: str,
+        callback: callable,
+        intervalo: int = 60
+    ):
+        """
+        Observa cambios en una configuración y llama al callback.
+        
+        Args:
+            seccion: Sección a observar
+            callback: Función a llamar cuando hay cambios
+            intervalo: Intervalo en segundos para verificar
+        """
+        config_actual = await self.obtener_config(seccion)
+        
+        while True:
+            await asyncio.sleep(intervalo)
+            
+            nueva_config = await self.obtener_config(seccion, usar_cache=False)
+            
+            if nueva_config != config_actual:
+                await callback(seccion, config_actual, nueva_config)
+                config_actual = nueva_config
+    
+    async def desconectar(self):
+        """Desconecta del servidor."""
+        if self._client:
+            await self._client.disconnect()
+
+
+# Ejemplo de uso
+async def main():
+    cliente = ConfigurationClient("config_server.py")
+    
+    try:
+        await cliente.conectar()
+        
+        # Obtener configuración de base de datos
+        db_config = await cliente.obtener_database_config()
+        print(f"Configuración de BD: {db_config}")
+        
+        # Obtener configuración de API
+        api_config = await cliente.obtener_api_config()
+        print(f"Configuración de API: {api_config}")
+        
+        # Obtener todas las configuraciones
+        todas = await cliente.obtener_todas_configs()
+        print(f"Todas las configuraciones: {json.dumps(todas, indent=2)}")
+        
+        # Invalidar caché y recargar
+        nueva_config = await cliente.recargar_config("database")
+        print(f"Nueva configuración de BD: {nueva_config}")
+        
+    finally:
+        await cliente.desconectar()
+
+asyncio.run(main())
+----
+
+==== Caso de Uso 2: Cliente de Datos de Referencia
+
+[source,python]
+----
+# client_resources_data.py
+"""
+Cliente MCP para acceso a datos de referencia usando resources.
+
+Caso de uso: Aplicación de e-commerce que accede a catálogos,
+precios y stock como recursos de solo lectura.
+"""
+from fastmcp import Client
+from fastmcp.client.stdio import StdioServerParameters
+from fastmcp.client.transports import StdioTransport
+import asyncio
+from typing import List, Dict, Any, Optional
+from functools import lru_cache
+
+class CatalogClient:
+    """Cliente para acceso a catálogos y datos de referencia."""
+    
+    def __init__(self, server_path: str):
+        self.server_path = server_path
+        self._client: Client = None
+        self._cache_ttl = 3600  # 1 hora
+        self._cache: Dict[str, tuple] = {}  # (data, timestamp)
+    
+    async def conectar(self):
+        """Conecta al servidor MCP."""
+        server_params = StdioServerParameters(
+            command="python",
+            args=[self.server_path]
+        )
+        self._client = Client(StdioTransport(server_params))
+        await self._client.connect()
+    
+    async def _obtener_con_cache(
+        self,
+        uri: str,
+        usar_cache: bool = True
+    ) -> Any:
+        """Obtiene recurso con caché."""
+        import time
+        
+        if usar_cache and uri in self._cache:
+            data, timestamp = self._cache[uri]
+            if time.time() - timestamp < self._cache_ttl:
+                return data
+        
+        # Leer recurso
+        data = await self._client.read_resource(uri)
+        
+        # Guardar en caché
+        self._cache[uri] = (data, time.time())
+        
+        return data
+    
+    async def obtener_categorias(self) -> List[Dict[str, Any]]:
+        """
+        Obtiene lista de categorías.
+        
+        Returns:
+            list de categorías
+        """
+        return await self._obtener_con_cache("data://categorias")
+    
+    async def obtener_categoria(
+        self,
+        categoria_id: int
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Obtiene una categoría por ID.
+        
+        Args:
+            categoria_id: ID de la categoría
+        
+        Returns:
+            dict con la categoría o None
+        """
+        return await self._obtener_con_cache(
+            f"data://categorias/{categoria_id}"
+        )
+    
+    async def obtener_productos(
+        self,
+        categoria_id: int = None,
+        page: int = 1,
+        limit: int = 20
+    ) -> Dict[str, Any]:
+        """
+        Obtiene productos paginados.
+        
+        Args:
+            categoria_id: Filtrar por categoría (opcional)
+            page: Número de página
+            limit: Elementos por página
+        
+        Returns:
+            dict con productos y metadatos de paginación
+        """
+        if categoria_id:
+            uri = f"data://productos?categoria={categoria_id}&page={page}&limit={limit}"
+        else:
+            uri = f"data://productos?page={page}&limit={limit}"
+        
+        return await self._obtener_con_cache(uri)
+    
+    async def obtener_producto(
+        self,
+        producto_id: int
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Obtiene un producto por ID.
+        
+        Args:
+            producto_id: ID del producto
+        
+        Returns:
+            dict con el producto o None
+        """
+        return await self._obtener_con_cache(
+            f"data://productos/{producto_id}"
+        )
+    
+    async def obtener_precio(
+        self,
+        producto_id: int,
+        moneda: str = "EUR"
+    ) -> Dict[str, Any]:
+        """
+        Obtiene precio de un producto.
+        
+        Args:
+            producto_id: ID del producto
+            moneda: Moneda (EUR, USD, etc.)
+        
+        Returns:
+            dict con precio y disponibilidad
+        """
+        return await self._obtener_con_cache(
+            f"data://precios/{producto_id}?moneda={moneda}"
+        )
+    
+    async def obtener_stock(
+        self,
+        producto_id: int,
+        almacen_id: int = None
+    ) -> Dict[str, Any]:
+        """
+        Obtiene stock de un producto.
+        
+        Args:
+            producto_id: ID del producto
+            almacen_id: ID del almacén (opcional)
+        
+        Returns:
+            dict con stock disponible
+        """
+        if almacen_id:
+            uri = f"data://stock/{producto_id}?almacen={almacen_id}"
+        else:
+            uri = f"data://stock/{producto_id}"
+        
+        return await self._obtener_con_cache(uri)
+    
+    async def buscar_productos(
+        self,
+        query: str,
+        filtros: Dict[str, Any] = None
+    ) -> List[Dict[str, Any]]:
+        """
+        Busca productos por texto.
+        
+        Args:
+            query: Término de búsqueda
+            filtros: Filtros adicionales
+        
+        Returns:
+            list de productos encontrados
+        """
+        # Para búsquedas, no usar caché
+        uri = f"data://productos/buscar?q={query}"
+        if filtros:
+            for key, value in filtros.items():
+                uri += f"&{key}={value}"
+        
+        return await self._client.read_resource(uri)
+    
+    async def obtener_metadatos(self) -> Dict[str, Any]:
+        """
+        Obtiene metadatos del catálogo.
+        
+        Returns:
+            dict con estadísticas y metadatos
+        """
+        return await self._obtener_con_cache("data://metadatos")
+    
+    async def verificar_disponibilidad(
+        self,
+        producto_id: int,
+        cantidad: int = 1
+    ) -> bool:
+        """
+        Verifica si hay stock disponible.
+        
+        Args:
+            producto_id: ID del producto
+            cantidad: Cantidad requerida
+        
+        Returns:
+            bool indicando disponibilidad
+        """
+        stock = await self.obtener_stock(producto_id)
+        return stock.get("disponible", 0) >= cantidad
+    
+    async def obtener_productos_relacionados(
+        self,
+        producto_id: int,
+        limite: int = 5
+    ) -> List[Dict[str, Any]]:
+        """
+        Obtiene productos relacionados.
+        
+        Args:
+            producto_id: ID del producto
+            limite: Máximo de productos
+        
+        Returns:
+            list de productos relacionados
+        """
+        return await self._obtener_con_cache(
+            f"data://productos/{producto_id}/relacionados?limite={limite}"
+        )
+    
+    async def desconectar(self):
+        """Desconecta del servidor."""
+        if self._client:
+            await self._client.disconnect()
+
+
+# Ejemplo de uso
+async def main():
+    cliente = CatalogClient("catalog_server.py")
+    
+    try:
+        await cliente.conectar()
+        
+        # Obtener categorías
+        categorias = await cliente.obtener_categorias()
+        print(f"Categorías: {len(categorias)} encontradas")
+        
+        # Obtener productos de una categoría
+        productos = await cliente.obtener_productos(
+            categoria_id=1,
+            page=1,
+            limit=10
+        )
+        print(f"Productos: {productos['total']} encontrados")
+        
+        # Obtener detalle de un producto
+        producto = await cliente.obtener_producto(1)
+        print(f"Producto: {producto['nombre']}")
+        
+        # Verificar disponibilidad
+        disponible = await cliente.verificar_disponibilidad(1, cantidad=5)
+        print(f"Disponibilidad: {'Sí' if disponible else 'No'}")
+        
+        # Buscar productos
+        resultados = await cliente.buscar_productos(
+            "laptop",
+            filtros={"marca": "Dell", "precio_max": 1000}
+        )
+        print(f"Búsqueda: {len(resultados)} resultados")
+        
+    finally:
+        await cliente.desconectar()
+
+asyncio.run(main())
+----
+
+=== Clientes que Utilizan PROMPTS
+
+Los **prompts** son plantillas predefinidas que ayudan a guiar al LLM en tareas específicas. Son ideales para estandarizar interacciones y asegurar respuestas consistentes.
+
+==== Caso de Uso 1: Cliente de Asistencia al Usuario
+
+[source,python]
+----
+# client_prompts_assistant.py
+"""
+Cliente MCP para asistencia al usuario usando prompts.
+
+Caso de uso: Asistente virtual que usa prompts predefinidos
+para generar respuestas consistentes y útiles.
+"""
+from fastmcp import Client
+from fastmcp.client.stdio import StdioServerParameters
+from fastmcp.client.transports import StdioTransport
+import asyncio
+from typing import Dict, Any, List, Optional
+
+class AssistantClient:
+    """Cliente de asistencia con prompts."""
+    
+    def __init__(self, server_path: str):
+        self.server_path = server_path
+        self._client: Client = None
+    
+    async def conectar(self):
+        """Conecta al servidor MCP."""
+        server_params = StdioServerParameters(
+            command="python",
+            args=[self.server_path]
+        )
+        self._client = Client(StdioTransport(server_params))
+        await self._client.connect()
+        
+        # Listar prompts disponibles
+        prompts = await self._client.list_prompts()
+        print(f"Conectado. {len(prompts)} prompts disponibles.")
+        for prompt in prompts:
+            print(f"  - {prompt.name}: {prompt.description}")
+    
+    async def obtener_prompt(
+        self,
+        nombre: str,
+        argumentos: Dict[str, Any]
+    ) -> str:
+        """
+        Obtiene un prompt con argumentos.
+        
+        Args:
+            nombre: Nombre del prompt
+            argumentos: Argumentos para el prompt
+        
+        Returns:
+            str con el prompt formateado
+        """
+        return await self._client.get_prompt(nombre, argumentos)
+    
+    async def prompt_bienvenida(
+        self,
+        nombre_usuario: str,
+        idioma: str = "es"
+    ) -> str:
+        """
+        Genera mensaje de bienvenida.
+        
+        Args:
+            nombre_usuario: Nombre del usuario
+            idioma: Idioma del mensaje
+        
+        Returns:
+            str con el mensaje de bienvenida
+        """
+        return await self.obtener_prompt(
+            "bienvenida",
+            {
+                "nombre": nombre_usuario,
+                "idioma": idioma
+            }
+        )
+    
+    async def prompt_ayuda(
+        self,
+        contexto: str,
+        pregunta: str
+    ) -> str:
+        """
+        Genera respuesta de ayuda.
+        
+        Args:
+            contexto: Contexto del usuario
+            pregunta: Pregunta específica
+        
+        Returns:
+            str con el prompt formateado
+        """
+        return await self.obtener_prompt(
+            "ayuda",
+            {
+                "contexto": contexto,
+                "pregunta": pregunta
+            }
+        )
+    
+    async def prompt_analisis_datos(
+        self,
+        datos: str,
+        tipo_analisis: str = "completo"
+    ) -> str:
+        """
+        Genera prompt para análisis de datos.
+        
+        Args:
+            datos: Datos a analizar
+            tipo_analisis: Tipo de análisis (completo, resumen, tendencias)
+        
+        Returns:
+            str con el prompt formateado
+        """
+        return await self.obtener_prompt(
+            "analisis_datos",
+            {
+                "datos": datos,
+                "tipo_analisis": tipo_analisis
+            }
+        )
+    
+    async def prompt_revision_codigo(
+        self,
+        codigo: str,
+        lenguaje: str,
+        nivel_detalle: str = "completo"
+    ) -> str:
+        """
+        Genera prompt para revisión de código.
+        
+        Args:
+            codigo: Código a revisar
+            lenguaje: Lenguaje de programación
+            nivel_detalle: Nivel de detalle (completo, resumen, critico)
+        
+        Returns:
+            str con el prompt formateado
+        """
+        return await self.obtener_prompt(
+            "revision_codigo",
+            {
+                "codigo": codigo,
+                "lenguaje": lenguaje,
+                "nivel_detalle": nivel_detalle
+            }
+        )
+    
+    async def prompt_generar_documentacion(
+        self,
+        elemento: str,
+        tipo: str,
+        contexto: str = ""
+    ) -> str:
+        """
+        Genera prompt para crear documentación.
+        
+        Args:
+            elemento: Elemento a documentar
+            tipo: Tipo de documentación (funcion, clase, modulo, api)
+            contexto: Contexto adicional
+        
+        Returns:
+            str con el prompt formateado
+        """
+        return await self.obtener_prompt(
+            "generar_documentacion",
+            {
+                "elemento": elemento,
+                "tipo": tipo,
+                "contexto": contexto
+            }
+        )
+    
+    async def prompt_resolucion_problema(
+        self,
+        descripcion: str,
+        contexto: str,
+        errores: List[str] = None
+    ) -> str:
+        """
+        Genera prompt para resolver problemas.
+        
+        Args:
+            descripcion: Descripción del problema
+            contexto: Contexto del problema
+            errores: Lista de errores (opcional)
+        
+        Returns:
+            str con el prompt formateado
+        """
+        return await self.obtener_prompt(
+            "resolucion_problema",
+            {
+                "descripcion": descripcion,
+                "contexto": contexto,
+                "errores": "\n".join(errores) if errores else ""
+            }
+        )
+    
+    async def prompt_planificacion(
+        self,
+        objetivo: str,
+        recursos: List[str],
+        restricciones: List[str] = None
+    ) -> str:
+        """
+        Genera prompt para planificación.
+        
+        Args:
+            objetivo: Objetivo a alcanzar
+            recursos: Recursos disponibles
+            restricciones: Restricciones (opcional)
+        
+        Returns:
+            str con el prompt formateado
+        """
+        return await self.obtener_prompt(
+            "planificacion",
+            {
+                "objetivo": objetivo,
+                "recursos": "\n".join(f"- {r}" for r in recursos),
+                "restricciones": "\n".join(f"- {r}" for r in (restricciones or []))
+            }
+        )
+    
+    async def desconectar(self):
+        """Desconecta del servidor."""
+        if self._client:
+            await self._client.disconnect()
+
+
+# Ejemplo de uso
+async def main():
+    cliente = AssistantClient("assistant_server.py")
+    
+    try:
+        await cliente.conectar()
+        
+        # Bienvenida
+        bienvenida = await cliente.prompt_bienvenida(
+            nombre_usuario="Juan",
+            idioma="es"
+        )
+        print("=== Bienvenida ===")
+        print(bienvenida)
+        
+        # Ayuda
+        ayuda = await cliente.prompt_ayuda(
+            contexto="El usuario está intentando configurar una base de datos PostgreSQL",
+            pregunta="¿Cómo configuro la conexión SSL?"
+        )
+        print("\n=== Ayuda ===")
+        print(ayuda)
+        
+        # Análisis de datos
+        datos_ejemplo = """
+        Ventas Q1: 10000
+        Ventas Q2: 12000
+        Ventas Q3: 15000
+        Ventas Q4: 18000
+        """
+        analisis = await cliente.prompt_analisis_datos(
+            datos=datos_ejemplo,
+            tipo_analisis="completo"
+        )
+        print("\n=== Análisis de Datos ===")
+        print(analisis)
+        
+        # Revisión de código
+        codigo_ejemplo = '''
+def calcular_total(items):
+    total = 0
+    for item in items:
+        total += item.precio * item.cantidad
+    return total
+        '''
+        revision = await cliente.prompt_revision_codigo(
+            codigo=codigo_ejemplo,
+            lenguaje="Python",
+            nivel_detalle="completo"
+        )
+        print("\n=== Revisión de Código ===")
+        print(revision)
+        
+        # Resolución de problemas
+        resolucion = await cliente.prompt_resolucion_problema(
+            descripcion="Error de conexión a la base de datos",
+            contexto="Aplicación web en producción",
+            errores=[
+                "Connection refused",
+                "Timeout after 30 seconds"
+            ]
+        )
+        print("\n=== Resolución de Problema ===")
+        print(resolucion)
+        
+    finally:
+        await cliente.desconectar()
+
+asyncio.run(main())
+----
+
+==== Caso de Uso 2: Cliente de Generación de Contenido
+
+[source,python]
+----
+# client_prompts_content.py
+"""
+Cliente MCP para generación de contenido usando prompts.
+
+Caso de uso: Plataforma de marketing que genera contenido
+personalizado usando prompts predefinidos.
+"""
+from fastmcp import Client
+from fastmcp.client.stdio import StdioServerParameters
+from fastmcp.client.transports import StdioTransport
+import asyncio
+from typing import Dict, Any, List, Optional
+
+class ContentGenerationClient:
+    """Cliente para generación de contenido con prompts."""
+    
+    def __init__(self, server_path: str):
+        self.server_path = server_path
+        self._client: Client = None
+    
+    async def conectar(self):
+        """Conecta al servidor MCP."""
+        server_params = StdioServerParameters(
+            command="python",
+            args=[self.server_path]
+        )
+        self._client = Client(StdioTransport(server_params))
+        await self._client.connect()
+    
+    async def generar_blog_post(
+        self,
+        titulo: str,
+        tema: str,
+        palabras_clave: List[str],
+        tono: str = "profesional",
+        longitud: int = 1000
+    ) -> str:
+        """
+        Genera prompt para crear un blog post.
+        
+        Args:
+            titulo: Título del post
+            tema: Tema principal
+            palabras_clave: Lista de palabras clave
+            tono: Tono del contenido (profesional, casual, tecnico)
+            longitud: Longitud aproximada en palabras
+        
+        Returns:
+            str con el prompt formateado
+        """
+        return await self._client.get_prompt(
+            "generar_blog_post",
+            {
+                "titulo": titulo,
+                "tema": tema,
+                "palabras_clave": ", ".join(palabras_clave),
+                "tono": tono,
+                "longitud": longitud
+            }
+        )
+    
+    async def generar_email_marketing(
+        self,
+        asunto: str,
+        producto: str,
+        beneficios: List[str],
+        call_to_action: str,
+        audiencia: str = "general"
+    ) -> str:
+        """
+        Genera prompt para email de marketing.
+        
+        Args:
+            asunto: Asunto del email
+            producto: Producto o servicio
+            beneficios: Lista de beneficios
+            call_to_action: Llamada a la acción
+            audiencia: Audiencia objetivo
+        
+        Returns:
+            str con el prompt formateado
+        """
+        return await self._client.get_prompt(
+            "generar_email_marketing",
+            {
+                "asunto": asunto,
+                "producto": producto,
+                "beneficios": "\n".join(f"- {b}" for b in beneficios),
+                "call_to_action": call_to_action,
+                "audiencia": audiencia
+            }
+        )
+    
+    async def generar_descripcion_producto(
+        self,
+        producto: str,
+        caracteristicas: List[str],
+        publico_objetivo: str,
+        estilo: str = "persuasivo"
+    ) -> str:
+        """
+        Genera prompt para descripción de producto.
+        
+        Args:
+            producto: Nombre del producto
+            caracteristicas: Lista de características
+            publico_objetivo: Público objetivo
+            estilo: Estilo de escritura
+        
+        Returns:
+            str con el prompt formateado
+        """
+        return await self._client.get_prompt(
+            "generar_descripcion_producto",
+            {
+                "producto": producto,
+                "caracteristicas": "\n".join(f"- {c}" for c in caracteristicas),
+                "publico_objetivo": publico_objetivo,
+                "estilo": estilo
+            }
+        )
+    
+    async def generar_post_redes(
+        self,
+        plataforma: str,
+        mensaje: str,
+        hashtags: List[str],
+        incluir_emoji: bool = True
+    ) -> str:
+        """
+        Genera prompt para post de redes sociales.
+        
+        Args:
+            plataforma: Plataforma (twitter, instagram, linkedin, facebook)
+            mensaje: Mensaje principal
+            hashtags: Lista de hashtags
+            incluir_emoji: Si incluir emojis
+        
+        Returns:
+            str con el prompt formateado
+        """
+        return await self._client.get_prompt(
+            "generar_post_redes",
+            {
+                "plataforma": plataforma,
+                "mensaje": mensaje,
+                "hashtags": " ".join(f"#{h}" for h in hashtags),
+                "incluir_emoji": "sí" if incluir_emoji else "no"
+            }
+        )
+    
+    async def generar_faq(
+        self,
+        tema: str,
+        cantidad: int = 10,
+        audiencia: str = "general"
+    ) -> str:
+        """
+        Genera prompt para sección de FAQs.
+        
+        Args:
+            tema: Tema principal
+            cantidad: Número de preguntas
+            audiencia: Audiencia objetivo
+        
+        Returns:
+            str con el prompt formateado
+        """
+        return await self._client.get_prompt(
+            "generar_faq",
+            {
+                "tema": tema,
+                "cantidad": cantidad,
+                "audiencia": audiencia
+            }
+        )
+    
+    async def generar_newsletter(
+        self,
+        titulo: str,
+        secciones: List[Dict[str, str]],
+        audiencia: str = "general"
+    ) -> str:
+        """
+        Genera prompt para newsletter.
+        
+        Args:
+            titulo: Título del newsletter
+            secciones: Lista de secciones con título y contenido
+            audiencia: Audiencia objetivo
+        
+        Returns:
+            str con el prompt formateado
+        """
+        secciones_str = "\n\n".join(
+            f"## {s['titulo']}\n{s['contenido']}"
+            for s in secciones
+        )
+        
+        return await self._client.get_prompt(
+            "generar_newsletter",
+            {
+                "titulo": titulo,
+                "secciones": secciones_str,
+                "audiencia": audiencia
+            }
+        )
+    
+    async def generar_caso_exito(
+        self,
+        cliente_nombre: str,
+        industria: str,
+        problema: str,
+        solucion: str,
+        resultados: List[str]
+    ) -> str:
+        """
+        Genera prompt para caso de éxito.
+        
+        Args:
+            cliente_nombre: Nombre del cliente
+            industria: Industria del cliente
+            problema: Problema inicial
+            solucion: Solución implementada
+            resultados: Lista de resultados
+        
+        Returns:
+            str con el prompt formateado
+        """
+        return await self._client.get_prompt(
+            "generar_caso_exito",
+            {
+                "cliente_nombre": cliente_nombre,
+                "industria": industria,
+                "problema": problema,
+                "solucion": solucion,
+                "resultados": "\n".join(f"- {r}" for r in resultados)
+            }
+        )
+    
+    async def desconectar(self):
+        """Desconecta del servidor."""
+        if self._client:
+            await self._client.disconnect()
+
+
+# Ejemplo de uso
+async def main():
+    cliente = ContentGenerationClient("content_server.py")
+    
+    try:
+        await cliente.conectar()
+        
+        # Generar blog post
+        blog_prompt = await cliente.generar_blog_post(
+            titulo="Introducción a MCP",
+            tema="Model Context Protocol",
+            palabras_clave=["MCP", "FastMCP", "Python", "LLM"],
+            tono="tecnico",
+            longitud=1500
+        )
+        print("=== Blog Post Prompt ===")
+        print(blog_prompt[:500] + "...")
+        
+        # Generar email de marketing
+        email_prompt = await cliente.generar_email_marketing(
+            asunto="Descubre cómo MCP puede transformar tu negocio",
+            producto="FastMCP Pro",
+            beneficios=[
+                "Integración rápida con LLMs",
+                "Desarrollo simplificado",
+                "Documentación automática"
+            ],
+            call_to_action="Prueba gratis por 30 días",
+            audiencia="desarrolladores"
+        )
+        print("\n=== Email Marketing Prompt ===")
+        print(email_prompt[:500] + "...")
+        
+        # Generar post de redes
+        post_prompt = await cliente.generar_post_redes(
+            plataforma="linkedin",
+            mensaje="Lanzamos FastMCP 2.0 con nuevas características",
+            hashtags=["FastMCP", "Python", "LLM", "Desarrollo"],
+            incluir_emoji=True
+        )
+        print("\n=== Post Redes Sociales Prompt ===")
+        print(post_prompt)
+        
+        # Generar FAQ
+        faq_prompt = await cliente.generar_faq(
+            tema="Model Context Protocol",
+            cantidad=10,
+            audiencia="desarrolladores"
+        )
+        print("\n=== FAQ Prompt ===")
+        print(faq_prompt[:500] + "...")
+        
+    finally:
+        await cliente.desconectar()
+
+asyncio.run(main())
+----
+
+== Agentes CrewAI con Servidores MCP Propios
+
+=== Arquitectura de Integración
+
+La integración de CrewAI con servidores MCP propios permite crear sistemas de agentes inteligentes que pueden acceder a herramientas, recursos y prompts personalizados.
+
+----
+┌─────────────────────────────────────────────────────────────────────┐
+│                         APLICACIÓN                                  │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  ┌──────────────────────────────────────────────────────────────┐  │
+│  │                     CREW DE AGENTES                           │  │
+│  │  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐         │  │
+│  │  │ Agent 1 │  │ Agent 2 │  │ Agent 3 │  │ Agent 4 │         │  │
+│  │  │(Analyst)│  │(Research│  │ (Writer)│  │(Reviewer│         │  │
+│  │  └────┬────┘  └────┬────┘  └────┬────┘  └────┬────┘         │  │
+│  │       │            │            │            │               │  │
+│  │       └────────────┴────────────┴────────────┘               │  │
+│  │                         │                                     │  │
+│  │                         ▼                                     │  │
+│  │              ┌─────────────────┐                              │  │
+│  │              │   MCP Tools     │                              │  │
+│  │              │   (Adaptadas)   │                              │  │
+│  │              └────────┬────────┘                              │  │
+│  └───────────────────────┼───────────────────────────────────────┘  │
+│                          │                                          │
+└──────────────────────────┼──────────────────────────────────────────┘
+                           │
+                           ▼
+              ┌─────────────────────────┐
+              │      MCP CLIENT         │
+              │      (FastMCP)          │
+              └────────────┬────────────┘
+                           │
+                           ▼
+              ┌─────────────────────────┐
+              │      MCP SERVER         │
+              │   (NUESTRO SERVIDOR)    │
+              │                         │
+              │  ┌─────────────────┐   │
+              │  │     Tools       │   │
+              │  ├─────────────────┤   │
+              │  │   Resources     │   │
+              │  ├─────────────────┤   │
+              │  │    Prompts      │   │
+              │  └─────────────────┘   │
+              └─────────────────────────┘
+----
+
+=== Servidor MCP para Agentes
+
+Primero, creamos un servidor MCP completo con todas las capacidades que nuestros agentes necesitarán:
+
+[source,python]
+----
+# agent_mcp_server.py
+"""
+Servidor MCP para agentes CrewAI.
+
+Este servidor proporciona herramientas, recursos y prompts
+específicamente diseñados para agentes de IA.
+"""
+from fastmcp import FastMCP
+from typing import Annotated, List, Dict, Any, Optional
+from pydantic import Field
+import json
+from datetime import datetime
+import uuid
+
+# Crear servidor
+mcp = FastMCP("agent-server", version="1.0.0")
+
+# =====================
+# DATOS SIMULADOS
+# =====================
+
+# Base de datos simulada
+DATABASE = {
+    "usuarios": {},
+    "productos": {},
+    "ordenes": {},
+    "tickets": {}
+}
+
+# Cache de resultados
+CACHE: Dict[str, Any] = {}
+
+# =====================
+# HERRAMIENTAS (TOOLS)
+# =====================
+
+@mcp.tool
+def buscar_en_base_datos(
+    tabla: Annotated[str, Field(description="Tabla a buscar")],
+    filtros: Annotated[Dict[str, Any], Field(description="Filtros de búsqueda")] = None,
+    limite: Annotated[int, Field(description="Número máximo de resultados", ge=1, le=100)] = 10
+) -> Dict[str, Any]:
+    """
+    Busca registros en la base de datos.
+    
+    Args:
+        tabla: Nombre de la tabla (usuarios, productos, ordenes, tickets)
+        filtros: Diccionario con filtros {campo: valor}
+        limite: Número máximo de resultados
+    
+    Returns:
+        dict con resultados y metadatos
+    """
+    if tabla not in DATABASE:
+        return {
+            "success": False,
+            "error": f"Tabla '{tabla}' no existe",
+            "tablas_disponibles": list(DATABASE.keys())
+        }
+    
+    resultados = list(DATABASE[tabla].values())
+    
+    # Aplicar filtros
+    if filtros:
+        resultados_filtrados = []
+        for registro in resultados:
+            coincide = True
+            for campo, valor in filtros.items():
+                if campo not in registro or registro[campo] != valor:
+                    coincide = False
+                    break
+            if coincide:
+                resultados_filtrados.append(registro)
+        resultados = resultados_filtrados
+    
+    # Limitar resultados
+    resultados = resultados[:limite]
+    
+    return {
+        "success": True,
+        "tabla": tabla,
+        "total": len(resultados),
+        "resultados": resultados,
+        "filtros_aplicados": filtros
+    }
+
+@mcp.tool
+def crear_registro(
+    tabla: Annotated[str, Field(description="Tabla donde crear el registro")],
+    datos: Annotated[Dict[str, Any], Field(description="Datos del registro")]
+) -> Dict[str, Any]:
+    """
+    Crea un nuevo registro en la base de datos.
+    
+    Args:
+        tabla: Nombre de la tabla
+        datos: Diccionario con los datos del registro
+    
+    Returns:
+        dict con el registro creado
+    """
+    if tabla not in DATABASE:
+        return {
+            "success": False,
+            "error": f"Tabla '{tabla}' no existe"
+        }
+    
+    # Generar ID
+    registro_id = str(uuid.uuid4())
+    datos["id"] = registro_id
+    datos["creado_en"] = datetime.now().isoformat()
+    
+    # Guardar
+    DATABASE[tabla][registro_id] = datos
+    
+    return {
+        "success": True,
+        "tabla": tabla,
+        "registro": datos
+    }
+
+@mcp.tool
+def actualizar_registro(
+    tabla: Annotated[str, Field(description="Tabla del registro")],
+    id: Annotated[str, Field(description="ID del registro")],
+    datos: Annotated[Dict[str, Any], Field(description="Datos a actualizar")]
+) -> Dict[str, Any]:
+    """
+    Actualiza un registro existente.
+    
+    Args:
+        tabla: Nombre de la tabla
+        id: ID del registro
+        datos: Datos a actualizar
+    
+    Returns:
+        dict con el registro actualizado
+    """
+    if tabla not in DATABASE:
+        return {"success": False, "error": f"Tabla '{tabla}' no existe"}
+    
+    if id not in DATABASE[tabla]:
+        return {"success": False, "error": f"Registro '{id}' no encontrado"}
+    
+    # Actualizar
+    DATABASE[tabla][id].update(datos)
+    DATABASE[tabla][id]["actualizado_en"] = datetime.now().isoformat()
+    
+    return {
+        "success": True,
+        "tabla": tabla,
+        "registro": DATABASE[tabla][id]
+    }
+
+@mcp.tool
+def eliminar_registro(
+    tabla: Annotated[str, Field(description="Tabla del registro")],
+    id: Annotated[str, Field(description="ID del registro")]
+) -> Dict[str, Any]:
+    """
+    Elimina un registro.
+    
+    Args:
+        tabla: Nombre de la tabla
+        id: ID del registro
+    
+    Returns:
+        dict con resultado de la operación
+    """
+    if tabla not in DATABASE:
+        return {"success": False, "error": f"Tabla '{tabla}' no existe"}
+    
+    if id not in DATABASE[tabla]:
+        return {"success": False, "error": f"Registro '{id}' no encontrado"}
+    
+    # Eliminar
+    registro_eliminado = DATABASE[tabla].pop(id)
+    
+    return {
+        "success": True,
+        "tabla": tabla,
+        "registro_eliminado": registro_eliminado
+    }
+
+@mcp.tool
+def ejecutar_consulta(
+    query: Annotated[str, Field(description="Consulta en lenguaje natural")],
+    contexto: Annotated[Dict[str, Any], Field(description="Contexto adicional")] = None
+) -> Dict[str, Any]:
+    """
+    Ejecuta una consulta en lenguaje natural.
+    
+    Args:
+        query: Consulta en lenguaje natural
+        contexto: Contexto adicional para la consulta
+    
+    Returns:
+        dict con resultados de la consulta
+    """
+    # Simulación de procesamiento de consulta
+    # En producción, esto se conectaría a un modelo de lenguaje
+    
+    resultados = {
+        "query": query,
+        "interpretacion": f"Procesando: {query}",
+        "resultados": [],
+        "sugerencias": []
+    }
+    
+    # Simular búsqueda en múltiples tablas
+    for tabla in DATABASE:
+        for registro in DATABASE[tabla].values():
+            # Simular matching
+            if any(
+                palabra.lower() in str(registro).lower()
+                for palabra in query.split()
+            ):
+                resultados["resultados"].append({
+                    "tabla": tabla,
+                    "registro": registro,
+                    "relevancia": 0.8
+                })
+    
+    resultados["total"] = len(resultados["resultados"])
+    
+    return resultados
+
+@mcp.tool
+def enviar_notificacion(
+    destinatario: Annotated[str, Field(description="Email del destinatario")],
+    asunto: Annotated[str, Field(description="Asunto de la notificación")],
+    mensaje: Annotated[str, Field(description="Contenido del mensaje")],
+    tipo: Annotated[str, Field(description="Tipo: email, sms, push")] = "email"
+) -> Dict[str, Any]:
+    """
+    Envía una notificación.
+    
+    Args:
+        destinatario: Email del destinatario
+        asunto: Asunto de la notificación
+        mensaje: Contenido del mensaje
+        tipo: Tipo de notificación
+    
+    Returns:
+        dict con resultado del envío
+    """
+    # Simular envío
+    notificacion_id = str(uuid.uuid4())
+    
+    return {
+        "success": True,
+        "id": notificacion_id,
+        "destinatario": destinatario,
+        "asunto": asunto,
+        "tipo": tipo,
+        "enviado_en": datetime.now().isoformat()
+    }
+
+@mcp.tool
+def generar_reporte(
+    tipo: Annotated[str, Field(description="Tipo de reporte: ventas, usuarios, tickets")],
+    filtros: Annotated[Dict[str, Any], Field(description="Filtros del reporte")] = None,
+    formato: Annotated[str, Field(description="Formato: json, csv, pdf")] = "json"
+) -> Dict[str, Any]:
+    """
+    Genera un reporte.
+    
+    Args:
+        tipo: Tipo de reporte
+        filtros: Filtros a aplicar
+        formato: Formato de salida
+    
+    Returns:
+        dict con el reporte generado
+    """
+    # Simular generación de reporte
+    reporte = {
+        "tipo": tipo,
+        "formato": formato,
+        "generado_en": datetime.now().isoformat(),
+        "filtros": filtros,
+        "datos": {}
+    }
+    
+    # Agregar datos según tipo
+    if tipo == "ventas":
+        reporte["datos"] = {
+            "total_ventas": 150000,
+            "productos_vendidos": 500,
+            "clientes_nuevos": 50
+        }
+    elif tipo == "usuarios":
+        reporte["datos"] = {
+            "total_usuarios": len(DATABASE["usuarios"]),
+            "activos": len([u for u in DATABASE["usuarios"].values() if u.get("activo")]),
+            "nuevos_mes": 25
+        }
+    elif tipo == "tickets":
+        reporte["datos"] = {
+            "total_tickets": len(DATABASE["tickets"]),
+            "abiertos": len([t for t in DATABASE["tickets"].values() if t.get("estado") == "abierto"]),
+            "resueltos": len([t for t in DATABASE["tickets"].values() if t.get("estado") == "resuelto"])
+        }
+    
+    return {
+        "success": True,
+        "reporte": reporte
+    }
+
+# =====================
+# RECURSOS (RESOURCES)
+# =====================
+
+@mcp.resource("config://database")
+def obtener_config_database() -> Dict[str, Any]:
+    """Obtiene configuración de base de datos."""
+    return {
+        "host": "localhost",
+        "port": 5432,
+        "database": "agent_db",
+        "max_connections": 20,
+        "timeout": 30
+    }
+
+@mcp.resource("config://api")
+def obtener_config_api() -> Dict[str, Any]:
+    """Obtiene configuración de API."""
+    return {
+        "host": "0.0.0.0",
+        "port": 8080,
+        "debug": False,
+        "rate_limit": 1000
+    }
+
+@mcp.resource("data://estadisticas")
+def obtener_estadisticas() -> Dict[str, Any]:
+    """Obtiene estadísticas del sistema."""
+    return {
+        "usuarios": len(DATABASE["usuarios"]),
+        "productos": len(DATABASE["productos"]),
+        "ordenes": len(DATABASE["ordenes"]),
+        "tickets": len(DATABASE["tickets"]),
+        "timestamp": datetime.now().isoformat()
+    }
+
+@mcp.resource("data://esquema/{tabla}")
+def obtener_esquema_tabla(tabla: str) -> Dict[str, Any]:
+    """
+    Obtiene esquema de una tabla.
+    
+    Args:
+        tabla: Nombre de la tabla
+    
+    Returns:
+        dict con el esquema
+    """
+    esquemas = {
+        "usuarios": {
+            "id": {"tipo": "string", "requerido": True},
+            "nombre": {"tipo": "string", "requerido": True},
+            "email": {"tipo": "string", "requerido": True},
+            "activo": {"tipo": "boolean", "requerido": False, "default": True}
+        },
+        "productos": {
+            "id": {"tipo": "string", "requerido": True},
+            "nombre": {"tipo": "string", "requerido": True},
+            "precio": {"tipo": "number", "requerido": True},
+            "stock": {"tipo": "integer", "requerido": False, "default": 0}
+        },
+        "ordenes": {
+            "id": {"tipo": "string", "requerido": True},
+            "usuario_id": {"tipo": "string", "requerido": True},
+            "productos": {"tipo": "array", "requerido": True},
+            "total": {"tipo": "number", "requerido": True},
+            "estado": {"tipo": "string", "requerido": False, "default": "pendiente"}
+        },
+        "tickets": {
+            "id": {"tipo": "string", "requerido": True},
+            "usuario_id": {"tipo": "string", "requerido": True},
+            "asunto": {"tipo": "string", "requerido": True},
+            "descripcion": {"tipo": "string", "requerido": True},
+            "estado": {"tipo": "string", "requerido": False, "default": "abierto"}
+        }
+    }
+    
+    if tabla not in esquemas:
+        return {"error": f"Tabla '{tabla}' no existe"}
+    
+    return {
+        "tabla": tabla,
+        "esquema": esquemas[tabla]
+    }
+
+@mcp.resource("cache://{clave}")
+def obtener_cache(clave: str) -> Dict[str, Any]:
+    """
+    Obtiene valor del caché.
+    
+    Args:
+        clave: Clave del caché
+    
+    Returns:
+        dict con el valor cacheado
+    """
+    if clave not in CACHE:
+        return {"error": f"Clave '{clave}' no encontrada"}
+    
+    return {
+        "clave": clave,
+        "valor": CACHE[clave],
+        "timestamp": datetime.now().isoformat()
+    }
+
+# =====================
+# PROMPTS
+# =====================
+
+@mcp.prompt
+def prompt_analisis_datos(
+    datos: str,
+    objetivo: str = "identificar tendencias"
+) -> str:
+    """
+    Prompt para análisis de datos.
+    
+    Args:
+        datos: Datos a analizar
+        objetivo: Objetivo del análisis
+    
+    Returns:
+        str con el prompt formateado
+    """
+    return f"""
+Eres un analista de datos experto. Tu tarea es analizar los siguientes datos
+con el objetivo de {objetivo}.
+
+Datos:
+{datos}
+
+Por favor, proporciona:
+1. Resumen de los datos
+2. Patrones identificados
+3. Anomalías detectadas
+4. Tendencias observadas
+5. Recomendaciones basadas en el análisis
+6. Conclusiones
+
+Responde de forma estructurada y clara.
+"""
+
+@mcp.prompt
+def prompt_resolucion_problema(
+    problema: str,
+    contexto: str,
+    restricciones: str = ""
+) -> str:
+    """
+    Prompt para resolver problemas.
+    
+    Args:
+        problema: Descripción del problema
+        contexto: Contexto adicional
+        restricciones: Restricciones a considerar
+    
+    Returns:
+        str con el prompt formateado
+    """
+    restricciones_text = f"\nRestricciones:\n{restricciones}" if restricciones else ""
+    
+    return f"""
+Eres un experto en resolución de problemas. Tu tarea es analizar y proponer
+soluciones para el siguiente problema.
+
+Problema:
+{problema}
+
+Contexto:
+{contexto}
+{restricciones_text}
+
+Por favor, proporciona:
+1. Análisis del problema
+2. Causas raíz identificadas
+3. Posibles soluciones (mínimo 3)
+4. Pros y contras de cada solución
+5. Recomendación final con justificación
+6. Plan de implementación
+
+Estructura tu respuesta de forma clara y detallada.
+"""
+
+@mcp.prompt
+def prompt_planificacion(
+    objetivo: str,
+    recursos: str,
+    tiempo: str = "2 semanas"
+) -> str:
+    """
+    Prompt para planificación.
+    
+    Args:
+        objetivo: Objetivo a alcanzar
+        recursos: Recursos disponibles
+        tiempo: Tiempo disponible
+    
+    Returns:
+        str con el prompt formateado
+    """
+    return f"""
+Eres un experto en planificación de proyectos. Tu tarea es crear un plan
+detallado para alcanzar el siguiente objetivo.
+
+Objetivo:
+{objetivo}
+
+Recursos disponibles:
+{recursos}
+
+Tiempo disponible: {tiempo}
+
+Por favor, proporciona:
+1. Desglose del objetivo en tareas
+2. Dependencias entre tareas
+3. Asignación de recursos
+4. Cronograma propuesto
+5. Riesgos identificados y mitigación
+6. Hitos de seguimiento
+7. Criterios de éxito
+
+Estructura el plan de forma clara y ejecutable.
+"""
+
+@mcp.prompt
+def prompt_generacion_codigo(
+    descripcion: str,
+    lenguaje: str,
+    requisitos: str = ""
+) -> str:
+    """
+    Prompt para generar código.
+    
+    Args:
+        descripcion: Descripción de lo que debe hacer el código
+        lenguaje: Lenguaje de programación
+        requisitos: Requisitos específicos
+    
+    Returns:
+        str con el prompt formateado
+    """
+    requisitos_text = f"\nRequisitos específicos:\n{requisitos}" if requisitos else ""
+    
+    return f"""
+Eres un desarrollador experto en {lenguaje}. Tu tarea es generar código
+que cumpla con la siguiente descripción.
+
+Descripción:
+{descripcion}
+{requisitos_text}
+
+Por favor, proporciona:
+1. Código completo y funcional
+2. Comentarios explicativos
+3. Manejo de errores apropiado
+4. Ejemplos de uso
+5. Consideraciones de rendimiento
+6. Tests unitarios (si aplica)
+
+El código debe seguir las mejores prácticas de {lenguaje}.
+"""
+
+if __name__ == "__main__":
+    mcp.run()
+----
+
+=== Cliente de Agentes CrewAI
+
+Ahora creamos el cliente CrewAI que se conecta a nuestro servidor MCP:
+
+[source,python]
+----
+# crew_mcp_agent_client.py
+"""
+Cliente CrewAI con integración MCP.
+
+Este cliente permite que los agentes de CrewAI utilicen
+herramientas, recursos y prompts de un servidor MCP propio.
+"""
+from fastmcp import Client
+from fastmcp.client.stdio import StdioServerParameters
+from fastmcp.client.transports import StdioTransport
+from crewai import Agent, Task, Crew, Process
+from crewai_tools import tool
+from typing import List, Dict, Any, Optional, Annotated
+from pydantic import Field
+import asyncio
+import json
+
+
+class MCPToolWrapper:
+    """Wrapper para convertir herramientas MCP en herramientas CrewAI."""
+    
+    def __init__(self, client: Client, tool_name: str, description: str):
+        self.client = client
+        self.tool_name = tool_name
+        self.description = description
+        self.name = f"mcp_{tool_name}"
+    
+    async def execute(self, **kwargs) -> Any:
+        """Ejecuta la herramienta MCP."""
+        return await self.client.call_tool(self.tool_name, kwargs)
+    
+    def to_crewai_tool(self):
+        """Convierte a herramienta CrewAI."""
+        
+        @tool(self.name)
+        def herramienta_wrapper(**kwargs):
+            """Herramienta MCP."""
+            loop = asyncio.get_event_loop()
+            return loop.run_until_complete(self.execute(**kwargs))
+        
+        herramienta_wrapper.description = self.description
+        return herramienta_wrapper
+
+
+class CrewAIMCPManager:
+    """Gestor de integración entre CrewAI y MCP."""
+    
+    def __init__(self, server_path: str):
+        self.server_path = server_path
+        self.client: Client = None
+        self.mcp_tools: Dict[str, MCPToolWrapper] = {}
+        self.crewai_tools: List = []
+    
+    async def conectar(self):
+        """Conecta al servidor MCP y carga herramientas."""
+        server_params = StdioServerParameters(
+            command="python",
+            args=[self.server_path]
+        )
+        self.client = Client(StdioTransport(server_params))
+        await self.client.connect()
+        
+        # Cargar herramientas
+        tools = await self.client.list_tools()
+        
+        for tool in tools:
+            mcp_tool = MCPToolWrapper(
+                self.client,
+                tool.name,
+                tool.description
+            )
+            self.mcp_tools[tool.name] = mcp_tool
+            self.crewai_tools.append(mcp_tool.to_crewai_tool())
+        
+        print(f"Cargadas {len(self.mcp_tools)} herramientas MCP")
+    
+    def obtener_herramienta(self, nombre: str) -> Optional[MCPToolWrapper]:
+        """Obtiene una herramienta específica."""
+        return self.mcp_tools.get(nombre)
+    
+    def obtener_herramientas_nombres(self) -> List[str]:
+        """Obtiene nombres de herramientas."""
+        return list(self.mcp_tools.keys())
+    
+    async def obtener_recurso(self, uri: str) -> Any:
+        """Obtiene un recurso del servidor MCP."""
+        return await self.client.read_resource(uri)
+    
+    async def obtener_prompt(
+        self,
+        nombre: str,
+        argumentos: Dict[str, Any]
+    ) -> str:
+        """Obtiene un prompt del servidor MCP."""
+        return await self.client.get_prompt(nombre, argumentos)
+    
+    async def desconectar(self):
+        """Desconecta del servidor."""
+        if self.client:
+            await self.client.disconnect()
+
+
+class AgentFactory:
+    """Factoría para crear agentes CrewAI con herramientas MCP."""
+    
+    def __init__(self, mcp_manager: CrewAIMCPManager):
+        self.mcp_manager = mcp_manager
+    
+    def crear_agente_datos(self) -> Agent:
+        """Crea agente especialista en datos."""
+        return Agent(
+            role="Especialista en Datos",
+            goal="Analizar y procesar datos de la base de datos",
+            backstory="""Eres un experto en análisis de datos con acceso a 
+            herramientas MCP para consultar bases de datos, generar reportes 
+            y extraer insights valiosos. Tu trabajo es procesar datos 
+            y proporcionar análisis detallados.""",
+            tools=self.mcp_manager.crewai_tools,
+            verbose=True,
+            allow_delegation=False
+        )
+    
+    def crear_agente_investigador(self) -> Agent:
+        """Crea agente investigador."""
+        return Agent(
+            role="Investigador",
+            goal="Investigar y recopilar información relevante",
+            backstory="""Eres un investigador experto que utiliza herramientas 
+            MCP para buscar información, consultar recursos y obtener datos 
+            contextuales. Tu trabajo es recopilar toda la información 
+            necesaria para el análisis.""",
+            tools=self.mcp_manager.crewai_tools,
+            verbose=True,
+            allow_delegation=True
+        )
+    
+    def crear_agente_escritor(self) -> Agent:
+        """Crea agente escritor."""
+        return Agent(
+            role="Escritor Técnico",
+            goal="Crear documentos y reportes claros y profesionales",
+            backstory="""Eres un escritor técnico experto que utiliza prompts 
+            MCP para generar contenido de alta calidad. Tu trabajo es 
+            sintetizar información en documentos claros y profesionales.""",
+            tools=self.mcp_manager.crewai_tools,
+            verbose=True
+        )
+    
+    def crear_agente_coordinador(self) -> Agent:
+        """Crea agente coordinador."""
+        return Agent(
+            role="Coordinador",
+            goal="Coordinar agentes y asegurar calidad del resultado",
+            backstory="""Eres un coordinador experto que supervisa el trabajo 
+            de otros agentes. Tu trabajo es asegurar que las tareas se 
+            completen correctamente y que el resultado final cumpla con 
+            los estándares de calidad.""",
+            tools=self.mcp_manager.crewai_tools,
+            verbose=True,
+            allow_delegation=True
+        )
+    
+    def crear_agente_soporte(self) -> Agent:
+        """Crea agente de soporte."""
+        return Agent(
+            role="Agente de Soporte",
+            goal="Resolver tickets y consultas de usuarios",
+            backstory="""Eres un agente de soporte técnico con acceso a 
+            herramientas MCP para consultar bases de datos, crear tickets 
+            y enviar notificaciones. Tu trabajo es resolver problemas 
+            de usuarios de forma eficiente.""",
+            tools=self.mcp_manager.crewai_tools,
+            verbose=True
+        )
+
+
+class TaskFactory:
+    """Factoría para crear tareas."""
+    
+    @staticmethod
+    def crear_tarea_analisis(
+        agente: Agent,
+        datos: str,
+        contexto: str = ""
+    ) -> Task:
+        """Crea tarea de análisis."""
+        return Task(
+            description=f"""
+            Analiza los siguientes datos:
+            
+            {datos}
+            
+            Contexto adicional: {contexto}
+            
+            Tu análisis debe incluir:
+            1. Resumen de los datos
+            2. Patrones identificados
+            3. Anomalías detectadas
+            4. Recomendaciones
+            """,
+            agent=agente,
+            expected_output="Análisis detallado con insights y recomendaciones"
+        )
+    
+    @staticmethod
+    def crear_tarea_investigacion(
+        agente: Agent,
+        tema: str,
+        preguntas: List[str] = None
+    ) -> Task:
+        """Crea tarea de investigación."""
+        preguntas_text = "\n".join(f"- {p}" for p in (preguntas or []))
+        
+        return Task(
+            description=f"""
+            Investiga sobre: {tema}
+            
+            Preguntas a responder:
+            {preguntas_text}
+            
+            Utiliza las herramientas MCP disponibles para buscar información
+            relevante en la base de datos y recursos.
+            """,
+            agent=agente,
+            expected_output="Informe de investigación con fuentes"
+        )
+    
+    @staticmethod
+    def crear_tarea_reporte(
+        agente: Agent,
+        tipo_reporte: str,
+        filtros: Dict[str, Any] = None
+    ) -> Task:
+        """Crea tarea de generación de reporte."""
+        filtros_text = json.dumps(filtros, indent=2) if filtros else "{}"
+        
+        return Task(
+            description=f"""
+            Genera un reporte de tipo: {tipo_reporte}
+            
+            Filtros a aplicar:
+            {filtros_text}
+            
+            Utiliza las herramientas MCP para obtener los datos necesarios
+            y generar el reporte completo.
+            """,
+            agent=agente,
+            expected_output="Reporte completo con datos y análisis"
+        )
+    
+    @staticmethod
+    def crear_tarea_soporte(
+        agente: Agent,
+        ticket_id: str,
+        problema: str
+    ) -> Task:
+        """Crea tarea de soporte."""
+        return Task(
+            description=f"""
+            Resuelve el siguiente ticket de soporte:
+            
+            Ticket ID: {ticket_id}
+            Problema: {problema}
+            
+            Pasos a seguir:
+            1. Buscar información relacionada en la base de datos
+            2. Analizar el problema
+            3. Proponer solución
+            4. Si es necesario, enviar notificación al usuario
+            5. Actualizar el estado del ticket
+            """,
+            agent=agente,
+            expected_output="Solución del ticket con pasos seguidos"
+        )
+
+
+class CrewMCPClient:
+    """Cliente completo de CrewAI con MCP."""
+    
+    def __init__(self, server_path: str):
+        self.server_path = server_path
+        self.mcp_manager: CrewAIMCPManager = None
+        self.agent_factory: AgentFactory = None
+        self.task_factory: TaskFactory = None
+    
+    async def inicializar(self):
+        """Inicializa el cliente."""
+        self.mcp_manager = CrewAIMCPManager(self.server_path)
+        await self.mcp_manager.conectar()
+        
+        self.agent_factory = AgentFactory(self.mcp_manager)
+        self.task_factory = TaskFactory()
+        
+        print("Cliente CrewAI-MCP inicializado")
+    
+    def crear_crew_analisis(self, datos: str) -> Crew:
+        """Crea crew para análisis de datos."""
+        # Agentes
+        especialista_datos = self.agent_factory.crear_agente_datos()
+        investigador = self.agent_factory.crear_agente_investigador()
+        escritor = self.agent_factory.crear_agente_escritor()
+        
+        # Tareas
+        tarea1 = Task(
+            description=f"Extrae y analiza los siguientes datos:\n{datos}",
+            agent=especialista_datos,
+            expected_output="Análisis inicial de los datos"
+        )
+        
+        tarea2 = Task(
+            description="Investiga contexto adicional para el análisis",
+            agent=investigador,
+            expected_output="Contexto y antecedentes relevantes"
+        )
+        
+        tarea3 = Task(
+            description="Sintetiza el análisis en un reporte final",
+            agent=escritor,
+            expected_output="Reporte completo con análisis y recomendaciones"
+        )
+        
+        return Crew(
+            agents=[especialista_datos, investigador, escritor],
+            tasks=[tarea1, tarea2, tarea3],
+            process=Process.sequential,
+            verbose=True
+        )
+    
+    def crear_crew_soporte(self) -> Crew:
+        """Crea crew para soporte técnico."""
+        # Agentes
+        agente_soporte = self.agent_factory.crear_agente_soporte()
+        coordinador = self.agent_factory.crear_agente_coordinador()
+        
+        # Tareas
+        tarea1 = Task(
+            description="Analiza el ticket de soporte y busca información relevante",
+            agent=agente_soporte,
+            expected_output="Análisis del problema y datos relevantes"
+        )
+        
+        tarea2 = Task(
+            description="Propone solución y actualiza el ticket",
+            agent=agente_soporte,
+            expected_output="Solución propuesta y ticket actualizado"
+        )
+        
+        tarea3 = Task(
+            description="Revisa y valida la solución",
+            agent=coordinador,
+            expected_output="Solución validada y lista para enviar"
+        )
+        
+        return Crew(
+            agents=[agente_soporte, coordinador],
+            tasks=[tarea1, tarea2, tarea3],
+            process=Process.sequential,
+            verbose=True
+        )
+    
+    def crear_crew_investigacion(self, tema: str) -> Crew:
+        """Crea crew para investigación."""
+        # Agentes
+        investigador = self.agent_factory.crear_agente_investigador()
+        analista = self.agent_factory.crear_agente_datos()
+        escritor = self.agent_factory.crear_agente_escritor()
+        
+        # Tareas
+        tarea1 = Task(
+            description=f"Investiga sobre: {tema}",
+            agent=investigador,
+            expected_output="Información recopilada de múltiples fuentes"
+        )
+        
+        tarea2 = Task(
+            description="Analiza la información recopilada",
+            agent=analista,
+            expected_output="Análisis de la información"
+        )
+        
+        tarea3 = Task(
+            description="Crea documento final con hallazgos",
+            agent=escritor,
+            expected_output="Documento estructurado con hallazgos"
+        )
+        
+        return Crew(
+            agents=[investigador, analista, escritor],
+            tasks=[tarea1, tarea2, tarea3],
+            process=Process.sequential,
+            verbose=True
+        )
+    
+    async def ejecutar_analisis(self, datos: str) -> str:
+        """Ejecuta análisis de datos."""
+        crew = self.crear_crew_analisis(datos)
+        return crew.kickoff()
+    
+    async def ejecutar_soporte(self, ticket_id: str, problema: str) -> str:
+        """Ejecuta resolución de soporte."""
+        crew = self.crear_crew_soporte()
+        return crew.kickoff()
+    
+    async def ejecutar_investigacion(self, tema: str) -> str:
+        """Ejecuta investigación."""
+        crew = self.crear_crew_investigacion(tema)
+        return crew.kickoff()
+    
+    async def cerrar(self):
+        """Cierra la conexión."""
+        if self.mcp_manager:
+            await self.mcp_manager.desconectar()
+
+
+# Ejemplo de uso completo
+async def main():
+    cliente = CrewMCPClient("agent_mcp_server.py")
+    
+    try:
+        await cliente.inicializar()
+        
+        print("\n=== Herramientas MCP disponibles ===")
+        for nombre in cliente.mcp_manager.obtener_herramientas_nombres():
+            print(f"  - {nombre}")
+        
+        print("\n=== Ejecutando análisis de datos ===")
+        datos_ejemplo = """
+        Usuarios activos: 150
+        Usuarios nuevos: 25
+        Tickets abiertos: 10
+        Tickets resueltos: 45
+        """
+        
+        resultado = await cliente.ejecutar_analisis(datos_ejemplo)
+        print(resultado)
+        
+    finally:
+        await cliente.cerrar()
+
+if __name__ == "__main__":
+    asyncio.run(main())
+----
+
+=== Ejemplo Avanzado: Sistema Multi-Agente Completo
+
+[source,python]
+----
+# crew_mcp_multiagent.py
+"""
+Sistema multi-agente completo con CrewAI y MCP.
+
+Este ejemplo muestra un sistema completo donde múltiples agentes
+colaboran utilizando herramientas de un servidor MCP propio.
+"""
+from fastmcp import Client
+from fastmcp.client.stdio import StdioServerParameters
+from fastmcp.client.transports import StdioTransport
+from crewai import Agent, Task, Crew, Process
+from crewai_tools import tool
+from typing import List, Dict, Any, Optional
+from dataclasses import dataclass
+from enum import Enum
+import asyncio
+import json
+
+
+class AgentRole(Enum):
+    """Roles de agentes."""
+    COORDINATOR = "coordinator"
+    DATA_ANALYST = "data_analyst"
+    RESEARCHER = "researcher"
+    WRITER = "writer"
+    SUPPORT = "support"
+
+
+@dataclass
+class AgentConfig:
+    """Configuración de un agente."""
+    role: str
+    goal: str
+    backstory: str
+    tools: List[str]
+    allow_delegation: bool = False
+    verbose: bool = True
+
+
+class MCPToolRegistry:
+    """Registro de herramientas MCP convertidas a CrewAI."""
+    
+    def __init__(self, client: Client):
+        self.client = client
+        self._tools: Dict[str, Any] = {}
+        self._crewai_tools: List = []
+    
+    async def cargar_herramientas(self):
+        """Carga todas las herramientas del servidor MCP."""
+        tools = await self.client.list_tools()
+        
+        for tool in tools:
+            crewai_tool = self._convertir_a_crewai(tool)
+            self._tools[tool.name] = crewai_tool
+            self._crewai_tools.append(crewai_tool)
+        
+        return len(self._tools)
+    
+    def _convertir_a_crewai(self, tool_info):
+        """Convierte herramienta MCP a CrewAI tool."""
+        nombre = tool_info.name
+        descripcion = tool_info.description
+        
+        @tool(f"mcp_{nombre}")
+        async def herramienta_mcp(**kwargs):
+            """Ejecuta herramienta MCP."""
+            return await self.client.call_tool(nombre, kwargs)
+        
+        herramienta_mcp.description = descripcion
+        return herramienta_mcp
+    
+    def obtener_herramienta(self, nombre: str) -> Any:
+        """Obtiene una herramienta específica."""
+        return self._tools.get(nombre)
+    
+    def obtener_todas(self) -> List:
+        """Obtiene todas las herramientas."""
+        return self._crewai_tools
+    
+    def obtener_por_categoria(self, categoria: str) -> List:
+        """Obtiene herramientas por categoría."""
+        # Categorías: database, notification, report, query
+        categorias = {
+            "database": ["buscar_en_base_datos", "crear_registro", 
+                        "actualizar_registro", "eliminar_registro"],
+            "notification": ["enviar_notificacion"],
+            "report": ["generar_reporte"],
+            "query": ["ejecutar_consulta"]
+        }
+        
+        herramientas = []
+        for nombre in categorias.get(categoria, []):
+            if nombre in self._tools:
+                herramientas.append(self._tools[nombre])
+        
+        return herramientas
+
+
+class DynamicAgentFactory:
+    """Factoría dinámica de agentes."""
+    
+    def __init__(self, tool_registry: MCPToolRegistry):
+        self.tool_registry = tool_registry
+        self._configs = self._crear_configs()
+    
+    def _crear_configs(self) -> Dict[AgentRole, AgentConfig]:
+        """Crea configuraciones predefinidas."""
+        return {
+            AgentRole.COORDINATOR: AgentConfig(
+                role="Coordinador",
+                goal="Coordinar equipos y asegurar calidad",
+                backstory="""Eres un coordinador experto que supervisa 
+                equipos de trabajo. Tu trabajo es asegurar que las tareas 
+                se distribuyan correctamente y que los resultados cumplan 
+                con los estándares de calidad.""",
+                tools=[],  # Puede usar todas las herramientas
+                allow_delegation=True,
+                verbose=True
+            ),
+            AgentRole.DATA_ANALYST: AgentConfig(
+                role="Analista de Datos",
+                goal="Analizar datos y extraer insights",
+                backstory="""Eres un analista de datos experto con capacidad 
+                para identificar patrones, tendencias y anomalías. Utilizas 
+                herramientas MCP para consultar bases de datos y generar 
+                reportes.""",
+                tools=["database", "report", "query"],
+                allow_delegation=False,
+                verbose=True
+            ),
+            AgentRole.RESEARCHER: AgentConfig(
+                role="Investigador",
+                goal="Investigar y recopilar información",
+                backstory="""Eres un investigador experto que busca 
+                información en múltiples fuentes. Utilizas herramientas 
+                MCP para consultar recursos y obtener datos contextuales.""",
+                tools=["database", "query"],
+                allow_delegation=False,
+                verbose=True
+            ),
+            AgentRole.WRITER: AgentConfig(
+                role="Escritor Técnico",
+                goal="Crear documentación clara y profesional",
+                backstory="""Eres un escritor técnico experto que 
+                sintetiza información en documentos claros y profesionales. 
+                Utilizas prompts MCP para generar contenido de alta calidad.""",
+                tools=["notification"],
+                allow_delegation=False,
+                verbose=True
+            ),
+            AgentRole.SUPPORT: AgentConfig(
+                role="Agente de Soporte",
+                goal="Resolver problemas de usuarios",
+                backstory="""Eres un agente de soporte técnico experto 
+                en resolver problemas. Utilizas herramientas MCP para 
+                consultar la base de conocimientos, crear tickets y 
+                enviar notificaciones.""",
+                tools=["database", "notification", "query"],
+                allow_delegation=False,
+                verbose=True
+            )
+        }
+    
+    def crear_agente(
+        self,
+        role: AgentRole,
+        custom_tools: List[str] = None
+    ) -> Agent:
+        """Crea un agente con el rol especificado."""
+        config = self._configs[role]
+        
+        # Obtener herramientas
+        if custom_tools:
+            tools = []
+            for categoria in custom_tools:
+                tools.extend(self.tool_registry.obtener_por_categoria(categoria))
+        elif config.tools:
+            tools = []
+            for categoria in config.tools:
+                tools.extend(self.tool_registry.obtener_por_categoria(categoria))
+        else:
+            tools = self.tool_registry.obtener_todas()
+        
+        return Agent(
+            role=config.role,
+            goal=config.goal,
+            backstory=config.backstory,
+            tools=tools,
+            allow_delegation=config.allow_delegation,
+            verbose=config.verbose
+        )
+
+
+class TaskBuilder:
+    """Constructor de tareas."""
+    
+    @staticmethod
+    def tarea_analisis_datos(
+        agente: Agent,
+        datos: str,
+        objetivo: str = "identificar patrones"
+    ) -> Task:
+        """Crea tarea de análisis."""
+        return Task(
+            description=f"""
+            Analiza los siguientes datos con el objetivo de {objetivo}:
+            
+            {datos}
+            
+            Pasos:
+            1. Busca información relevante en la base de datos
+            2. Identifica patrones y tendencias
+            3. Detecta anomalías
+            4. Genera reporte con hallazgos
+            """,
+            agent=agente,
+            expected_output="Análisis detallado con patrones, anomalías y recomendaciones"
+        )
+    
+    @staticmethod
+    def tarea_investigacion(
+        agente: Agent,
+        tema: str,
+        profundidad: str = "completa"
+    ) -> Task:
+        """Crea tarea de investigación."""
+        return Task(
+            description=f"""
+            Realiza una investigación {profundidad} sobre: {tema}
+            
+            Pasos:
+            1. Busca información en la base de datos
+            2. Consulta recursos disponibles
+            3. Recopila datos relevantes
+            4. Organiza la información encontrada
+            """,
+            agent=agente,
+            expected_output="Informe de investigación con fuentes y datos"
+        )
+    
+    @staticmethod
+    def tarea_generacion_reporte(
+        agente: Agent,
+        tipo: str,
+        filtros: Dict = None
+    ) -> Task:
+        """Crea tarea de generación de reporte."""
+        filtros_text = json.dumps(filtros, indent=2) if filtros else "{}"
+        
+        return Task(
+            description=f"""
+            Genera un reporte de tipo: {tipo}
+            
+            Filtros:
+            {filtros_text}
+            
+            Pasos:
+            1. Consulta datos necesarios
+            2. Procesa y analiza datos
+            3. Genera reporte estructurado
+            4. Incluye gráficos si es necesario
+            """,
+            agent=agente,
+            expected_output="Reporte completo en formato estructurado"
+        )
+    
+    @staticmethod
+    def tarea_soporte(
+        agente: Agent,
+        ticket_id: str,
+        problema: str,
+        usuario: str = None
+    ) -> Task:
+        """Crea tarea de soporte."""
+        usuario_text = f"Usuario: {usuario}" if usuario else ""
+        
+        return Task(
+            description=f"""
+            Resuelve el siguiente ticket de soporte:
+            
+            Ticket ID: {ticket_id}
+            Problema: {problema}
+            {usuario_text}
+            
+            Pasos:
+            1. Busca información del usuario en la base de datos
+            2. Consulta tickets relacionados
+            3. Analiza el problema
+            4. Propone solución
+            5. Envía notificación al usuario
+            6. Actualiza el ticket
+            """,
+            agent=agente,
+            expected_output="Solución del ticket con pasos seguidos"
+        )
+    
+    @staticmethod
+    def tarea_documentacion(
+        agente: Agent,
+        elemento: str,
+        tipo: str = "funcion"
+    ) -> Task:
+        """Crea tarea de documentación."""
+        return Task(
+            description=f"""
+            Genera documentación para: {elemento}
+            Tipo: {tipo}
+            
+            Pasos:
+            1. Analiza el elemento a documentar
+            2. Genera descripción clara
+            3. Incluye ejemplos de uso
+            4. Añade notas importantes
+            """,
+            agent=agente,
+            expected_output="Documentación completa y estructurada"
+        )
+
+
+class MultiAgentCrewSystem:
+    """Sistema completo multi-agente con MCP."""
+    
+    def __init__(self, server_path: str):
+        self.server_path = server_path
+        self.client: Client = None
+        self.tool_registry: MCPToolRegistry = None
+        self.agent_factory: DynamicAgentFactory = None
+        self.task_builder: TaskBuilder = None
+    
+    async def inicializar(self):
+        """Inicializa el sistema."""
+        # Conectar al servidor MCP
+        server_params = StdioServerParameters(
+            command="python",
+            args=[self.server_path]
+        )
+        self.client = Client(StdioTransport(server_params))
+        await self.client.connect()
+        
+        # Cargar herramientas
+        self.tool_registry = MCPToolRegistry(self.client)
+        num_tools = await self.tool_registry.cargar_herramientas()
+        
+        # Crear factorías
+        self.agent_factory = DynamicAgentFactory(self.tool_registry)
+        self.task_builder = TaskBuilder()
+        
+        print(f"Sistema inicializado con {num_tools} herramientas")
+    
+    async def crear_crew_analisis_completo(
+        self,
+        datos: str,
+        contexto: str = ""
+    ) -> Crew:
+        """Crea crew para análisis completo."""
+        # Agentes
+        analista = self.agent_factory.crear_agente(AgentRole.DATA_ANALYST)
+        investigador = self.agent_factory.crear_agente(AgentRole.RESEARCHER)
+        escritor = self.agent_factory.crear_agente(AgentRole.WRITER)
+        coordinador = self.agent_factory.crear_agente(AgentRole.COORDINATOR)
+        
+        # Tareas
+        tareas = [
+            self.task_builder.tarea_analisis_datos(
+                analista,
+                datos,
+                objetivo="identificar patrones y anomalías"
+            ),
+            self.task_builder.tarea_investigacion(
+                investigador,
+                f"contexto de los datos: {contexto}",
+                profundidad="completa"
+            ),
+            self.task_builder.tarea_generacion_reporte(
+                escritor,
+                tipo="analisis",
+                filtros={"datos": datos}
+            ),
+            Task(
+                description="Revisa el análisis y el reporte final",
+                agent=coordinador,
+                expected_output="Reporte validado y aprobado"
+            )
+        ]
+        
+        return Crew(
+            agents=[analista, investigador, escritor, coordinador],
+            tasks=tareas,
+            process=Process.sequential,
+            verbose=True
+        )
+    
+    async def crear_crew_soporte_tecnico(self) -> Crew:
+        """Crea crew para soporte técnico."""
+        # Agentes
+        soporte = self.agent_factory.crear_agente(AgentRole.SUPPORT)
+        coordinador = self.agent_factory.crear_agente(AgentRole.COORDINATOR)
+        
+        # Tareas (se definirán dinámicamente)
+        return Crew(
+            agents=[soporte, coordinador],
+            tasks=[],  # Se añaden tareas dinámicamente
+            process=Process.sequential,
+            verbose=True
+        )
+    
+    async def crear_crew_documentacion(
+        self,
+        elementos: List[str]
+    ) -> Crew:
+        """Crea crew para generar documentación."""
+        # Agentes
+        investigador = self.agent_factory.crear_agente(AgentRole.RESEARCHER)
+        escritor = self.agent_factory.crear_agente(AgentRole.WRITER)
+        coordinador = self.agent_factory.crear_agente(AgentRole.COORDINATOR)
+        
+        # Tareas
+        tareas = []
+        for elemento in elementos:
+            tareas.append(
+                self.task_builder.tarea_documentacion(
+                    investigador,
+                    elemento,
+                    tipo="funcion"
+                )
+            )
+            tareas.append(
+                Task(
+                    description=f"Documenta: {elemento}",
+                    agent=escritor,
+                    expected_output="Documentación del elemento"
+                )
+            )
+        
+        tareas.append(
+            Task(
+                description="Compila toda la documentación en un documento final",
+                agent=coordinador,
+                expected_output="Documento completo con toda la documentación"
+            )
+        )
+        
+        return Crew(
+            agents=[investigador, escritor, coordinador],
+            tasks=tareas,
+            process=Process.sequential,
+            verbose=True
+        )
+    
+    async def ejecutar_analisis(
+        self,
+        datos: str,
+        contexto: str = ""
+    ) -> str:
+        """Ejecuta análisis completo."""
+        crew = await self.crear_crew_analisis_completo(datos, contexto)
+        return crew.kickoff()
+    
+    async def ejecutar_soporte(
+        self,
+        ticket_id: str,
+        problema: str,
+        usuario: str = None
+    ) -> str:
+        """Ejecuta resolución de soporte."""
+        # Crear crew
+        crew = await self.crear_crew_soporte_tecnico()
+        
+        # Añadir tareas
+        soporte = crew.agents[0]
+        coordinador = crew.agents[1]
+        
+        crew.tasks = [
+            self.task_builder.tarea_soporte(soporte, ticket_id, problema, usuario),
+            Task(
+                description="Valida la solución propuesta",
+                agent=coordinador,
+                expected_output="Solución validada"
+            )
+        ]
+        
+        return crew.kickoff()
+    
+    async def ejecutar_documentacion(
+        self,
+        elementos: List[str]
+    ) -> str:
+        """Ejecuta generación de documentación."""
+        crew = await self.crear_crew_documentacion(elementos)
+        return crew.kickoff()
+    
+    async def cerrar(self):
+        """Cierra el sistema."""
+        if self.client:
+            await self.client.disconnect()
+
+
+# Ejemplo de uso completo
+async def main():
+    sistema = MultiAgentCrewSystem("agent_mcp_server.py")
+    
+    try:
+        await sistema.inicializar()
+        
+        # Ejemplo 1: Análisis de datos
+        print("\n=== Ejecutando análisis de datos ===")
+        datos_ejemplo = """
+        Ventas Q1: $150,000
+        Ventas Q2: $180,000
+        Ventas Q3: $165,000
+        Ventas Q4: $210,000
+        
+        Usuarios activos: 1,500
+        Usuarios nuevos: 250
+        Tickets abiertos: 45
+        Tickets resueltos: 180
+        """
+        
+        resultado_analisis = await sistema.ejecutar_analisis(
+            datos=datos_ejemplo,
+            contexto="E-commerce con crecimiento sostenido"
+        )
+        print(resultado_analisis)
+        
+        # Ejemplo 2: Soporte técnico
+        print("\n=== Ejecutando soporte técnico ===")
+        resultado_soporte = await sistema.ejecutar_soporte(
+            ticket_id="TKT-001",
+            problema="Usuario no puede acceder a su cuenta",
+            usuario="juan@empresa.com"
+        )
+        print(resultado_soporte)
+        
+        # Ejemplo 3: Documentación
+        print("\n=== Ejecutando generación de documentación ===")
+        resultado_docs = await sistema.ejecutar_documentacion(
+            elementos=[
+                "buscar_en_base_datos",
+                "crear_registro",
+                "generar_reporte"
+            ]
+        )
+        print(resultado_docs)
+        
+    finally:
+        await sistema.cerrar()
+
+if __name__ == "__main__":
+    asyncio.run(main())
+----
+
+== Buenas Prácticas
+
+=== Gestión de Conexiones
+
+.Use siempre context managers
+[source,python]
+----
+# Correcto
+async with Client(transport) as client:
+    result = await client.call_tool("tool", args)
+
+# Incorrecto
+client = Client(transport)
+await client.connect()
+result = await client.call_tool("tool", args)
+# Falta disconnect!
+----
+
+=== Manejo de Errores
+
+.Use try-finally siempre
+[source,python]
+----
+# Correcto
+try:
+    result = await client.call_tool("tool", args)
+except MCPError as e:
+    logger.error(f"Error MCP: {e}")
+    raise
+finally:
+    await client.disconnect()
+
+# Incorrecto
+result = await client.call_tool("tool", args)
+# Sin manejo de errores
+----
+
+=== Validación de Entradas
+
+.Valide antes de enviar
+[source,python]
+----
+# Correcto
+from pydantic import BaseModel, Field, validator
+
+class EntradaValidada(BaseModel):
+    valor: int = Field(..., ge=0, le=100)
+    nombre: str = Field(..., min_length=1, max_length=50)
+    
+    @validator('nombre')
+    def nombre_sin_espacios(cls, v):
+        return v.strip()
+
+entrada = EntradaValidada(valor=10, nombre="  test  ")
+result = await client.call_tool("tool", entrada.dict())
+
+# Incorrecto
+result = await client.call_tool("tool", {
+    "valor": -5,  # Valor inválido
+    "nombre": ""  # Nombre vacío
+})
+----
+
+=== Timeout y Reintentos
+
+.Configure timeouts adecuados
+[source,python]
+----
+# Correcto
+from tenacity import retry, stop_after_attempt, wait_exponential
+
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=10)
+)
+async def llamar_con_reintentos(client, tool, args, timeout=30):
+    return await asyncio.wait_for(
+        client.call_tool(tool, args),
+        timeout=timeout
+    )
+
+# Incorrecto
+result = await client.call_tool("tool", args)
+# Puede colgar indefinidamente
+----
+
+=== Testing
+
+.Use fixtures para tests
+[source,python]
+----
+# Correcto
+import pytest
+from unittest.mock import AsyncMock
+
+@pytest.fixture
+async def mock_client():
+    client = AsyncMock(spec=Client)
+    client.call_tool = AsyncMock(return_value={"result": "ok"})
+    yield client
+
+@pytest.mark.asyncio
+async def test_llamada_herramienta(mock_client):
+    result = await mock_client.call_tool("test_tool", {"arg": "value"})
+    assert result["result"] == "ok"
+----
+
+=== Seguridad
+
+.No hardcodear secrets
+[source,python]
+----
+# Correcto
+import os
+
+class SecureMCPClient:
+    def __init__(self):
+        self.api_key = os.getenv("MCP_API_KEY")
+        if not self.api_key:
+            raise ValueError("MCP_API_KEY no configurada")
+
+# Incorrecto
+class InsecureMCPClient:
+    def __init__(self):
+        self.api_key = "hardcoded-api-key-12345"  # Peligroso!
+----
+
+=== Performance
+
+.Use caché cuando sea apropiado
+[source,python]
+----
+# Correcto
+from functools import lru_cache
+import time
+
+class CachedMCPClient:
+    def __init__(self, client: Client, ttl: int = 300):
+        self.client = client
+        self.ttl = ttl
+        self._cache: dict = {}
+        self._cache_times: dict = {}
+    
+    async def call_tool(self, tool: str, args: dict, use_cache: bool = True):
+        if use_cache and tool in self._cache:
+            if time.time() - self._cache_times.get(tool, 0) < self.ttl:
+                return self._cache[tool]
+        
+        result = await self.client.call_tool(tool, args)
+        self._cache[tool] = result
+        self._cache_times[tool] = time.time()
+        return result
+----
+
+== Troubleshooting
+
+=== Error de Conexión
+
+----
+MCPConnectionError: Cannot connect to server
+----
+
+**Solución:** Verificar que el servidor está ejecutándose y la ruta es correcta.
+
+[source,python]
+----
+async def debug_connection():
+    try:
+        async with Client(transport) as client:
+            print("Conexión exitosa")
+    except MCPConnectionError as e:
+        print(f"Error de conexión: {e}")
+        print("Verificar:")
+        print("1. El servidor MCP está ejecutándose")
+        print("2. La ruta al servidor es correcta")
+        print("3. Las dependencias están instaladas")
+----
+
+=== Timeout
+
+----
+asyncio.TimeoutError: Operation timed out
+----
+
+**Solución:** Aumentar timeout o investigar cuello de botella.
+
+[source,python]
+----
+async def call_with_timeout(client, tool, args, timeout=60):
+    try:
+        result = await asyncio.wait_for(
+            client.call_tool(tool, args),
+            timeout=timeout
+        )
+        return result
+    except asyncio.TimeoutError:
+        print(f"Timeout después de {timeout}s")
+        raise
+----
+
+=== Error de Validación
+
+----
+ValidationError: Invalid arguments for tool 'xxx'
+----
+
+**Solución:** Verificar schema de la herramienta.
+
+[source,python]
+----
+async def debug_tool_schema(client, tool_name):
+    tools = await client.list_tools()
+    tool = next((t for t in tools if t.name == tool_name), None)
+    
+    if tool:
+        print(f"Herramienta: {tool.name}")
+        print(f"Descripción: {tool.description}")
+        print(f"Schema: {json.dumps(tool.inputSchema, indent=2)}")
+----
+
+=== MCP Inspector
+
+.Use MCP Inspector para debugging
+[source,bash]
+----
+# Ejecutar servidor con Inspector
+npx @modelcontextprotocol/inspector python server.py
+
+# O con FastMCP
+fastmcp run server.py:mcp --transport sse --port 8080
+# Y abrir http://localhost:8080
+----
+
+== Recursos y Referencias
+
+=== Documentación Oficial
+
+[cols="1,2"]
+|===
+| Recurso | URL
+
+| FastMCP Docs
+| https://gofastmcp.com
+
+| MCP Specification
+| https://modelcontextprotocol.io
+
+| MCP Python SDK
+| https://github.com/modelcontextprotocol/python-sdk
+
+| CrewAI Docs
+| https://docs.crewai.com
+|===
+
+=== Checklist de Producción
+
+- [ ] Manejo de errores completo
+- [ ] Logging configurado
+- [ ] Métricas implementadas
+- [ ] Timeout configurado
+- [ ] Reintentos implementados
+- [ ] Cache según necesidad
+- [ ] Tests unitarios
+- [ ] Tests de integración
+- [ ] Documentación actualizada
+- [ ] CI/CD configurado
+- [ ] Monitorización en producción
+- [ ] Backup y recuperación
+- [ ] Seguridad implementada
+
+=== Próximos Pasos
+
+1. **Profundizar en FastMCP**: Explorar funcionalidades avanzadas
+2. **Practicar con ejemplos**: Crear servidores MCP propios
+3. **Integrar con agentes**: Explorar más frameworks (LangChain, AutoGen)
+4. **Desplegar en producción**: Configurar entorno real
+5. **Contribuir**: Open source en MCP ecosystem
+
+== Conclusión
+
+Esta guía ha cubierto:
+
+* **Fundamentos de MCP**: Arquitectura, componentes y tipos de cliente
+* **FastMCP Framework**: Instalación, configuración y servidor completo
+* **Clientes por tipo de uso**:
+  - Tools: Automatización y procesamiento de datos
+  - Resources: Configuración dinámica y datos de referencia
+  - Prompts: Asistencia y generación de contenido
+* **Integración con CrewAI**: Agentes que consumen servidores MCP propios
+* **Patrones de diseño**: Repository, Observer, Factory, Builder
+* **Buenas prácticas**: Conexión, errores, validación, seguridad
+* **Troubleshooting**: Problemas comunes y soluciones
+
+La combinación de FastMCP y CrewAI permite crear sistemas de agentes inteligentes
+que pueden acceder a herramientas, recursos y prompts personalizados de forma
+estandarizada y escalable.
+
+---
+
+**¡Gracias!** 🚀

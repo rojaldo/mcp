@@ -1,0 +1,1589 @@
+= OpenClaw — Presentación Completa
+:author: Bot-Bunnny
+:version: 2.0
+:toc: left
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+:rouge-style: github
+
+== ¿Qué es OpenClaw?
+
+**OpenClaw** es un asistente personal de IA que ejecutas en tus propios dispositivos. Responde en los canales que ya usas (WhatsApp, Telegram, Slack, Discord, Signal, iMessage, y muchos más), puede hablar y escuchar en macOS/iOS/Android, y renderiza un Canvas interactivo que controlas.
+
+[cols="1,1"]
+|===
+| Característica | Descripción
+
+| **Local-first**
+| Todo se ejecuta en tu máquina. No hay nube de terceros.
+
+| **Multi-canal**
+| 20+ canales de mensajería integrados.
+
+| **Multi-modelo**
+| OpenAI, Anthropic, Mistral, Google, y más.
+
+| **Multi-agente**
+| Routing de canales a agentes aislados.
+
+| **Skills**
+| Habilidades extensibles via ClawHub.
+
+| **Apps companion**
+| macOS, iOS, Android opcionales.
+|===
+
+---
+
+== Arquitectura y Componentes
+
+=== Diagrama General
+
+----
+WhatsApp / Telegram / Slack / Discord / Signal / iMessage / IRC / Teams / Matrix
+               │
+               ▼
+┌───────────────────────────────┐
+│            Gateway            │
+│       (control plane)         │
+│     ws://127.0.0.1:18789      │
+└──────────────┬────────────────┘
+               │
+               ├─ Pi agent (RPC)
+               ├─ CLI (openclaw …)
+               ├─ WebChat UI
+               ├─ macOS app
+               └─ iOS / Android nodes
+----
+
+=== Componentes Principales
+
+[cols="1,3"]
+|===
+| Componente | Descripción
+
+| **Gateway**
+| WebSocket control plane para sesiones, canales, herramientas y eventos.
+
+| **Pi Agent**
+| Runtime del agente en modo RPC con streaming de tools.
+
+| **CLI**
+| Interfaz de línea de comandos completa.
+
+| **Control UI**
+| Dashboard web para gestión.
+
+| **Nodes**
+| Apps companion para macOS/iOS/Android.
+|===
+
+---
+
+== Instalación y Setup
+
+=== Requisitos
+
+[cols="1,1"]
+|===
+| Requisito | Versión
+
+| Node.js
+| **24** (recomendado) o 22.16+
+
+| npm/pnpm/bun
+| Cualquiera de los tres
+
+| Sistema operativo
+| macOS, Linux, Windows (WSL2)
+|===
+
+=== Instalación Básica
+
+[source,bash]
+----
+# Con npm
+npm install -g openclaw@latest
+
+# Con pnpm
+pnpm add -g openclaw@latest
+
+# Verificar instalación
+openclaw --version
+# 🦞 OpenClaw 2026.3.24 (cff6dc9)
+----
+
+=== Onboarding Guiado
+
+[source,bash]
+----
+# Iniciar configuración interactiva
+openclaw onboard --install-daemon
+----
+
+---
+
+== Comando `gateway` — Control del Gateway
+
+=== Definición
+
+El **Gateway** es el plano de control central de OpenClaw. Es un servidor WebSocket que coordina sesiones, canales, herramientas y eventos. Todos los componentes (CLI, apps, agents) se conectan al Gateway.
+
+=== Sintaxis
+
+[source,bash]
+----
+openclaw gateway [options] [command]
+----
+
+=== Opciones Principales
+
+[cols="1,2,1,4"]
+|===
+| Opción | Tipo | Default | Descripción
+
+| `--port <port>`
+| number
+| 18789
+| Puerto para el WebSocket del gateway
+
+| `--bind <mode>`
+| string
+| loopback
+| Modo de bind: `loopback` \| `lan` \| `tailnet` \| `auto`
+
+| `--auth <mode>`
+| string
+| none
+| Modo de autenticación: `none` \| `token` \| `password`
+
+| `--password <password>`
+| string
+| -
+| Password para modo auth=password
+
+| `--token <token>`
+| string
+| -
+| Token para modo auth=token
+
+| `--tailscale <mode>`
+| string
+| off
+| Exposición Tailscale: `off` \| `serve` \| `funnel`
+
+| `--verbose`
+| flag
+| false
+| Logging detallado
+
+| `--force`
+| flag
+| false
+| Mata proceso existente en el puerto
+|===
+
+=== Subcomandos
+
+[cols="1,4"]
+|===
+| Comando | Descripción
+
+| `run`
+| Ejecuta el gateway en foreground
+
+| `start`
+| Inicia el servicio (systemd/launchd)
+
+| `stop`
+| Detiene el servicio
+
+| `restart`
+| Reinicia el servicio
+
+| `status`
+| Estado del servicio + probe
+
+| `health`
+| Health check del gateway
+
+| `discover`
+| Descubre gateways via Bonjour
+
+| `probe`
+| Reachability + discovery + health
+
+| `install`
+| Instala el servicio
+
+| `uninstall`
+| Desinstala el servicio
+|===
+
+=== Ejemplos Detallados
+
+[source,bash]
+----
+# Iniciar gateway básico
+openclaw gateway run
+
+# Iniciar en puerto específico con verbose
+openclaw gateway run --port 19001 --verbose
+
+# Iniciar con autenticación por password
+openclaw gateway run --auth password --password mi_password
+
+# Iniciar con acceso LAN
+openclaw gateway run --bind lan
+
+# Iniciar con Tailscale (tailnet-only)
+openclaw gateway run --tailscale serve
+
+# Iniciar con Tailscale público
+openclaw gateway run --tailscale funnel --auth password --password mi_password
+
+# Forzar reinicio
+openclaw gateway run --force
+
+# Ver estado
+openclaw gateway status
+
+# Ver health
+openclaw gateway health
+
+# Instalar como servicio
+openclaw gateway install
+openclaw gateway start
+----
+
+=== Modos de Bind
+
+[cols="1,3,3"]
+|===
+| Modo | Descripción | Caso de uso
+
+| `loopback`
+| Solo localhost (127.0.0.1)
+| Desarrollo local, máximo seguridad
+
+| `lan`
+| Todas las interfaces de LAN
+| Acceso desde otros dispositivos en la red
+
+| `tailnet`
+| Solo vía Tailscale
+| Acceso remoto seguro sin exponer públicamente
+
+| `auto`
+| Detección automática
+| Selecciona según configuración
+|===
+
+---
+
+== Comando `agent` — Ejecutar Agente
+
+=== Definición
+
+El comando `agent` ejecuta un **turno del agente** via el Gateway. Puede enviar mensajes al agente, especificar nivel de thinking, cambiar agente, y entregar respuestas a canales.
+
+=== Sintaxis
+
+[source,bash]
+----
+openclaw agent [options]
+----
+
+=== Opciones Principales
+
+[cols="1,2,1,4"]
+|===
+| Opción | Tipo | Default | Descripción
+
+| `-m, --message <text>`
+| string
+| -
+| Mensaje para el agente
+
+| `--agent <id>`
+| string
+| default
+| ID del agente (sobrescribe routing)
+
+| `--thinking <level>`
+| string
+| medium
+| Nivel de thinking: `off` \| `minimal` \| `low` \| `medium` \| `high` \| `xhigh`
+
+| `--channel <channel>`
+| string
+| last
+| Canal de entrega: `telegram` \| `whatsapp` \| `discord` \| `slack` \| etc.
+
+| `--deliver`
+| flag
+| false
+| Envía respuesta al canal seleccionado
+
+| `-t, --to <number>`
+| string
+| -
+| Número E.164 del destinatario
+
+| `--timeout <seconds>`
+| number
+| 600
+| Timeout en segundos
+
+| `--local`
+| flag
+| false
+| Ejecuta localmente (sin gateway)
+
+| `--json`
+| flag
+| false
+| Output como JSON
+
+| `--verbose on\|off`
+| string
+| -
+| Persiste nivel verbose para sesión
+|===
+
+=== Niveles de Thinking
+
+[cols="1,2,4"]
+|===
+| Nivel
+| Uso Típico
+| Descripción
+
+| `off`
+| Respuestas directas
+| Sin thinking, respuestas inmediatas y rápidas
+
+| `minimal`
+| Tareas simples
+| Mínimo thinking, para consultas básicas
+
+| `low`
+| Consultas básicas
+| Thinking bajo, respuestas ágiles
+
+| `medium`
+| Uso general
+| Balance entre thinking y velocidad (default)
+
+| `high`
+| Análisis complejo
+| Thinking alto, para tareas que requieren análisis
+
+| `xhigh`
+| Máximo análisis
+| Thinking máximo, para análisis profundo
+|===
+
+=== Ejemplos Detallados
+
+[source,bash]
+----
+# Mensaje simple
+openclaw agent --message "Resume mi última sesión"
+
+# Nueva sesión con número
+openclaw agent --to +15555550123 --message "Hola, ¿cómo estás?"
+
+# Agente específico
+openclaw agent --agent ops --message "Analiza los logs"
+
+# Thinking alto para análisis
+openclaw agent --message "Revisa arquitectura" --thinking high
+
+# Ejecutar localmente
+openclaw agent --local --message "Test rápido"
+
+# Entregar respuesta al canal
+openclaw agent --to +15555550123 --message "Genera reporte" --deliver
+
+# Cambiar canal de entrega
+openclaw agent --agent ops --message "Reporte" --deliver --reply-channel slack --reply-to "#reports"
+
+# Timeout personalizado
+openclaw agent --message "Análisis largo" --timeout 1800
+
+# Verbose persistido
+openclaw agent --message "Debug" --verbose on
+
+# Output JSON
+openclaw agent --message "Estado" --json
+----
+
+---
+
+== Comando `message` — Mensajería
+
+=== Definición
+
+El comando `message` gestiona el **envío y recepción de mensajes** en todos los canales soportados. Permite enviar mensajes, media, reacciones, polls, y más.
+
+=== Sintaxis
+
+[source,bash]
+----
+openclaw message [options] [command]
+----
+
+=== Subcomandos Principales
+
+[cols="1,4"]
+|===
+| Comando | Descripción
+
+| `send`
+| Enviar un mensaje
+
+| `read`
+| Leer mensajes recientes
+
+| `edit`
+| Editar un mensaje
+
+| `delete`
+| Eliminar un mensaje
+
+| `react`
+| Añadir/quitar reacción
+
+| `pin`
+| Fijar un mensaje
+
+| `poll`
+| Enviar una encuesta
+
+| `broadcast`
+| Broadcast a múltiples targets
+
+| `ban`
+| Banear un miembro
+
+| `kick`
+| Kickear un miembro
+
+| `thread`
+| Acciones de thread
+|===
+
+=== Opciones de `message send`
+
+[cols="1,2,1,4"]
+|===
+| Opción | Tipo | Default | Descripción
+
+| `-t, --target <dest>`
+| string
+| -
+| Destinatario (E.164, chat ID, @username, canal)
+
+| `-m, --message <text>`
+| string
+| -
+| Cuerpo del mensaje
+
+| `--channel <channel>`
+| string
+| -
+| Canal: `telegram` \| `whatsapp` \| `discord` \| `slack` \| etc.
+
+| `--media <path-or-url>`
+| path/url
+| -
+| Adjuntar media (image/audio/video/document)
+
+| `--reply-to <id>`
+| string
+| -
+| Responder a mensaje específico
+
+| `--silent`
+| flag
+| false
+| Enviar sin notificación (Telegram + Discord)
+
+| `--force-document`
+| flag
+| false
+| Enviar como documento (sin compresión)
+
+| `--buttons <json>`
+| json
+| -
+| Botones inline (Telegram)
+
+| `--components <json>`
+| json
+| -
+| Discord components
+
+| `--thread-id <id>`
+| string
+| -
+| Thread ID (Telegram forum)
+
+| `--dry-run`
+| flag
+| false
+| Ver payload sin enviar
+|===
+
+=== Ejemplos Detallados
+
+[source,bash]
+----
+# Mensaje simple
+openclaw message send --target +15555550123 --message "Hola!"
+
+# Con media
+openclaw message send --target +15555550123 --message "Foto" --media photo.jpg
+
+# Como documento
+openclaw message send --target +15555550123 --message "PDF" --media report.pdf --force-document
+
+# Silenciosamente
+openclaw message send --target +15555550123 --message "Notificación" --silent
+
+# Reply
+openclaw message send --target +15555550123 --message "Respuesta" --reply-to 12345
+
+# En thread
+openclaw message send --channel telegram --target -100123456 --message "En thread" --thread-id 789
+
+# Con botones (Telegram)
+openclaw message send --target +15555550123 --message "Elige:" --buttons '[["Opción 1"],["Opción 2"]]'
+
+# Discord components
+openclaw message send --channel discord --target 123456 --message "Select:" --components '{"type":1,"components":[{"type":3,"options":[{"label":"A","value":"a"}]}]}'
+
+# Dry run
+openclaw message send --target +15555550123 --message "Test" --dry-run
+
+# Poll
+openclaw message poll --channel discord --target channel:123 --poll-question "¿Pizza?" --poll-option Pizza --poll-option Sushi
+
+# Reacción
+openclaw message react --channel discord --target 123 --message-id 456 --emoji "✅"
+
+# Leer mensajes
+openclaw message read --channel telegram --target +15555550123
+
+# Editar
+openclaw message edit --channel telegram --target +15555550123 --message-id 123 --message "Editado"
+
+# Eliminar
+openclaw message delete --channel telegram --target +15555550123 --message-id 123
+----
+
+---
+
+== Comando `channels` — Gestión de Canales
+
+=== Definición
+
+El comando `channels` gestiona los **canales de chat conectados**. Permite añadir, configurar, conectar y desconectar canales.
+
+=== Sintaxis
+
+[source,bash]
+----
+openclaw channels [options] [command]
+----
+
+=== Subcomandos
+
+[cols="1,4"]
+|===
+| Comando | Descripción
+
+| `list`
+| Lista canales configurados + auth profiles
+
+| `status`
+| Estado del canal del gateway
+
+| `add`
+| Añade o actualiza cuenta de canal
+
+| `remove`
+| Deshabilita o elimina cuenta
+
+| `login`
+| Enlaza cuenta (si soportado)
+
+| `logout`
+| Desconecta sesión (si soportado)
+
+| `logs`
+| Logs recientes del canal
+
+| `capabilities`
+| Capacidades del proveedor
+
+| `resolve`
+| Resuelve nombres a IDs
+|===
+
+=== Ejemplos Detallados
+
+[source,bash]
+----
+# Listar canales
+openclaw channels list
+
+# Ver estado con probes
+openclaw channels status --probe
+
+# Añadir Telegram
+openclaw channels add --channel telegram --token "123456:ABCDEF"
+
+# Añadir Slack
+openclaw channels add --channel slack --bot-token "xoxb-..." --app-token "xapp-..."
+
+# Añadir Discord
+openclaw channels add --channel discord --token "bot-token"
+
+# Login a WhatsApp (QR)
+openclaw channels login --channel whatsapp
+
+# Login a Slack
+openclaw channels login --channel slack
+
+# Logout
+openclaw channels logout --channel whatsapp
+
+# Ver logs
+openclaw channels logs --channel telegram
+
+# Ver capacidades
+openclaw channels capabilities --channel discord
+
+# Resolver nombre
+openclaw channels resolve --channel telegram --name @mychannel
+----
+
+---
+
+== Comando `config` — Configuración
+
+=== Definición
+
+El comando `config` gestiona la **configuración de OpenClaw**. Permite obtener, establecer y validar valores de configuración.
+
+=== Sintaxis
+
+[source,bash]
+----
+openclaw config [options] [command]
+----
+
+=== Subcomandos
+
+[cols="1,4"]
+|===
+| Comando | Descripción
+
+| `file`
+| Imprime path del config activo
+
+| `get`
+| Obtiene valor por dot path
+
+| `set`
+| Establece valores por path
+
+| `unset`
+| Elimina valor por dot path
+
+| `validate`
+| Valida config contra schema
+|===
+
+=== Dot Paths Comunes
+
+[cols="1,2"]
+|===
+| Path | Descripción
+
+| `agent.model`
+| Modelo por defecto
+
+| `gateway.port`
+| Puerto del gateway
+
+| `gateway.bind`
+| Modo de bind
+
+| `gateway.auth.mode`
+| Modo de autenticación
+
+| `channels.telegram.botToken`
+| Token de Telegram
+
+| `channels.slack.botToken`
+| Bot token de Slack
+
+| `channels.discord.token`
+| Token de Discord
+
+| `agents.defaults.sandbox.mode`
+| Modo sandbox
+
+| `agents.defaults.workspace`
+| Directorio workspace
+|===
+
+=== Ejemplos Detallados
+
+[source,bash]
+----
+# Ver archivo de config
+openclaw config file
+
+# Obtener valor
+openclaw config get agent.model
+
+# Obtener valor anidado
+openclaw config get channels.telegram.botToken
+
+# Establecer valor simple
+openclaw config set agent.model "openai/gpt-4o"
+
+# Establecer con JSON estricto
+openclaw config set gateway.port 19001 --strict-json
+
+# Establecer con referencia a env var
+openclaw config set channels.discord.token --ref-provider default --ref-source env --ref-id DISCORD_BOT_TOKEN
+
+# Establecer secrets desde archivo
+openclaw config set secrets.providers.vault --provider-source file --provider-path /etc/openclaw/secrets.json --provider-mode json
+
+# Batch desde archivo
+openclaw config set --batch-file ./config-set.batch.json --dry-run
+
+# Eliminar valor
+openclaw config unset agents.defaults.model
+
+# Validar config
+openclaw config validate
+----
+
+---
+
+== Comando `models` — Gestión de Modelos
+
+=== Definición
+
+El comando `models` gestiona los **modelos de LLM disponibles**. Permite listar, escanear, establecer modelos por defecto, y gestionar fallbacks.
+
+=== Sintaxis
+
+[source,bash]
+----
+openclaw models [options] [command]
+----
+
+=== Subcomandos
+
+[cols="1,4"]
+|===
+| Comando | Descripción
+
+| `list`
+| Lista modelos configurados
+
+| `scan`
+| Escanea modelos OpenRouter gratuitos
+
+| `status`
+| Estado de modelos configurados
+
+| `set`
+| Establece modelo por defecto
+
+| `set-image`
+| Establece modelo de imágenes
+
+| `aliases`
+| Gestiona aliases de modelos
+
+| `auth`
+| Gestiona perfiles de autenticación
+
+| `fallbacks`
+| Gestiona lista de fallbacks
+
+| `image-fallbacks`
+| Gestiona fallbacks de imágenes
+|===
+
+=== Ejemplos Detallados
+
+[source,bash]
+----
+# Listar modelos
+openclaw models list
+
+# Ver estado
+openclaw models status
+
+# Estado en JSON
+openclaw models status --status-json
+
+# Establecer modelo por defecto
+openclaw models set "anthropic/claude-opus-4"
+
+# Establecer modelo de imágenes
+openclaw models set-image "openai/dall-e-3"
+
+# Escanear OpenRouter
+openclaw models scan
+
+# Gestionar aliases
+openclaw models aliases list
+openclaw models aliases add "my-model" "anthropic/claude-opus-4"
+
+# Gestionar auth
+openclaw models auth list
+openclaw models auth add --provider openai --api-key "sk-..."
+
+# Gestionar fallbacks
+openclaw models fallbacks list
+openclaw models fallbacks add "openai/gpt-4o"
+openclaw models fallbacks add "google/gemini-2.5-pro"
+----
+
+---
+
+== Comando `skills` — Habilidades
+
+=== Definición
+
+El comando `skills` gestiona las **habilidades del agente**. Las skills son módulos extensibles que añaden capacidades específicas.
+
+=== Sintaxis
+
+[source,bash]
+----
+openclaw skills [options] [command]
+----
+
+=== Subcomandos
+
+[cols="1,4"]
+|===
+| Comando | Descripción
+
+| `list`
+| Lista todas las skills disponibles
+
+| `search`
+| Busca skills en ClawHub
+
+| `info`
+| Información detallada de skill
+
+| `install`
+| Instala skill desde ClawHub
+
+| `update`
+| Actualiza skills instaladas
+
+| `check`
+| Verifica skills listas vs faltantes requisitos
+|===
+
+=== Ejemplos Detallados
+
+[source,bash]
+----
+# Listar skills
+openclaw skills list
+
+# Buscar skills
+openclaw skills search "github"
+
+# Info de skill
+openclaw skills info weather
+
+# Instalar skill
+openclaw skills install github
+
+# Actualizar skills
+openclaw skills update
+
+# Verificar estado
+openclaw skills check
+----
+
+---
+
+== Comando `cron` — Trabajos Programados
+
+=== Definición
+
+El comando `cron` gestiona los **trabajos programados** via Gateway. Permite crear, editar, eliminar y ejecutar trabajos con expresiones cron.
+
+=== Sintaxis
+
+[source,bash]
+----
+openclaw cron [options] [command]
+----
+
+=== Subcomandos
+
+[cols="1,4"]
+|===
+| Comando | Descripción
+
+| `list`
+| Lista trabajos cron
+
+| `add`
+| Añade trabajo cron
+
+| `edit`
+| Edita trabajo cron
+
+| `enable`
+| Habilita trabajo
+
+| `disable`
+| Deshabilita trabajo
+
+| `rm`
+| Elimina trabajo
+
+| `run`
+| Ejecuta trabajo ahora (debug)
+
+| `runs`
+| Historial de ejecuciones
+
+| `status`
+| Estado del scheduler
+|===
+
+=== Ejemplos Detallados
+
+[source,bash]
+----
+# Listar trabajos
+openclaw cron list
+
+# Añadir trabajo diario a las 9am
+openclaw cron add --name "daily-report" --cron "0 9 * * *" --message "Genera reporte diario"
+
+# Añadir trabajo one-shot
+openclaw cron add --name "reminder" --at "2026-04-22T10:00:00Z" --message "Recordatorio"
+
+# Añadir con timezone
+openclaw cron add --name "eu-meeting" --at "2026-04-22T15:00:00" --tz "Europe/Madrid" --message "Reunión EU"
+
+# Editar trabajo
+openclaw cron edit "daily-report" --cron "0 10 * * *"
+
+# Habilitar/deshabilitar
+openclaw cron enable "daily-report"
+openclaw cron disable "daily-report"
+
+# Eliminar trabajo
+openclaw cron remove "daily-report"
+
+# Ejecutar ahora (debug)
+openclaw cron run "daily-report"
+
+# Ver historial
+openclaw cron runs
+
+# Ver estado del scheduler
+openclaw cron status
+----
+
+---
+
+== Comando `security` — Auditoría de Seguridad
+
+=== Definición
+
+El comando `security` audita la **configuración local y el estado** por foot-guns de seguridad comunes.
+
+=== Sintaxis
+
+[source,bash]
+----
+openclaw security [options] [command]
+----
+
+=== Opciones
+
+[cols="1,2,1,4"]
+|===
+| Opción | Tipo | Default | Descripción
+
+| `--deep`
+| flag
+| false
+| Incluye probes al Gateway live
+
+| `--fix`
+| flag
+| false
+| Aplica reparaciones automáticas
+
+| `--json`
+| flag
+| false
+| Output JSON
+
+| `--token <token>`
+| string
+| -
+| Token para deep probe
+
+| `--password <password>`
+| string
+| -
+| Password para deep probe
+|===
+
+=== Ejemplos Detallados
+
+[source,bash]
+----
+# Auditoría básica
+openclaw security audit
+
+# Auditoría profunda
+openclaw security audit --deep
+
+# Con token explícito
+openclaw security audit --deep --token mi_token
+
+# Con password explícito
+openclaw security audit --deep --password mi_password
+
+# Con reparación automática
+openclaw security audit --fix
+
+# Output JSON
+openclaw security audit --json
+----
+
+---
+
+== Comando `doctor` — Diagnóstico
+
+=== Definición
+
+El comando `doctor` diagnostica y repara **problemas de configuración** automáticamente.
+
+=== Sintaxis
+
+[source,bash]
+----
+openclaw doctor [options]
+----
+
+=== Opciones
+
+[cols="1,2,1,4"]
+|===
+| Opción | Tipo | Default | Descripción
+
+| `--fix`
+| flag
+| false
+| Aplica reparaciones automáticas
+
+| `--json`
+| flag
+| false
+| Output JSON
+|===
+
+=== Ejemplos Detallados
+
+[source,bash]
+----
+# Diagnóstico completo
+openclaw doctor
+
+# Con reparación automática
+openclaw doctor --fix
+
+# Output JSON
+openclaw doctor --json
+----
+
+---
+
+== Comando `status` — Estado del Sistema
+
+=== Definición
+
+El comando `status` muestra el **estado del sistema** incluyendo Gateway, canales, y agentes.
+
+=== Sintaxis
+
+[source,bash]
+----
+openclaw status [options]
+----
+
+=== Opciones
+
+[cols="1,2,1,4"]
+|===
+| Opción | Tipo | Default | Descripción
+
+| `--all`
+| flag
+| false
+| Muestra todos los agentes
+
+| `--deep`
+| flag
+| false
+| Diagnóstico profundo
+
+| `--json`
+| flag
+| false
+| Output JSON
+|===
+
+=== Ejemplos Detallados
+
+[source,bash]
+----
+# Estado básico
+openclaw status
+
+# Con todos los agentes
+openclaw status --all
+
+# Estado profundo
+openclaw status --deep
+
+# Output JSON
+openclaw status --json
+----
+
+---
+
+== Comando `update` — Actualizaciones
+
+=== Definición
+
+El comando `update` gestiona las **actualizaciones de OpenClaw**.
+
+=== Sintaxis
+
+[source,bash]
+----
+openclaw update [options]
+----
+
+=== Opciones
+
+[cols="1,2,1,4"]
+|===
+| Opción | Tipo | Default | Descripción
+
+| `--channel <channel>`
+| string
+| stable
+| Canal: `stable` \| `beta` \| `dev`
+|===
+
+=== Ejemplos Detallados
+
+[source,bash]
+----
+# Verificar actualizaciones
+openclaw update
+
+# Canal stable
+openclaw update --channel stable
+
+# Canal beta
+openclaw update --channel beta
+
+# Canal dev
+openclaw update --channel dev
+----
+
+---
+
+== Comandos de Chat (In-Chat)
+
+Estos comandos se envían **directamente en los chats**:
+
+[cols="1,3"]
+|===
+| Comando | Descripción
+
+| `/status`
+| Estado compacto de la sesión (modelo + tokens)
+
+| `/new` o `/reset`
+| Resetea la sesión
+
+| `/compact`
+| Compacta contexto (resumen)
+
+| `/think <level>`
+| Nivel de thinking: off \| minimal \| low \| medium \| high \| xhigh
+
+| `/verbose on|off`
+| Toggle verbose
+
+| `/usage off|tokens|full`
+| Footer de uso por respuesta
+
+| `/restart`
+| Reiniciar gateway (owner-only en grupos)
+
+| `/activation mention|always`
+| Toggle de activación en grupos
+
+| `/tools`
+| Ver herramientas disponibles
+
+| `/elevated on|off`
+| Toggle permisos elevados
+
+| `/reasoning on|off`
+| Toggle reasoning mode
+|===
+
+---
+
+== Canales Soportados
+
+OpenClaw soporta más de **20 canales**:
+
+[cols="1,1"]
+|===
+| Canal | Documentación
+
+| **WhatsApp**
+| docs.openclaw.ai/channels/whatsapp
+
+| **Telegram**
+| docs.openclaw.ai/channels/telegram
+
+| **Slack**
+| docs.openclaw.ai/channels/slack
+
+| **Discord**
+| docs.openclaw.ai/channels/discord
+
+| **Signal**
+| docs.openclaw.ai/channels/signal
+
+| **iMessage**
+| docs.openclaw.ai/channels/bluebubbles
+
+| **Microsoft Teams**
+| docs.openclaw.ai/channels/msteams
+
+| **Matrix**
+| docs.openclaw.ai/channels/matrix
+
+| **IRC**
+| docs.openclaw.ai/channels/irc
+
+| **Google Chat**
+| docs.openclaw.ai/channels/googlechat
+
+| **Feishu**
+| docs.openclaw.ai/channels/feishu
+
+| **LINE**
+| docs.openclaw.ai/channels/line
+
+| **Mattermost**
+| docs.openclaw.ai/channels/mattermost
+
+| **Nostr**
+| docs.openclaw.ai/channels/nostr
+
+| **Twitch**
+| docs.openclaw.ai/channels/twitch
+
+| **Zalo**
+| docs.openclaw.ai/channels/zalo
+
+| **WebChat**
+| docs.openclaw.ai/web/webchat
+|===
+
+---
+
+== Modelos Soportados
+
+[cols="1,1"]
+|===
+| Proveedor | Modelos
+
+| **OpenAI**
+| GPT-4o, GPT-4.1, GPT-5.2, o4-mini, Codex
+
+| **Anthropic**
+| Claude Opus 4, Claude Sonnet 4, Claude 3.5
+
+| **Google**
+| Gemini 2.5 Pro, Gemini 2.0 Flash
+
+| **Mistral**
+| Mistral Large, Mistral Medium, Codestral
+
+| **DeepSeek**
+| DeepSeek V3, DeepSeek Coder
+
+| **OpenRouter**
+| Acceso a 100+ modelos
+
+| **Local**
+| Ollama, LM Studio, vLLM
+
+| **MiniMax**
+| M2.7, M2.5
+|===
+
+---
+
+== Skills Disponibles
+
+[cols="1,2"]
+|===
+| Skill | Descripción
+
+| `weather`
+| Clima y pronósticos via wttr.in
+
+| `healthcheck`
+| Auditoría de seguridad del host
+
+| `node-connect`
+| Diagnóstico de conexión de apps
+
+| `skill-creator`
+| Crear nuevas skills
+
+| `tmux`
+| Control remoto de tmux
+
+| `github`
+| Integración con GitHub
+
+| `1password`
+| Acceso a 1Password
+
+| `discord`
+| Comandos avanzados de Discord
+
+| `slack`
+| Comandos avanzados de Slack
+
+| `obsidian`
+| Integración con Obsidian
+
+| `apple-notes`
+| Notas de Apple
+
+| `apple-reminders`
+| Recordatorios de Apple
+
+| `summarize`
+| Resumen de contenido
+|===
+
+---
+
+== Flujos de Trabajo Comunes
+
+=== Flujo: Instalación Inicial
+
+[source,bash]
+----
+# 1. Instalar
+npm install -g openclaw@latest
+
+# 2. Onboarding
+openclaw onboard --install-daemon
+
+# 3. Verificar estado
+openclaw status
+
+# 4. Configurar modelo
+openclaw config set agent.model "anthropic/claude-opus-4"
+
+# 5. Iniciar gateway
+openclaw gateway start
+
+# 6. Verificar canales
+openclaw channels list
+
+# 7. Diagnóstico final
+openclaw doctor --fix
+----
+
+=== Flujo: Configurar Telegram
+
+[source,bash]
+----
+# 1. Añadir token
+openclaw channels add --channel telegram --token "123456:ABCDEF"
+
+# 2. Verificar estado
+openclaw channels status --channel telegram
+
+# 3. Configurar allowlist
+openclaw config set channels.telegram.allowFrom --json '["123456789"]'
+
+# 4. Probar envío
+openclaw message send --channel telegram --target 123456789 --message "Test"
+
+# 5. Ver logs
+openclaw channels logs --channel telegram
+----
+
+=== Flujo: Acceso Remoto con Tailscale
+
+[source,bash]
+----
+# 1. Configurar Tailscale serve
+openclaw config set gateway.tailscale.mode "serve"
+
+# 2. Reiniciar gateway
+openclaw gateway restart
+
+# 3. Verificar
+openclaw gateway status
+
+# Para acceso público (funnel):
+# openclaw config set gateway.tailscale.mode "funnel"
+# openclaw config set gateway.auth.mode "password"
+# openclaw config set gateway.auth.password "mi_password"
+# openclaw gateway restart
+----
+
+=== Flujo: Auditoría de Seguridad
+
+[source,bash]
+----
+# 1. Auditoría básica
+openclaw security audit
+
+# 2. Auditoría profunda
+openclaw security audit --deep
+
+# 3. Reparar problemas
+openclaw doctor --fix
+
+# 4. Verificar config
+openclaw config validate
+
+# 5. Ver estado
+openclaw status --deep
+----
+
+---
+
+== Resumen de Comandos
+
+[cols="1,2"]
+|===
+| Comando | Descripción
+
+| `gateway`
+| Control del WebSocket Gateway
+
+| `agent`
+| Ejecutar turnos del agente
+
+| `message`
+| Enviar y gestionar mensajes
+
+| `channels`
+| Gestionar canales conectados
+
+| `config`
+| Gestionar configuración
+
+| `models`
+| Gestionar modelos LLM
+
+| `skills`
+| Gestionar habilidades
+
+| `sessions`
+| Gestionar sesiones
+
+| `cron`
+| Gestionar trabajos programados
+
+| `security`
+| Auditoría de seguridad
+
+| `doctor`
+| Diagnóstico y reparación
+
+| `status`
+| Estado del sistema
+
+| `update`
+| Actualizaciones
+
+| `pairing`
+| Emparejamiento de usuarios
+
+| `onboard`
+| Configuración inicial
+|===
+
+---
+
+== Recursos y Enlaces
+
+=== Enlaces Oficiales
+
+[cols="1,2"]
+|===
+| Recurso | URL
+
+| **Website**
+| https://openclaw.ai
+
+| **Documentación**
+| https://docs.openclaw.ai
+
+| **GitHub**
+| https://github.com/openclaw/openclaw
+
+| **ClawHub (Skills)**
+| https://clawhub.ai
+
+| **Discord**
+| https://discord.com/invite/clawd
+
+| **NPM**
+| https://www.npmjs.com/package/openclaw
+|===
+
+---
+
+**¡Presentación completa!** 🦞

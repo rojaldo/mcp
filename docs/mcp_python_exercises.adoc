@@ -1,5 +1,5 @@
 = 10 Ejercicios con MCP
-:author: Bot-Bunnny
+:author: AI Generated
 :version: 1.0
 :toc: left
 :toclevels: 3

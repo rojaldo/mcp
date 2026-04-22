@@ -1,5 +1,5 @@
 = FastMCP: Guía Completa de Documentación
-:author: Bot-Bunnny
+:author: AI Generated
 :version: 2.3.0
 :toc: left
 :toclevels: 4

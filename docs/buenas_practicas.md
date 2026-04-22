@@ -4256,6 +4256,986 @@ if __name__ == "__main__":
 
 ---
 
+# PARTE 11: SAMPLING
+
+---
+
+# ¿Qué es Sampling?
+
+## Solicitar generaciones de LLM desde el servidor
+
+---
+
+**Definición:**
+
+**Sampling** es una característica de MCP que permite a un servidor solicitar al cliente que genere texto usando su modelo de lenguaje. Esto permite flujos de trabajo donde el servidor puede pedir al LLM que procese datos, genere contenido o tome decisiones.
+
+---
+
+**Casos de uso:**
+
+- Generación de texto bajo demanda
+- Análisis de contenido
+- Resúmenes automáticos
+- Traducción de textos
+- Clasificación inteligente
+- Toma de decisiones asistida por LLM
+
+---
+
+# Sampling en FastMCP
+
+## Conceptos básicos
+
+---
+
+```python
+from fastmcp import FastMCP
+from fastmcp.server.sampling import SampleRequest, SampleResult
+
+mcp = FastMCP("mi-servidor")
+
+@mcp.tool
+async def analyze_sentiment(text: str) -> dict:
+ """Analiza el sentimiento de un texto usando el LLM del cliente."""
+ 
+ # Crear solicitud de sampling
+ request = SampleRequest(
+ messages=[
+ {"role": "user", "content": f"Analiza el sentimiento del siguiente texto. Responde SOLO con: positivo, negativo o neutral.\n\nTexto: {text}"}
+ ],
+ max_tokens=10,
+ temperature=0.0  # Determinístico
+ )
+ 
+ # Solicitar sampling al cliente
+ result: SampleResult = await mcp.sample(request)
+ 
+ sentiment = result.content.strip().lower()
+ 
+ return {
+ "success": True,
+ "data": {
+ "sentiment": sentiment,
+ "confidence": result.model.get("confidence", "unknown")
+ }
+ }
+```
+
+---
+
+# Parámetros de SampleRequest
+
+## Configuración de la generación
+
+---
+
+```python
+from fastmcp.server.sampling import SampleRequest
+from typing import Literal
+
+request = SampleRequest(
+ # Mensajes para el LLM (formato OpenAI-like)
+ messages=[
+ {"role": "system", "content": "Eres un asistente especializado en clasificación."},
+ {"role": "user", "content": "Clasifica este texto..."}
+ ],
+ 
+ # Límite de tokens
+ max_tokens=100,
+ 
+ # Temperatura (0.0 = determinístico, 1.0 = creativo)
+ temperature=0.3,
+ 
+ # Modelo preferido (opcional)
+ model_preferences=["claude-3-sonnet", "gpt-4o"],
+ 
+ # Stop tokens (opcional)
+ stop=["\n", "END"],
+ 
+ # Top-p sampling (opcional)
+ top_p=0.9,
+ 
+ # Top-k sampling (opcional)
+ top_k=50
+)
+```
+
+---
+
+# Ejemplo: Generación de Resúmenes
+
+---
+
+```python
+from fastmcp import FastMCP
+from fastmcp.server.sampling import SampleRequest
+
+mcp = FastMCP("document-server")
+
+@mcp.tool
+async def summarize_document(
+ doc_id: str,
+ max_length: int = 200
+) -> dict:
+ """Genera un resumen de un documento usando el LLM del cliente."""
+ 
+ # Obtener documento
+ doc = db.get_document(doc_id)
+ if not doc:
+ return {"success": False, "error": {"code": "NOT_FOUND"}}
+ 
+ # Verificar longitud
+ if len(doc.content) < 100:
+ return {
+ "success": True,
+ "data": {
+ "summary": doc.content,
+ "method": "original_too_short"
+ }
+ }
+ 
+ # Solicitar resumen al LLM
+ request = SampleRequest(
+ messages=[
+ {
+ "role": "system",
+ "content": "Eres un experto en resumir documentos. "
+ "Genera resúmenes concisos y precisos."
+ },
+ {
+ "role": "user",
+ "content": f"Resume el siguiente documento en máximo {max_length} palabras:\n\n{doc.content[:5000]}"
+ }
+ ],
+ max_tokens=max_length * 4, # ~4 tokens por palabra
+ temperature=0.3
+ )
+ 
+ result = await mcp.sample(request)
+ 
+ return {
+ "success": True,
+ "data": {
+ "summary": result.content,
+ "original_length": len(doc.content),
+ "summary_length": len(result.content),
+ "doc_id": doc_id
+ }
+ }
+```
+
+---
+
+# Ejemplo: Clasificación Inteligente
+
+---
+
+```python
+from fastmcp import FastMCP
+from fastmcp.server.sampling import SampleRequest
+import json
+
+mcp = FastMCP("classifier-server")
+
+@mcp.tool
+async def classify_ticket(
+ ticket_id: str,
+ categories: list[str] = None
+) -> dict:
+ """Clasifica un ticket de soporte usando el LLM."""
+ 
+ if not categories:
+ categories = ["technical", "billing", "general", "urgent", "feature_request"]
+ 
+ ticket = db.get_ticket(ticket_id)
+ if not ticket:
+ return {"success": False, "error": {"code": "NOT_FOUND"}}
+ 
+ # Prompt de clasificación
+ prompt = f"""Clasifica el siguiente ticket de soporte.
+
+Categorías disponibles: {', '.join(categories)}
+
+Responde SOLO con un JSON válido:
+{{"category": "categoria", "confidence": 0.95, "reason": "breve explicación"}}
+
+Ticket:
+Asunto: {ticket.subject}
+Descripción: {ticket.description}
+"""
+
+ request = SampleRequest(
+ messages=[{"role": "user", "content": prompt}],
+ max_tokens=150,
+ temperature=0.0 # Determinístico
+ )
+ 
+ result = await mcp.sample(request)
+ 
+ # Parsear respuesta
+ try:
+ classification = json.loads(result.content)
+ return {
+ "success": True,
+ "data": {
+ "ticket_id": ticket_id,
+ "category": classification.get("category"),
+ "confidence": classification.get("confidence"),
+ "reason": classification.get("reason")
+ }
+ }
+ except json.JSONDecodeError:
+ return {
+ "success": False,
+ "error": {
+ "code": "PARSE_ERROR",
+ "message": "No se pudo parsear la clasificación"
+ }
+ }
+```
+
+---
+
+# Sampling con Contexto de Conversación
+
+---
+
+```python
+from fastmcp import FastMCP
+from fastmcp.server.sampling import SampleRequest
+
+mcp = FastMCP("chat-server")
+
+@mcp.tool
+async def suggest_response(
+ conversation_id: str,
+ context: str = ""
+) -> dict:
+ """Sugiere una respuesta para una conversación."""
+ 
+ # Obtener historial
+ messages = db.get_conversation_messages(conversation_id)
+ 
+ # Construir contexto para el LLM
+ llm_messages = [
+ {
+ "role": "system",
+ "content": f"Eres un asistente útil. {context}"
+ }
+ ]
+ 
+ # Añadir historial
+ for msg in messages[-10:]: # Últimos 10 mensajes
+ llm_messages.append({
+ "role": msg.role,
+ "content": msg.content
+ })
+ 
+ # Solicitar sugerencia
+ llm_messages.append({
+ "role": "user",
+ "content": "Sugiere la próxima respuesta:"
+ })
+ 
+ request = SampleRequest(
+ messages=llm_messages,
+ max_tokens=500,
+ temperature=0.7
+ )
+ 
+ result = await mcp.sample(request)
+ 
+ return {
+ "success": True,
+ "data": {
+ "suggestion": result.content,
+ "conversation_id": conversation_id
+ }
+ }
+```
+
+---
+
+# Buenas Prácticas para Sampling
+
+---
+
+### 1. Usar temperaturas bajas para tareas determinísticas
+
+```python
+# Clasificación, extracción, parsing
+request = SampleRequest(temperature=0.0)
+```
+
+---
+
+### 2. Limitar tokens apropiadamente
+
+```python
+# Solo lo necesario
+request = SampleRequest(max_tokens=50) # Para respuestas cortas
+```
+
+---
+
+### 3. Proporcionar contexto claro
+
+```python
+messages=[
+ {"role": "system", "content": "Eres un experto en..."},
+ {"role": "user", "content": "Instrucción específica..."}
+]
+```
+
+---
+
+### 4. Manejar errores de conexión
+
+```python
+try:
+ result = await mcp.sample(request)
+except SamplingError as e:
+ return {
+ "success": False,
+ "error": {
+ "code": "SAMPLING_UNAVAILABLE",
+ "message": "El cliente no soporta sampling"
+ }
+ }
+```
+
+---
+
+# PARTE 12: ELICITATION
+
+---
+
+# ¿Qué es Elicitation?
+
+## Solicitar información al usuario desde el servidor
+
+---
+
+**Definición:**
+
+**Elicitation** es una característica de MCP que permite al servidor solicitar información adicional al usuario durante la ejecución de una tool. Esto es útil cuando faltan parámetros o se necesita confirmación.
+
+---
+
+**Casos de uso:**
+
+- Solicitar parámetros faltantes
+- Pedir confirmación antes de acciones destructivas
+- Clarificar ambigüedades
+- Obtener preferencias del usuario
+- Autenticación interactiva
+
+---
+
+# Elicitation en FastMCP
+
+## Conceptos básicos
+
+---
+
+```python
+from fastmcp import FastMCP
+from fastmcp.server.elicitation import ElicitRequest, ElicitResult
+
+mcp = FastMCP("mi-servidor")
+
+@mcp.tool
+async def delete_user(user_id: str) -> dict:
+ """Elimina un usuario con confirmación."""
+ 
+ # Verificar que existe
+ user = db.get_user(user_id)
+ if not user:
+ return {"success": False, "error": {"code": "NOT_FOUND"}}
+ 
+ # Solicitar confirmación
+ request = ElicitRequest(
+ message=f"¿Estás seguro de que deseas eliminar al usuario '{user.name}' ({user.email})? Esta acción es irreversible.",
+ 
+ # Campos a solicitar
+ fields={
+ "confirm": {
+ "type": "boolean",
+ "description": "Confirmar eliminación",
+ "required": True
+ },
+ "reason": {
+ "type": "string",
+ "description": "Razón de la eliminación (opcional)",
+ "required": False
+ }
+ }
+ )
+ 
+ # Solicitar input al usuario
+ result: ElicitResult = await mcp.elicit(request)
+ 
+ if not result.values.get("confirm"):
+ return {
+ "success": False,
+ "error": {
+ "code": "CANCELLED",
+ "message": "Eliminación cancelada por el usuario"
+ }
+ }
+ 
+ # Proceder con eliminación
+ db.delete_user(user_id)
+ 
+ return {
+ "success": True,
+ "data": {
+ "deleted": True,
+ "reason": result.values.get("reason", "No especificada")
+ }
+ }
+```
+
+---
+
+# Tipos de Campos en Elicitation
+
+---
+
+```python
+from fastmcp.server.elicitation import ElicitRequest
+
+request = ElicitRequest(
+ message="Proporciona la información necesaria:",
+ 
+ fields={
+ # String simple
+ "name": {
+ "type": "string",
+ "description": "Nombre del usuario",
+ "required": True
+ },
+ 
+ # Email con validación
+ "email": {
+ "type": "string",
+ "format": "email",
+ "description": "Email del usuario",
+ "required": True
+ },
+ 
+ # Número con restricciones
+ "age": {
+ "type": "integer",
+ "description": "Edad del usuario",
+ "minimum": 0,
+ "maximum": 150,
+ "required": False
+ },
+ 
+ # Booleano
+ "newsletter": {
+ "type": "boolean",
+ "description": "¿Suscribirse al newsletter?",
+ "default": False,
+ "required": False
+ },
+ 
+ # Selección (enum)
+ "role": {
+ "type": "string",
+ "enum": ["admin", "user", "guest"],
+ "description": "Rol del usuario",
+ "default": "user",
+ "required": True
+ },
+ 
+ # Texto largo
+ "bio": {
+ "type": "string",
+ "format": "textarea",
+ "description": "Biografía del usuario",
+ "maxLength": 500,
+ "required": False
+ }
+ }
+)
+```
+
+---
+
+# Ejemplo: Formulario de Usuario
+
+---
+
+```python
+from fastmcp import FastMCP
+from fastmcp.server.elicitation import ElicitRequest, ElicitResult
+
+mcp = FastMCP("user-management")
+
+@mcp.tool
+async def create_user_interactive() -> dict:
+ """Crea un usuario interactuando con el usuario."""
+ 
+ # Solicitar información
+ request = ElicitRequest(
+ message="Proporciona los datos del nuevo usuario:",
+ 
+ fields={
+ "name": {
+ "type": "string",
+ "description": "Nombre completo del usuario",
+ "minLength": 2,
+ "maxLength": 100,
+ "required": True
+ },
+ 
+ "email": {
+ "type": "string",
+ "format": "email",
+ "description": "Email del usuario",
+ "required": True
+ },
+ 
+ "role": {
+ "type": "string",
+ "enum": ["admin", "user", "guest"],
+ "description": "Rol del usuario",
+ "default": "user",
+ "required": True
+ },
+ 
+ "department": {
+ "type": "string",
+ "description": "Departamento (opcional)",
+ "required": False
+ },
+ 
+ "send_welcome": {
+ "type": "boolean",
+ "description": "¿Enviar email de bienvenida?",
+ "default": True,
+ "required": False
+ }
+ }
+ )
+ 
+ result: ElicitResult = await mcp.elicit(request)
+ 
+ # Validar email
+ if not is_valid_email(result.values.get("email")):
+ return {
+ "success": False,
+ "error": {
+ "code": "INVALID_EMAIL",
+ "message": "El email proporcionado no es válido"
+ }
+ }
+ 
+ # Crear usuario
+ user = db.create_user(
+ name=result.values["name"],
+ email=result.values["email"],
+ role=result.values["role"],
+ department=result.values.get("department"),
+ send_welcome=result.values.get("send_welcome", True)
+ )
+ 
+ return {
+ "success": True,
+ "data": {
+ "user_id": user.id,
+ "name": user.name,
+ "email": user.email,
+ "role": user.role
+ }
+ }
+```
+
+---
+
+# Ejemplo: Confirmación de Pago
+
+---
+
+```python
+from fastmcp import FastMCP
+from fastmcp.server.elicitation import ElicitRequest
+
+mcp = FastMCP("payment-server")
+
+@mcp.tool
+async def process_payment(
+ amount: float,
+ currency: str = "EUR"
+) -> dict:
+ """Procesa un pago con confirmación del usuario."""
+ 
+ # Validar monto
+ if amount <= 0:
+ return {
+ "success": False,
+ "error": {
+ "code": "INVALID_AMOUNT",
+ "message": "El monto debe ser mayor que 0"
+ }
+ }
+ 
+ # Solicitar confirmación
+ request = ElicitRequest(
+ message=f"Confirma el pago de {amount:.2f} {currency}",
+ 
+ fields={
+ "confirm": {
+ "type": "boolean",
+ "description": "¿Confirmar el pago?",
+ "required": True
+ },
+ 
+ "payment_method": {
+ "type": "string",
+ "enum": ["card", "bank_transfer", "paypal"],
+ "description": "Método de pago",
+ "required": True
+ },
+ 
+ "save_method": {
+ "type": "boolean",
+ "description": "¿Guardar método para futuros pagos?",
+ "default": False,
+ "required": False
+ },
+ 
+ "notes": {
+ "type": "string",
+ "description": "Notas (opcional)",
+ "maxLength": 200,
+ "required": False
+ }
+ }
+ )
+ 
+ result = await mcp.elicit(request)
+ 
+ if not result.values.get("confirm"):
+ return {
+ "success": False,
+ "error": {
+ "code": "PAYMENT_CANCELLED",
+ "message": "El usuario canceló el pago"
+ }
+ }
+ 
+ # Procesar pago
+ payment = payment_service.process(
+ amount=amount,
+ currency=currency,
+ method=result.values["payment_method"],
+ save_method=result.values.get("save_method", False),
+ notes=result.values.get("notes")
+ )
+ 
+ return {
+ "success": True,
+ "data": {
+ "payment_id": payment.id,
+ "amount": amount,
+ "currency": currency,
+ "method": result.values["payment_method"],
+ "status": payment.status
+ }
+ }
+```
+
+---
+
+# Elicitation Múltiple (Wizard)
+
+---
+
+```python
+from fastmcp import FastMCP
+from fastmcp.server.elicitation import ElicitRequest
+
+mcp = FastMCP("setup-wizard")
+
+@mcp.tool
+async def setup_project() -> dict:
+ """Asistente de configuración de proyecto paso a paso."""
+ 
+ # Paso 1: Información básica
+ step1 = ElicitRequest(
+ message="Paso 1/3: Información básica del proyecto",
+ 
+ fields={
+ "project_name": {
+ "type": "string",
+ "description": "Nombre del proyecto",
+ "minLength": 3,
+ "maxLength": 50,
+ "required": True
+ },
+ 
+ "description": {
+ "type": "string",
+ "format": "textarea",
+ "description": "Descripción del proyecto",
+ "maxLength": 500,
+ "required": False
+ }
+ }
+ )
+ 
+ result1 = await mcp.elicit(step1)
+ 
+ # Paso 2: Tecnologías
+ step2 = ElicitRequest(
+ message=f"Paso 2/3: Tecnologías para '{result1.values['project_name']}'",
+ 
+ fields={
+ "language": {
+ "type": "string",
+ "enum": ["python", "javascript", "typescript", "go", "rust"],
+ "description": "Lenguaje principal",
+ "required": True
+ },
+ 
+ "framework": {
+ "type": "string",
+ "description": "Framework (opcional)",
+ "required": False
+ },
+ 
+ "database": {
+ "type": "string",
+ "enum": ["postgresql", "mysql", "mongodb", "sqlite", "none"],
+ "description": "Base de datos",
+ "default": "postgresql",
+ "required": True
+ }
+ }
+ )
+ 
+ result2 = await mcp.elicit(step2)
+ 
+ # Paso 3: Confirmación
+ step3 = ElicitRequest(
+ message=f"Paso 3/3: Confirmar configuración",
+ 
+ fields={
+ "create_repo": {
+ "type": "boolean",
+ "description": "¿Crear repositorio Git?",
+ "default": True,
+ "required": True
+ },
+ 
+ "add_ci": {
+ "type": "boolean",
+ "description": "¿Añadir CI/CD?",
+ "default": False,
+ "required": False
+ },
+ 
+ "proceed": {
+ "type": "boolean",
+ "description": "¿Crear proyecto?",
+ "required": True
+ }
+ }
+ )
+ 
+ result3 = await mcp.elicit(step3)
+ 
+ if not result3.values.get("proceed"):
+ return {
+ "success": False,
+ "error": {
+ "code": "CANCELLED",
+ "message": "Configuración cancelada"
+ }
+ }
+ 
+ # Crear proyecto
+ project = create_project(
+ name=result1.values["project_name"],
+ description=result1.values.get("description"),
+ language=result2.values["language"],
+ framework=result2.values.get("framework"),
+ database=result2.values["database"],
+ create_repo=result3.values.get("create_repo", True),
+ add_ci=result3.values.get("add_ci", False)
+ )
+ 
+ return {
+ "success": True,
+ "data": {
+ "project_id": project.id,
+ "name": project.name,
+ "path": project.path,
+ "steps_completed": 3
+ }
+ }
+```
+
+---
+
+# Combinar Sampling y Elicitation
+
+---
+
+```python
+from fastmcp import FastMCP
+from fastmcp.server.sampling import SampleRequest
+from fastmcp.server.elicitation import ElicitRequest
+
+mcp = FastMCP("smart-assistant")
+
+@mcp.tool
+async def smart_search(query: str) -> dict:
+ """Búsqueda inteligente con clarificación."""
+ 
+ # Usar sampling para entender la intención
+ sample_req = SampleRequest(
+ messages=[{
+ "role": "user",
+ "content": f"El usuario busca: '{query}'. ¿Qué tipo de búsqueda es? Responde SOLO: users, products, orders o unknown"
+ }],
+ max_tokens=10,
+ temperature=0.0
+ )
+ 
+ sample_result = await mcp.sample(sample_req)
+ intent = sample_result.content.strip().lower()
+ 
+ if intent == "unknown":
+ # Usar elicitation para clarificar
+ elicit_req = ElicitRequest(
+ message="No entendí tu búsqueda. ¿Qué buscas?",
+ 
+ fields={
+ "search_type": {
+ "type": "string",
+ "enum": ["users", "products", "orders"],
+ "description": "Tipo de búsqueda",
+ "required": True
+ },
+ 
+ "search_term": {
+ "type": "string",
+ "description": "Término de búsqueda",
+ "required": True
+ }
+ }
+ )
+ 
+ elicit_result = await mcp.elicit(elicit_req)
+ 
+ intent = elicit_result.values["search_type"]
+ query = elicit_result.values["search_term"]
+ 
+ # Realizar búsqueda
+ if intent == "users":
+ results = db.search_users(query)
+ elif intent == "products":
+ results = db.search_products(query)
+ else:
+ results = db.search_orders(query)
+ 
+ return {
+ "success": True,
+ "data": {
+ "type": intent,
+ "query": query,
+ "results": results
+ }
+ }
+```
+
+---
+
+# Buenas Prácticas para Elicitation
+
+---
+
+### 1. Usar para interacciones necesarias, no opcionales
+
+```python
+# Correcto: Confirmar antes de eliminar
+if is_destructive:
+ await mcp.elicit(confirm_request)
+```
+
+---
+
+### 2. Proporcionar defaults sensatos
+
+```python
+"newsletter": {
+ "type": "boolean",
+ "description": "¿Suscribirse al newsletter?",
+ "default": False, # Default razonable
+ "required": False
+}
+```
+
+---
+
+### 3. Validar después de recibir
+
+```python
+result = await mcp.elicit(request)
+
+# Validar
+if not is_valid_email(result.values.get("email")):
+ return {"success": False, "error": {...}}
+```
+
+---
+
+### 4. Manejar cancelaciones
+
+```python
+result = await mcp.elicit(request)
+
+if result.cancelled:
+ return {
+ "success": False,
+ "error": {
+ "code": "CANCELLED",
+ "message": "Operación cancelada por el usuario"
+ }
+ }
+```
+
+---
+
+# Checklist de Sampling y Elicitation
+
+---
+
+### Sampling
+
+- [ ] Usar temperatura baja para tareas determinísticas
+- [ ] Limitar max_tokens apropiadamente
+- [ ] Proporcionar contexto claro en system prompt
+- [ ] Manejar errores de conexión
+- [ ] Parsear respuestas con try/except
+
+---
+
+### Elicitation
+
+- [ ] Usar para interacciones necesarias
+- [ ] Proporcionar defaults sensatos
+- [ ] Validar inputs después de recibir
+- [ ] Manejar cancelaciones
+- [ ] Limitar número de pasos en wizards
+
+---
+
 # Resumen Final
 
 ## Los 10 mandamientos del diseño MCP

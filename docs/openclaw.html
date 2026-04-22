@@ -1,0 +1,2891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.26">
+<meta name="author" content="Bot-Bunnny">
+<title>OpenClaw — Presentación Completa</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<style>
+/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+/* Uncomment the following line when using as a custom stylesheet */
+/* @import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"; */
+html{font-family:sans-serif;-webkit-text-size-adjust:100%}
+a{background:none}
+a:focus{outline:thin dotted}
+a:active,a:hover{outline:0}
+h1{font-size:2em;margin:.67em 0}
+b,strong{font-weight:bold}
+abbr{font-size:.9em}
+abbr[title]{cursor:help;border-bottom:1px dotted #dddddf;text-decoration:none}
+dfn{font-style:italic}
+hr{height:0}
+mark{background:#ff0;color:#000}
+code,kbd,pre,samp{font-family:monospace;font-size:1em}
+pre{white-space:pre-wrap}
+q{quotes:"\201C" "\201D" "\2018" "\2019"}
+small{font-size:80%}
+sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.25em}
+img{border:0}
+svg:not(:root){overflow:hidden}
+figure{margin:0}
+audio,video{display:inline-block}
+audio:not([controls]){display:none;height:0}
+fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
+legend{border:0;padding:0}
+button,input,select,textarea{font-family:inherit;font-size:100%;margin:0}
+button,input{line-height:normal}
+button,select{text-transform:none}
+button,html input[type=button],input[type=reset],input[type=submit]{-webkit-appearance:button;cursor:pointer}
+button[disabled],html input[disabled]{cursor:default}
+input[type=checkbox],input[type=radio]{padding:0}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}
+textarea{overflow:auto;vertical-align:top}
+table{border-collapse:collapse;border-spacing:0}
+*,::before,::after{box-sizing:border-box}
+html,body{font-size:100%}
+body{background:#fff;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Noto Serif","DejaVu Serif",serif;line-height:1;position:relative;cursor:auto;-moz-tab-size:4;-o-tab-size:4;tab-size:4;word-wrap:anywhere;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}
+a:hover{cursor:pointer}
+img,object,embed{max-width:100%;height:auto}
+object,embed{height:100%}
+img{-ms-interpolation-mode:bicubic}
+.left{float:left!important}
+.right{float:right!important}
+.text-left{text-align:left!important}
+.text-right{text-align:right!important}
+.text-center{text-align:center!important}
+.text-justify{text-align:justify!important}
+.hide{display:none}
+img,object,svg{display:inline-block;vertical-align:middle}
+textarea{height:auto;min-height:50px}
+select{width:100%}
+.subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
+div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0}
+a{color:#2156a5;text-decoration:underline;line-height:inherit}
+a:hover,a:focus{color:#1d4b8f}
+a img{border:0}
+p{line-height:1.6;margin-bottom:1.25em;text-rendering:optimizeLegibility}
+p aside{font-size:.875em;line-height:1.35;font-style:italic}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{font-family:"Open Sans","DejaVu Sans",sans-serif;font-weight:300;font-style:normal;color:#ba3925;text-rendering:optimizeLegibility;margin-top:1em;margin-bottom:.5em;line-height:1.0125em}
+h1 small,h2 small,h3 small,#toctitle small,.sidebarblock>.content>.title small,h4 small,h5 small,h6 small{font-size:60%;color:#e99b8f;line-height:0}
+h1{font-size:2.125em}
+h2{font-size:1.6875em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.375em}
+h4,h5{font-size:1.125em}
+h6{font-size:1em}
+hr{border:solid #dddddf;border-width:1px 0 0;clear:both;margin:1.25em 0 1.1875em}
+em,i{font-style:italic;line-height:inherit}
+strong,b{font-weight:bold;line-height:inherit}
+small{font-size:60%;line-height:inherit}
+code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
+ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
+ul,ol{margin-left:1.5em}
+ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
+ul.circle{list-style-type:circle}
+ul.disc{list-style-type:disc}
+ul.square{list-style-type:square}
+ul.circle ul:not([class]),ul.disc ul:not([class]),ul.square ul:not([class]){list-style:inherit}
+ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
+dl dt{margin-bottom:.3125em;font-weight:bold}
+dl dd{margin-bottom:1.25em}
+blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
+blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
+@media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
+h1{font-size:2.75em}
+h2{font-size:2.3125em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
+h4{font-size:1.4375em}}
+table{background:#fff;margin-bottom:1.25em;border:1px solid #dedede;word-wrap:normal}
+table thead,table tfoot{background:#f7f8f7}
+table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
+table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
+table tr.even,table tr.alt{background:#f8f8f7}
+table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{line-height:1.6}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
+h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
+.center{margin-left:auto;margin-right:auto}
+.stretch{width:100%}
+.clearfix::before,.clearfix::after,.float-group::before,.float-group::after{content:" ";display:table}
+.clearfix::after,.float-group::after{clear:both}
+:not(pre).nobreak{word-wrap:normal}
+:not(pre).nowrap{white-space:nowrap}
+:not(pre).pre-wrap{white-space:pre-wrap}
+:not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
+pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
+pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
+pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
+em em{font-style:normal}
+strong strong{font-weight:400}
+.keyseq{color:rgba(51,51,51,.8)}
+kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background:#f7f7f7;border:1px solid #ccc;border-radius:3px;box-shadow:0 1px 0 rgba(0,0,0,.2),inset 0 0 0 .1em #fff;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
+.keyseq kbd:first-child{margin-left:0}
+.keyseq kbd:last-child{margin-right:0}
+.menuseq,.menuref{color:#000}
+.menuseq b:not(.caret),.menuref{font-weight:inherit}
+.menuseq{word-spacing:-.02em}
+.menuseq b.caret{font-size:1.25em;line-height:.8}
+.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
+b.button::before,b.button::after{position:relative;top:-1px;font-weight:400}
+b.button::before{content:"[";padding:0 3px 0 2px}
+b.button::after{content:"]";padding:0 2px 0 3px}
+p a>code:hover{color:rgba(0,0,0,.9)}
+#header,#content,#footnotes,#footer{width:100%;margin:0 auto;max-width:62.5em;*zoom:1;position:relative;padding-left:.9375em;padding-right:.9375em}
+#header::before,#header::after,#content::before,#content::after,#footnotes::before,#footnotes::after,#footer::before,#footer::after{content:" ";display:table}
+#header::after,#content::after,#footnotes::after,#footer::after{clear:both}
+#content{margin-top:1.25em}
+#content::before{content:none}
+#header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
+#header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
+#header .details span:first-child{margin-left:-.125em}
+#header .details span.email a{color:rgba(0,0,0,.85)}
+#header .details br{display:none}
+#header .details br+span::before{content:"\00a0\2013\00a0"}
+#header .details br+span.author::before{content:"\00a0\22c5\00a0";color:rgba(0,0,0,.85)}
+#header .details br+span#revremark::before{content:"\00a0|\00a0"}
+#header #revnumber{text-transform:capitalize}
+#header #revnumber::after{content:"\00a0"}
+#content>h1:first-child:not([class]){color:rgba(0,0,0,.85);border-bottom:1px solid #dddddf;padding-bottom:8px;margin-top:0;padding-top:1rem;margin-bottom:1.25rem}
+#toc{border-bottom:1px solid #e7e7e9;padding-bottom:.5em}
+#toc>ul{margin-left:.125em}
+#toc ul.sectlevel0>li>a{font-style:italic}
+#toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
+#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
+#toc li{line-height:1.3334;margin-top:.3334em}
+#toc a{text-decoration:none}
+#toc a:active{text-decoration:underline}
+#toctitle{color:#7a2518;font-size:1.2em}
+@media screen and (min-width:768px){#toctitle{font-size:1.375em}
+body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
+#toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
+#toc.toc2>ul{font-size:.9em;margin-bottom:0}
+#toc.toc2 ul ul{margin-left:0;padding-left:1em}
+#toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
+body.toc2.toc-right{padding-left:0;padding-right:15em}
+body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #e7e7e9;left:auto;right:0}}
+@media screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
+#toc.toc2{width:20em}
+#toc.toc2 #toctitle{font-size:1.375em}
+#toc.toc2>ul{font-size:.95em}
+#toc.toc2 ul ul{padding-left:1.25em}
+body.toc2.toc-right{padding-left:0;padding-right:20em}}
+#content #toc{border:1px solid #e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;border-radius:4px}
+#content #toc>:first-child{margin-top:0}
+#content #toc>:last-child{margin-bottom:0}
+#footer{max-width:none;background:rgba(0,0,0,.8);padding:1.25em}
+#footer-text{color:hsla(0,0%,100%,.8);line-height:1.44}
+#content{margin-bottom:.625em}
+.sect1{padding-bottom:.625em}
+@media screen and (min-width:768px){#content{margin-bottom:1.25em}
+.sect1{padding-bottom:1.25em}}
+.sect1:last-child{padding-bottom:0}
+.sect1+.sect1{border-top:1px solid #e7e7e9}
+#content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
+#content h1>a.anchor::before,h2>a.anchor::before,h3>a.anchor::before,#toctitle>a.anchor::before,.sidebarblock>.content>.title>a.anchor::before,h4>a.anchor::before,h5>a.anchor::before,h6>a.anchor::before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
+#content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
+#content h1>a.link,h2>a.link,h3>a.link,#toctitle>a.link,.sidebarblock>.content>.title>a.link,h4>a.link,h5>a.link,h6>a.link{color:#ba3925;text-decoration:none}
+#content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
+details,.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
+details{margin-left:1.25rem}
+details>summary{cursor:pointer;display:block;position:relative;line-height:1.6;margin-bottom:.625rem;outline:none;-webkit-tap-highlight-color:transparent}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"";border:solid transparent;border-left:solid;border-width:.3em 0 .3em .5em;position:absolute;top:.5em;left:-1.25rem;transform:translateX(15%)}
+details[open]>summary::before{border:solid transparent;border-top:solid;border-width:.5em .3em 0;transform:translateY(15%)}
+details>summary::after{content:"";width:1.25rem;height:1em;position:absolute;top:.3em;left:-1.25rem}
+.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{text-rendering:optimizeLegibility;text-align:left;font-family:"Noto Serif","DejaVu Serif",serif;font-size:1rem;font-style:italic}
+table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
+.paragraph.lead>p,#preamble>.sectionbody>[class=paragraph]:first-of-type p{font-size:1.21875em;line-height:1.6;color:rgba(0,0,0,.85)}
+.admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
+.admonitionblock>table td.icon{text-align:center;width:80px}
+.admonitionblock>table td.icon img{max-width:none}
+.admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
+.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
+.admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
+.sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
+.sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
+.exampleblock>.content>:first-child,.sidebarblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child,.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
+@media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
+@media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
+.literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
+.literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
+.listingblock>.content{position:relative}
+.listingblock pre>code{display:block}
+.listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
+.listingblock:hover code[data-lang]::before{display:block}
+.listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
+.listingblock.terminal pre .command:not([data-prompt])::before{content:"$"}
+.listingblock pre.highlightjs{padding:0}
+.listingblock pre.highlightjs>code{padding:1em;border-radius:4px}
+.listingblock pre.prettyprint{border-width:0}
+.prettyprint{background:#f7f7f8}
+pre.prettyprint .linenums{line-height:1.45;margin-left:2em}
+pre.prettyprint li{background:none;list-style-type:inherit;padding-left:0}
+pre.prettyprint li code[data-lang]::before{opacity:1}
+pre.prettyprint li:not(:first-child) code[data-lang]::before{display:none}
+table.linenotable{border-collapse:separate;border:0;margin-bottom:0;background:none}
+table.linenotable td[class]{color:inherit;vertical-align:top;padding:0;line-height:inherit;white-space:normal}
+table.linenotable td.code{padding-left:.75em}
+table.linenotable td.linenos,pre.pygments .linenos{border-right:1px solid;opacity:.35;padding-right:.5em;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
+pre.pygments span.linenos{display:inline-block;margin-right:.75em}
+.quoteblock{margin:0 1em 1.25em 1.5em;display:table}
+.quoteblock:not(.excerpt)>.title{margin-left:-1.5em;margin-bottom:.75em}
+.quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
+.quoteblock blockquote{margin:0;padding:0;border:0}
+.quoteblock blockquote::before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
+.quoteblock blockquote>.paragraph:last-child p{margin-bottom:0}
+.quoteblock .attribution{margin-top:.75em;margin-right:.5ex;text-align:right}
+.verseblock{margin:0 1em 1.25em}
+.verseblock pre{font-family:"Open Sans","DejaVu Sans",sans-serif;font-size:1.15rem;color:rgba(0,0,0,.85);font-weight:300;text-rendering:optimizeLegibility}
+.verseblock pre strong{font-weight:400}
+.verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
+.quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
+.quoteblock .attribution br,.verseblock .attribution br{display:none}
+.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
+.quoteblock.abstract blockquote::before,.quoteblock.excerpt blockquote::before,.quoteblock .quoteblock blockquote::before{display:none}
+.quoteblock.abstract blockquote,.quoteblock.abstract p,.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{line-height:1.6;word-spacing:0}
+.quoteblock.abstract{margin:0 1em 1.25em;display:block}
+.quoteblock.abstract>.title{margin:0 0 .375em;font-size:1.15em;text-align:center}
+.quoteblock.excerpt>blockquote,.quoteblock .quoteblock{padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
+.quoteblock.excerpt,.quoteblock .quoteblock{margin-left:0}
+.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
+.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;font-size:.85rem;text-align:left;margin-right:0}
+p.tableblock:last-child{margin-bottom:0}
+td.tableblock>.content{margin-bottom:1.25em;word-wrap:anywhere}
+td.tableblock>.content>:last-child{margin-bottom:-1.25em}
+table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
+table.grid-all>*>tr>*{border-width:1px}
+table.grid-cols>*>tr>*{border-width:0 1px}
+table.grid-rows>*>tr>*{border-width:1px 0}
+table.frame-all{border-width:1px}
+table.frame-ends{border-width:1px 0}
+table.frame-sides{border-width:0 1px}
+table.frame-none>colgroup+*>:first-child>*,table.frame-sides>colgroup+*>:first-child>*{border-top-width:0}
+table.frame-none>:last-child>:last-child>*,table.frame-sides>:last-child>:last-child>*{border-bottom-width:0}
+table.frame-none>*>tr>:first-child,table.frame-ends>*>tr>:first-child{border-left-width:0}
+table.frame-none>*>tr>:last-child,table.frame-ends>*>tr>:last-child{border-right-width:0}
+table.stripes-all>*>tr,table.stripes-odd>*>tr:nth-of-type(odd),table.stripes-even>*>tr:nth-of-type(even),table.stripes-hover>*>tr:hover{background:#f8f8f7}
+th.halign-left,td.halign-left{text-align:left}
+th.halign-right,td.halign-right{text-align:right}
+th.halign-center,td.halign-center{text-align:center}
+th.valign-top,td.valign-top{vertical-align:top}
+th.valign-bottom,td.valign-bottom{vertical-align:bottom}
+th.valign-middle,td.valign-middle{vertical-align:middle}
+table thead th,table tfoot th{font-weight:bold}
+tbody tr th{background:#f7f8f7}
+tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
+p.tableblock>code:only-child{background:none;padding:0}
+p.tableblock{font-size:1em}
+ol{margin-left:1.75em}
+ul li ol{margin-left:1.5em}
+dl dd{margin-left:1.125em}
+dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
+li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
+ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
+ul.unstyled,ol.unstyled{margin-left:0}
+li>p:empty:only-child::before{content:"";display:inline-block}
+ul.checklist>li>p:first-child{margin-left:-1em}
+ul.checklist>li>p:first-child>.fa-square-o:first-child,ul.checklist>li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
+ul.checklist>li>p:first-child>input[type=checkbox]:first-child{margin-right:.25em}
+ul.inline{display:flex;flex-flow:row wrap;list-style:none;margin:0 0 .625em -1.25em}
+ul.inline>li{margin-left:1.25em}
+.unstyled dl dt{font-weight:400;font-style:normal}
+ol.arabic{list-style-type:decimal}
+ol.decimal{list-style-type:decimal-leading-zero}
+ol.loweralpha{list-style-type:lower-alpha}
+ol.upperalpha{list-style-type:upper-alpha}
+ol.lowerroman{list-style-type:lower-roman}
+ol.upperroman{list-style-type:upper-roman}
+ol.lowergreek{list-style-type:lower-greek}
+.hdlist>table,.colist>table{border:0;background:none}
+.hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
+td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
+td.hdlist1{font-weight:bold;padding-bottom:1.25em}
+td.hdlist2{word-wrap:anywhere}
+.literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
+.colist td:not([class]):first-child{padding:.4em .75em 0;line-height:1;vertical-align:top}
+.colist td:not([class]):first-child img{max-width:none}
+.colist td:not([class]):last-child{padding:.25em 0}
+.thumb,.th{line-height:0;display:inline-block;border:4px solid #fff;box-shadow:0 0 0 1px #ddd}
+.imageblock.left{margin:.25em .625em 1.25em 0}
+.imageblock.right{margin:.25em 0 1.25em .625em}
+.imageblock>.title{margin-bottom:0}
+.imageblock.thumb,.imageblock.th{border-width:6px}
+.imageblock.thumb>.title,.imageblock.th>.title{padding:0 .125em}
+.image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
+.image.left{margin-right:.625em}
+.image.right{margin-left:.625em}
+a.image{text-decoration:none;display:inline-block}
+a.image object{pointer-events:none}
+sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
+sup.footnote a,sup.footnoteref a{text-decoration:none}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
+#footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
+#footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
+#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
+#footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
+#footnotes .footnote:last-of-type{margin-bottom:0}
+#content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
+div.unbreakable{page-break-inside:avoid}
+.big{font-size:larger}
+.small{font-size:smaller}
+.underline{text-decoration:underline}
+.overline{text-decoration:overline}
+.line-through{text-decoration:line-through}
+.aqua{color:#00bfbf}
+.aqua-background{background:#00fafa}
+.black{color:#000}
+.black-background{background:#000}
+.blue{color:#0000bf}
+.blue-background{background:#0000fa}
+.fuchsia{color:#bf00bf}
+.fuchsia-background{background:#fa00fa}
+.gray{color:#606060}
+.gray-background{background:#7d7d7d}
+.green{color:#006000}
+.green-background{background:#007d00}
+.lime{color:#00bf00}
+.lime-background{background:#00fa00}
+.maroon{color:#600000}
+.maroon-background{background:#7d0000}
+.navy{color:#000060}
+.navy-background{background:#00007d}
+.olive{color:#606000}
+.olive-background{background:#7d7d00}
+.purple{color:#600060}
+.purple-background{background:#7d007d}
+.red{color:#bf0000}
+.red-background{background:#fa0000}
+.silver{color:#909090}
+.silver-background{background:#bcbcbc}
+.teal{color:#006060}
+.teal-background{background:#007d7d}
+.white{color:#bfbfbf}
+.white-background{background:#fafafa}
+.yellow{color:#bfbf00}
+.yellow-background{background:#fafa00}
+span.icon>.fa{cursor:default}
+a span.icon>.fa{cursor:inherit}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note::before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip::before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning::before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution::before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important::before{content:"\f06a";color:#bf0000}
+.conum[data-value]{display:inline-block;color:#fff!important;background:rgba(0,0,0,.8);border-radius:50%;text-align:center;font-size:.75em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Open Sans","DejaVu Sans",sans-serif;font-style:normal;font-weight:bold}
+.conum[data-value] *{color:#fff!important}
+.conum[data-value]+b{display:none}
+.conum[data-value]::after{content:attr(data-value)}
+pre .conum[data-value]{position:relative;top:-.125em}
+b.conum *{color:inherit!important}
+.conum:not([data-value]):empty{display:none}
+dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
+h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
+p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
+p,blockquote,dt,td.content,td.hdlist1,span.alt,summary{font-size:1.0625rem}
+p{margin-bottom:1.25rem}
+.sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
+.exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
+.print-only{display:none!important}
+@page{margin:1.25cm .75cm}
+@media print{*{box-shadow:none!important;text-shadow:none!important}
+html{font-size:80%}
+a{color:inherit!important;text-decoration:underline!important}
+a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
+a[href^="http:"]:not(.bare)::after,a[href^="https:"]:not(.bare)::after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
+abbr[title]{border-bottom:1px dotted}
+abbr[title]::after{content:" (" attr(title) ")"}
+pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
+thead{display:table-header-group}
+svg{max-width:100%}
+p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
+h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
+#header,#content,#footnotes,#footer{max-width:none}
+#toc,.sidebarblock,.exampleblock>.content{background:none!important}
+#toc{border-bottom:1px solid #dddddf!important;padding-bottom:0!important}
+body.book #header{text-align:center}
+body.book #header>h1:first-child{border:0!important;margin:2.5em 0 1em}
+body.book #header .details{border:0!important;display:block;padding:0!important}
+body.book #header .details span:first-child{margin-left:0!important}
+body.book #header .details br{display:block}
+body.book #header .details br+span::before{content:none!important}
+body.book #toc{border:0!important;text-align:left!important;padding:0!important;margin:0!important}
+body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-break-before:always}
+.listingblock code[data-lang]::before{display:block}
+#footer{padding:0 .9375em}
+.hide-on-print{display:none!important}
+.print-only{display:block!important}
+.hide-for-print{display:none!important}
+.show-for-print{display:inherit!important}}
+@media amzn-kf8,print{#header>h1:first-child{margin-top:1.25rem}
+.sect1{padding:0!important}
+.sect1+.sect1{border:0}
+#footer{background:none}
+#footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+pre.rouge table td { padding: 5px; }
+pre.rouge table pre { margin: 0; }
+pre.rouge, pre.rouge .w {
+  color: #24292f;
+  background-color: #f6f8fa;
+}
+pre.rouge .k, pre.rouge .kd, pre.rouge .kn, pre.rouge .kp, pre.rouge .kr, pre.rouge .kt, pre.rouge .kv {
+  color: #cf222e;
+}
+pre.rouge .gr {
+  color: #f6f8fa;
+}
+pre.rouge .gd {
+  color: #82071e;
+  background-color: #ffebe9;
+}
+pre.rouge .nb {
+  color: #953800;
+}
+pre.rouge .nc {
+  color: #953800;
+}
+pre.rouge .no {
+  color: #953800;
+}
+pre.rouge .nn {
+  color: #953800;
+}
+pre.rouge .sr {
+  color: #116329;
+}
+pre.rouge .na {
+  color: #116329;
+}
+pre.rouge .nt {
+  color: #116329;
+}
+pre.rouge .gi {
+  color: #116329;
+  background-color: #dafbe1;
+}
+pre.rouge .ges {
+  font-weight: bold;
+  font-style: italic;
+}
+pre.rouge .kc {
+  color: #0550ae;
+}
+pre.rouge .l, pre.rouge .ld, pre.rouge .m, pre.rouge .mb, pre.rouge .mf, pre.rouge .mh, pre.rouge .mi, pre.rouge .il, pre.rouge .mo, pre.rouge .mx {
+  color: #0550ae;
+}
+pre.rouge .sb {
+  color: #0550ae;
+}
+pre.rouge .bp {
+  color: #0550ae;
+}
+pre.rouge .ne {
+  color: #0550ae;
+}
+pre.rouge .nl {
+  color: #0550ae;
+}
+pre.rouge .py {
+  color: #0550ae;
+}
+pre.rouge .nv, pre.rouge .vc, pre.rouge .vg, pre.rouge .vi, pre.rouge .vm {
+  color: #0550ae;
+}
+pre.rouge .o, pre.rouge .ow {
+  color: #0550ae;
+}
+pre.rouge .gh {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre.rouge .gu {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre.rouge .s, pre.rouge .sa, pre.rouge .sc, pre.rouge .dl, pre.rouge .sd, pre.rouge .s2, pre.rouge .se, pre.rouge .sh, pre.rouge .sx, pre.rouge .s1, pre.rouge .ss {
+  color: #0a3069;
+}
+pre.rouge .nd {
+  color: #8250df;
+}
+pre.rouge .nf, pre.rouge .fm {
+  color: #8250df;
+}
+pre.rouge .err {
+  color: #f6f8fa;
+  background-color: #82071e;
+}
+pre.rouge .c, pre.rouge .ch, pre.rouge .cd, pre.rouge .cm, pre.rouge .cp, pre.rouge .cpf, pre.rouge .c1, pre.rouge .cs {
+  color: #6e7781;
+}
+pre.rouge .gl {
+  color: #6e7781;
+}
+pre.rouge .gt {
+  color: #6e7781;
+}
+pre.rouge .ni {
+  color: #24292f;
+}
+pre.rouge .si {
+  color: #24292f;
+}
+pre.rouge .ge {
+  color: #24292f;
+  font-style: italic;
+}
+pre.rouge .gs {
+  color: #24292f;
+  font-weight: bold;
+}
+</style>
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<h1>OpenClaw — Presentación Completa</h1>
+<div class="details">
+<span id="author" class="author">Bot-Bunnny</span><br>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_qué_es_openclaw">¿Qué es OpenClaw?</a></li>
+<li><a href="#_arquitectura_y_componentes">Arquitectura y Componentes</a>
+<ul class="sectlevel2">
+<li><a href="#_diagrama_general">Diagrama General</a></li>
+<li><a href="#_componentes_principales">Componentes Principales</a></li>
+</ul>
+</li>
+<li><a href="#_instalación_y_setup">Instalación y Setup</a>
+<ul class="sectlevel2">
+<li><a href="#_requisitos">Requisitos</a></li>
+<li><a href="#_instalación_básica">Instalación Básica</a></li>
+<li><a href="#_onboarding_guiado">Onboarding Guiado</a></li>
+</ul>
+</li>
+<li><a href="#_comando_gateway_control_del_gateway">Comando <code>gateway</code> — Control del Gateway</a>
+<ul class="sectlevel2">
+<li><a href="#_definición">Definición</a></li>
+<li><a href="#_sintaxis">Sintaxis</a></li>
+<li><a href="#_opciones_principales">Opciones Principales</a></li>
+<li><a href="#_subcomandos">Subcomandos</a></li>
+<li><a href="#_ejemplos_detallados">Ejemplos Detallados</a></li>
+<li><a href="#_modos_de_bind">Modos de Bind</a></li>
+</ul>
+</li>
+<li><a href="#_comando_agent_ejecutar_agente">Comando <code>agent</code> — Ejecutar Agente</a>
+<ul class="sectlevel2">
+<li><a href="#_definición_2">Definición</a></li>
+<li><a href="#_sintaxis_2">Sintaxis</a></li>
+<li><a href="#_opciones_principales_2">Opciones Principales</a></li>
+<li><a href="#_niveles_de_thinking">Niveles de Thinking</a></li>
+<li><a href="#_ejemplos_detallados_2">Ejemplos Detallados</a></li>
+</ul>
+</li>
+<li><a href="#_comando_message_mensajería">Comando <code>message</code> — Mensajería</a>
+<ul class="sectlevel2">
+<li><a href="#_definición_3">Definición</a></li>
+<li><a href="#_sintaxis_3">Sintaxis</a></li>
+<li><a href="#_subcomandos_principales">Subcomandos Principales</a></li>
+<li><a href="#_opciones_de_message_send">Opciones de <code>message send</code></a></li>
+<li><a href="#_ejemplos_detallados_3">Ejemplos Detallados</a></li>
+</ul>
+</li>
+<li><a href="#_comando_channels_gestión_de_canales">Comando <code>channels</code> — Gestión de Canales</a>
+<ul class="sectlevel2">
+<li><a href="#_definición_4">Definición</a></li>
+<li><a href="#_sintaxis_4">Sintaxis</a></li>
+<li><a href="#_subcomandos_2">Subcomandos</a></li>
+<li><a href="#_ejemplos_detallados_4">Ejemplos Detallados</a></li>
+</ul>
+</li>
+<li><a href="#_comando_config_configuración">Comando <code>config</code> — Configuración</a>
+<ul class="sectlevel2">
+<li><a href="#_definición_5">Definición</a></li>
+<li><a href="#_sintaxis_5">Sintaxis</a></li>
+<li><a href="#_subcomandos_3">Subcomandos</a></li>
+<li><a href="#_dot_paths_comunes">Dot Paths Comunes</a></li>
+<li><a href="#_ejemplos_detallados_5">Ejemplos Detallados</a></li>
+</ul>
+</li>
+<li><a href="#_comando_models_gestión_de_modelos">Comando <code>models</code> — Gestión de Modelos</a>
+<ul class="sectlevel2">
+<li><a href="#_definición_6">Definición</a></li>
+<li><a href="#_sintaxis_6">Sintaxis</a></li>
+<li><a href="#_subcomandos_4">Subcomandos</a></li>
+<li><a href="#_ejemplos_detallados_6">Ejemplos Detallados</a></li>
+</ul>
+</li>
+<li><a href="#_comando_skills_habilidades">Comando <code>skills</code> — Habilidades</a>
+<ul class="sectlevel2">
+<li><a href="#_definición_7">Definición</a></li>
+<li><a href="#_sintaxis_7">Sintaxis</a></li>
+<li><a href="#_subcomandos_5">Subcomandos</a></li>
+<li><a href="#_ejemplos_detallados_7">Ejemplos Detallados</a></li>
+</ul>
+</li>
+<li><a href="#_comando_cron_trabajos_programados">Comando <code>cron</code> — Trabajos Programados</a>
+<ul class="sectlevel2">
+<li><a href="#_definición_8">Definición</a></li>
+<li><a href="#_sintaxis_8">Sintaxis</a></li>
+<li><a href="#_subcomandos_6">Subcomandos</a></li>
+<li><a href="#_ejemplos_detallados_8">Ejemplos Detallados</a></li>
+</ul>
+</li>
+<li><a href="#_comando_security_auditoría_de_seguridad">Comando <code>security</code> — Auditoría de Seguridad</a>
+<ul class="sectlevel2">
+<li><a href="#_definición_9">Definición</a></li>
+<li><a href="#_sintaxis_9">Sintaxis</a></li>
+<li><a href="#_opciones">Opciones</a></li>
+<li><a href="#_ejemplos_detallados_9">Ejemplos Detallados</a></li>
+</ul>
+</li>
+<li><a href="#_comando_doctor_diagnóstico">Comando <code>doctor</code> — Diagnóstico</a>
+<ul class="sectlevel2">
+<li><a href="#_definición_10">Definición</a></li>
+<li><a href="#_sintaxis_10">Sintaxis</a></li>
+<li><a href="#_opciones_2">Opciones</a></li>
+<li><a href="#_ejemplos_detallados_10">Ejemplos Detallados</a></li>
+</ul>
+</li>
+<li><a href="#_comando_status_estado_del_sistema">Comando <code>status</code> — Estado del Sistema</a>
+<ul class="sectlevel2">
+<li><a href="#_definición_11">Definición</a></li>
+<li><a href="#_sintaxis_11">Sintaxis</a></li>
+<li><a href="#_opciones_3">Opciones</a></li>
+<li><a href="#_ejemplos_detallados_11">Ejemplos Detallados</a></li>
+</ul>
+</li>
+<li><a href="#_comando_update_actualizaciones">Comando <code>update</code> — Actualizaciones</a>
+<ul class="sectlevel2">
+<li><a href="#_definición_12">Definición</a></li>
+<li><a href="#_sintaxis_12">Sintaxis</a></li>
+<li><a href="#_opciones_4">Opciones</a></li>
+<li><a href="#_ejemplos_detallados_12">Ejemplos Detallados</a></li>
+</ul>
+</li>
+<li><a href="#_comandos_de_chat_in_chat">Comandos de Chat (In-Chat)</a></li>
+<li><a href="#_canales_soportados">Canales Soportados</a></li>
+<li><a href="#_modelos_soportados">Modelos Soportados</a></li>
+<li><a href="#_skills_disponibles">Skills Disponibles</a></li>
+<li><a href="#_flujos_de_trabajo_comunes">Flujos de Trabajo Comunes</a>
+<ul class="sectlevel2">
+<li><a href="#_flujo_instalación_inicial">Flujo: Instalación Inicial</a></li>
+<li><a href="#_flujo_configurar_telegram">Flujo: Configurar Telegram</a></li>
+<li><a href="#_flujo_acceso_remoto_con_tailscale">Flujo: Acceso Remoto con Tailscale</a></li>
+<li><a href="#_flujo_auditoría_de_seguridad">Flujo: Auditoría de Seguridad</a></li>
+</ul>
+</li>
+<li><a href="#_resumen_de_comandos">Resumen de Comandos</a></li>
+<li><a href="#_recursos_y_enlaces">Recursos y Enlaces</a>
+<ul class="sectlevel2">
+<li><a href="#_enlaces_oficiales">Enlaces Oficiales</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_qué_es_openclaw">¿Qué es OpenClaw?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>OpenClaw</strong> es un asistente personal de IA que ejecutas en tus propios dispositivos. Responde en los canales que ya usas (WhatsApp, Telegram, Slack, Discord, Signal, iMessage, y muchos más), puede hablar y escuchar en macOS/iOS/Android, y renderiza un Canvas interactivo que controlas.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Característica</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Local-first</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Todo se ejecuta en tu máquina. No hay nube de terceros.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Multi-canal</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">20+ canales de mensajería integrados.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Multi-modelo</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">OpenAI, Anthropic, Mistral, Google, y más.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Multi-agente</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Routing de canales a agentes aislados.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Skills</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Habilidades extensibles via ClawHub.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Apps companion</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">macOS, iOS, Android opcionales.</p></td>
+</tr>
+</tbody>
+</table>
+<hr>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_arquitectura_y_componentes">Arquitectura y Componentes</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_diagrama_general">Diagrama General</h3>
+<div class="listingblock">
+<div class="content">
+<pre>WhatsApp / Telegram / Slack / Discord / Signal / iMessage / IRC / Teams / Matrix
+               │
+               ▼
+┌───────────────────────────────┐
+│            Gateway            │
+│       (control plane)         │
+│     ws://127.0.0.1:18789      │
+└──────────────┬────────────────┘
+               │
+               ├─ Pi agent (RPC)
+               ├─ CLI (openclaw …)
+               ├─ WebChat UI
+               ├─ macOS app
+               └─ iOS / Android nodes</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_componentes_principales">Componentes Principales</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 75%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Componente</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Gateway</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WebSocket control plane para sesiones, canales, herramientas y eventos.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Pi Agent</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Runtime del agente en modo RPC con streaming de tools.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>CLI</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Interfaz de línea de comandos completa.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Control UI</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Dashboard web para gestión.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Nodes</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Apps companion para macOS/iOS/Android.</p></td>
+</tr>
+</tbody>
+</table>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_instalación_y_setup">Instalación y Setup</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_requisitos">Requisitos</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Requisito</th>
+<th class="tableblock halign-left valign-top">Versión</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Node.js</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>24</strong> (recomendado) o 22.16+</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">npm/pnpm/bun</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Cualquiera de los tres</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sistema operativo</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">macOS, Linux, Windows (WSL2)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_instalación_básica">Instalación Básica</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># Con npm</span>
+npm <span class="nb">install</span> <span class="nt">-g</span> openclaw@latest
+
+<span class="c"># Con pnpm</span>
+pnpm add <span class="nt">-g</span> openclaw@latest
+
+<span class="c"># Verificar instalación</span>
+openclaw <span class="nt">--version</span>
+<span class="c"># 🦞 OpenClaw 2026.3.24 (cff6dc9)</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_onboarding_guiado">Onboarding Guiado</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># Iniciar configuración interactiva</span>
+openclaw onboard <span class="nt">--install-daemon</span></code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_comando_gateway_control_del_gateway">Comando <code>gateway</code> — Control del Gateway</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_definición">Definición</h3>
+<div class="paragraph">
+<p>El <strong>Gateway</strong> es el plano de control central de OpenClaw. Es un servidor WebSocket que coordina sesiones, canales, herramientas y eventos. Todos los componentes (CLI, apps, agents) se conectan al Gateway.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_sintaxis">Sintaxis</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">openclaw gateway <span class="o">[</span>options] <span class="o">[</span><span class="nb">command</span><span class="o">]</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_opciones_principales">Opciones Principales</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 12.5%;">
+<col style="width: 25%;">
+<col style="width: 12.5%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Opción</th>
+<th class="tableblock halign-left valign-top">Tipo</th>
+<th class="tableblock halign-left valign-top">Default</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--port &lt;port&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">18789</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Puerto para el WebSocket del gateway</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--bind &lt;mode&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">loopback</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Modo de bind: <code>loopback</code> | <code>lan</code> | <code>tailnet</code> | <code>auto</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--auth &lt;mode&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">none</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Modo de autenticación: <code>none</code> | <code>token</code> | <code>password</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--password &lt;password&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Password para modo auth=password</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--token &lt;token&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Token para modo auth=token</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--tailscale &lt;mode&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">off</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Exposición Tailscale: <code>off</code> | <code>serve</code> | <code>funnel</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--verbose</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">flag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Logging detallado</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--force</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">flag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Mata proceso existente en el puerto</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_subcomandos">Subcomandos</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 80%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Comando</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>run</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Ejecuta el gateway en foreground</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>start</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Inicia el servicio (systemd/launchd)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>stop</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Detiene el servicio</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>restart</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Reinicia el servicio</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>status</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Estado del servicio + probe</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>health</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Health check del gateway</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>discover</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Descubre gateways via Bonjour</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>probe</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Reachability + discovery + health</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>install</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Instala el servicio</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uninstall</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Desinstala el servicio</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_ejemplos_detallados">Ejemplos Detallados</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># Iniciar gateway básico</span>
+openclaw gateway run
+
+<span class="c"># Iniciar en puerto específico con verbose</span>
+openclaw gateway run <span class="nt">--port</span> 19001 <span class="nt">--verbose</span>
+
+<span class="c"># Iniciar con autenticación por password</span>
+openclaw gateway run <span class="nt">--auth</span> password <span class="nt">--password</span> mi_password
+
+<span class="c"># Iniciar con acceso LAN</span>
+openclaw gateway run <span class="nt">--bind</span> lan
+
+<span class="c"># Iniciar con Tailscale (tailnet-only)</span>
+openclaw gateway run <span class="nt">--tailscale</span> serve
+
+<span class="c"># Iniciar con Tailscale público</span>
+openclaw gateway run <span class="nt">--tailscale</span> funnel <span class="nt">--auth</span> password <span class="nt">--password</span> mi_password
+
+<span class="c"># Forzar reinicio</span>
+openclaw gateway run <span class="nt">--force</span>
+
+<span class="c"># Ver estado</span>
+openclaw gateway status
+
+<span class="c"># Ver health</span>
+openclaw gateway health
+
+<span class="c"># Instalar como servicio</span>
+openclaw gateway <span class="nb">install
+</span>openclaw gateway start</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_modos_de_bind">Modos de Bind</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 42.8571%;">
+<col style="width: 42.8572%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Modo</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+<th class="tableblock halign-left valign-top">Caso de uso</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>loopback</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Solo localhost (127.0.0.1)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Desarrollo local, máximo seguridad</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>lan</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Todas las interfaces de LAN</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Acceso desde otros dispositivos en la red</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>tailnet</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Solo vía Tailscale</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Acceso remoto seguro sin exponer públicamente</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>auto</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Detección automática</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Selecciona según configuración</p></td>
+</tr>
+</tbody>
+</table>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_comando_agent_ejecutar_agente">Comando <code>agent</code> — Ejecutar Agente</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_definición_2">Definición</h3>
+<div class="paragraph">
+<p>El comando <code>agent</code> ejecuta un <strong>turno del agente</strong> via el Gateway. Puede enviar mensajes al agente, especificar nivel de thinking, cambiar agente, y entregar respuestas a canales.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_sintaxis_2">Sintaxis</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">openclaw agent <span class="o">[</span>options]</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_opciones_principales_2">Opciones Principales</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 12.5%;">
+<col style="width: 25%;">
+<col style="width: 12.5%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Opción</th>
+<th class="tableblock halign-left valign-top">Tipo</th>
+<th class="tableblock halign-left valign-top">Default</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>-m, --message &lt;text&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Mensaje para el agente</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--agent &lt;id&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">default</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ID del agente (sobrescribe routing)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--thinking &lt;level&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">medium</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Nivel de thinking: <code>off</code> | <code>minimal</code> | <code>low</code> | <code>medium</code> | <code>high</code> | <code>xhigh</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--channel &lt;channel&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">last</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Canal de entrega: <code>telegram</code> | <code>whatsapp</code> | <code>discord</code> | <code>slack</code> | etc.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--deliver</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">flag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Envía respuesta al canal seleccionado</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>-t, --to &lt;number&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Número E.164 del destinatario</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--timeout &lt;seconds&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">600</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Timeout en segundos</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--local</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">flag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Ejecuta localmente (sin gateway)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--json</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">flag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Output como JSON</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--verbose on|off</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Persiste nivel verbose para sesión</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_niveles_de_thinking">Niveles de Thinking</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 28.5714%;">
+<col style="width: 57.1429%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Nivel</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Uso Típico</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Descripción</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>off</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Respuestas directas</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sin thinking, respuestas inmediatas y rápidas</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>minimal</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Tareas simples</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Mínimo thinking, para consultas básicas</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>low</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Consultas básicas</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Thinking bajo, respuestas ágiles</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>medium</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Uso general</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Balance entre thinking y velocidad (default)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>high</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Análisis complejo</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Thinking alto, para tareas que requieren análisis</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>xhigh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Máximo análisis</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Thinking máximo, para análisis profundo</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_ejemplos_detallados_2">Ejemplos Detallados</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># Mensaje simple</span>
+openclaw agent <span class="nt">--message</span> <span class="s2">"Resume mi última sesión"</span>
+
+<span class="c"># Nueva sesión con número</span>
+openclaw agent <span class="nt">--to</span> +15555550123 <span class="nt">--message</span> <span class="s2">"Hola, ¿cómo estás?"</span>
+
+<span class="c"># Agente específico</span>
+openclaw agent <span class="nt">--agent</span> ops <span class="nt">--message</span> <span class="s2">"Analiza los logs"</span>
+
+<span class="c"># Thinking alto para análisis</span>
+openclaw agent <span class="nt">--message</span> <span class="s2">"Revisa arquitectura"</span> <span class="nt">--thinking</span> high
+
+<span class="c"># Ejecutar localmente</span>
+openclaw agent <span class="nt">--local</span> <span class="nt">--message</span> <span class="s2">"Test rápido"</span>
+
+<span class="c"># Entregar respuesta al canal</span>
+openclaw agent <span class="nt">--to</span> +15555550123 <span class="nt">--message</span> <span class="s2">"Genera reporte"</span> <span class="nt">--deliver</span>
+
+<span class="c"># Cambiar canal de entrega</span>
+openclaw agent <span class="nt">--agent</span> ops <span class="nt">--message</span> <span class="s2">"Reporte"</span> <span class="nt">--deliver</span> <span class="nt">--reply-channel</span> slack <span class="nt">--reply-to</span> <span class="s2">"#reports"</span>
+
+<span class="c"># Timeout personalizado</span>
+openclaw agent <span class="nt">--message</span> <span class="s2">"Análisis largo"</span> <span class="nt">--timeout</span> 1800
+
+<span class="c"># Verbose persistido</span>
+openclaw agent <span class="nt">--message</span> <span class="s2">"Debug"</span> <span class="nt">--verbose</span> on
+
+<span class="c"># Output JSON</span>
+openclaw agent <span class="nt">--message</span> <span class="s2">"Estado"</span> <span class="nt">--json</span></code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_comando_message_mensajería">Comando <code>message</code> — Mensajería</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_definición_3">Definición</h3>
+<div class="paragraph">
+<p>El comando <code>message</code> gestiona el <strong>envío y recepción de mensajes</strong> en todos los canales soportados. Permite enviar mensajes, media, reacciones, polls, y más.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_sintaxis_3">Sintaxis</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">openclaw message <span class="o">[</span>options] <span class="o">[</span><span class="nb">command</span><span class="o">]</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_subcomandos_principales">Subcomandos Principales</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 80%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Comando</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>send</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Enviar un mensaje</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>read</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Leer mensajes recientes</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>edit</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Editar un mensaje</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>delete</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Eliminar un mensaje</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>react</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Añadir/quitar reacción</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>pin</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Fijar un mensaje</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>poll</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Enviar una encuesta</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>broadcast</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Broadcast a múltiples targets</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>ban</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Banear un miembro</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>kick</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Kickear un miembro</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>thread</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Acciones de thread</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_opciones_de_message_send">Opciones de <code>message send</code></h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 12.5%;">
+<col style="width: 25%;">
+<col style="width: 12.5%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Opción</th>
+<th class="tableblock halign-left valign-top">Tipo</th>
+<th class="tableblock halign-left valign-top">Default</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>-t, --target &lt;dest&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Destinatario (E.164, chat ID, @username, canal)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>-m, --message &lt;text&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Cuerpo del mensaje</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--channel &lt;channel&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Canal: <code>telegram</code> | <code>whatsapp</code> | <code>discord</code> | <code>slack</code> | etc.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--media &lt;path-or-url&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">path/url</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Adjuntar media (image/audio/video/document)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--reply-to &lt;id&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Responder a mensaje específico</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--silent</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">flag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Enviar sin notificación (Telegram + Discord)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--force-document</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">flag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Enviar como documento (sin compresión)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--buttons &lt;json&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">json</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Botones inline (Telegram)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--components &lt;json&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">json</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Discord components</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--thread-id &lt;id&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Thread ID (Telegram forum)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--dry-run</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">flag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Ver payload sin enviar</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_ejemplos_detallados_3">Ejemplos Detallados</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># Mensaje simple</span>
+openclaw message send <span class="nt">--target</span> +15555550123 <span class="nt">--message</span> <span class="s2">"Hola!"</span>
+
+<span class="c"># Con media</span>
+openclaw message send <span class="nt">--target</span> +15555550123 <span class="nt">--message</span> <span class="s2">"Foto"</span> <span class="nt">--media</span> photo.jpg
+
+<span class="c"># Como documento</span>
+openclaw message send <span class="nt">--target</span> +15555550123 <span class="nt">--message</span> <span class="s2">"PDF"</span> <span class="nt">--media</span> report.pdf <span class="nt">--force-document</span>
+
+<span class="c"># Silenciosamente</span>
+openclaw message send <span class="nt">--target</span> +15555550123 <span class="nt">--message</span> <span class="s2">"Notificación"</span> <span class="nt">--silent</span>
+
+<span class="c"># Reply</span>
+openclaw message send <span class="nt">--target</span> +15555550123 <span class="nt">--message</span> <span class="s2">"Respuesta"</span> <span class="nt">--reply-to</span> 12345
+
+<span class="c"># En thread</span>
+openclaw message send <span class="nt">--channel</span> telegram <span class="nt">--target</span> <span class="nt">-100123456</span> <span class="nt">--message</span> <span class="s2">"En thread"</span> <span class="nt">--thread-id</span> 789
+
+<span class="c"># Con botones (Telegram)</span>
+openclaw message send <span class="nt">--target</span> +15555550123 <span class="nt">--message</span> <span class="s2">"Elige:"</span> <span class="nt">--buttons</span> <span class="s1">'[["Opción 1"],["Opción 2"]]'</span>
+
+<span class="c"># Discord components</span>
+openclaw message send <span class="nt">--channel</span> discord <span class="nt">--target</span> 123456 <span class="nt">--message</span> <span class="s2">"Select:"</span> <span class="nt">--components</span> <span class="s1">'{"type":1,"components":[{"type":3,"options":[{"label":"A","value":"a"}]}]}'</span>
+
+<span class="c"># Dry run</span>
+openclaw message send <span class="nt">--target</span> +15555550123 <span class="nt">--message</span> <span class="s2">"Test"</span> <span class="nt">--dry-run</span>
+
+<span class="c"># Poll</span>
+openclaw message poll <span class="nt">--channel</span> discord <span class="nt">--target</span> channel:123 <span class="nt">--poll-question</span> <span class="s2">"¿Pizza?"</span> <span class="nt">--poll-option</span> Pizza <span class="nt">--poll-option</span> Sushi
+
+<span class="c"># Reacción</span>
+openclaw message react <span class="nt">--channel</span> discord <span class="nt">--target</span> 123 <span class="nt">--message-id</span> 456 <span class="nt">--emoji</span> <span class="s2">"✅"</span>
+
+<span class="c"># Leer mensajes</span>
+openclaw message <span class="nb">read</span> <span class="nt">--channel</span> telegram <span class="nt">--target</span> +15555550123
+
+<span class="c"># Editar</span>
+openclaw message edit <span class="nt">--channel</span> telegram <span class="nt">--target</span> +15555550123 <span class="nt">--message-id</span> 123 <span class="nt">--message</span> <span class="s2">"Editado"</span>
+
+<span class="c"># Eliminar</span>
+openclaw message delete <span class="nt">--channel</span> telegram <span class="nt">--target</span> +15555550123 <span class="nt">--message-id</span> 123</code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_comando_channels_gestión_de_canales">Comando <code>channels</code> — Gestión de Canales</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_definición_4">Definición</h3>
+<div class="paragraph">
+<p>El comando <code>channels</code> gestiona los <strong>canales de chat conectados</strong>. Permite añadir, configurar, conectar y desconectar canales.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_sintaxis_4">Sintaxis</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">openclaw channels <span class="o">[</span>options] <span class="o">[</span><span class="nb">command</span><span class="o">]</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_subcomandos_2">Subcomandos</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 80%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Comando</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>list</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Lista canales configurados + auth profiles</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>status</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Estado del canal del gateway</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>add</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Añade o actualiza cuenta de canal</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>remove</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Deshabilita o elimina cuenta</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>login</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Enlaza cuenta (si soportado)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>logout</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Desconecta sesión (si soportado)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>logs</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Logs recientes del canal</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>capabilities</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Capacidades del proveedor</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>resolve</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Resuelve nombres a IDs</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_ejemplos_detallados_4">Ejemplos Detallados</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># Listar canales</span>
+openclaw channels list
+
+<span class="c"># Ver estado con probes</span>
+openclaw channels status <span class="nt">--probe</span>
+
+<span class="c"># Añadir Telegram</span>
+openclaw channels add <span class="nt">--channel</span> telegram <span class="nt">--token</span> <span class="s2">"123456:ABCDEF"</span>
+
+<span class="c"># Añadir Slack</span>
+openclaw channels add <span class="nt">--channel</span> slack <span class="nt">--bot-token</span> <span class="s2">"xoxb-..."</span> <span class="nt">--app-token</span> <span class="s2">"xapp-..."</span>
+
+<span class="c"># Añadir Discord</span>
+openclaw channels add <span class="nt">--channel</span> discord <span class="nt">--token</span> <span class="s2">"bot-token"</span>
+
+<span class="c"># Login a WhatsApp (QR)</span>
+openclaw channels login <span class="nt">--channel</span> whatsapp
+
+<span class="c"># Login a Slack</span>
+openclaw channels login <span class="nt">--channel</span> slack
+
+<span class="c"># Logout</span>
+openclaw channels <span class="nb">logout</span> <span class="nt">--channel</span> whatsapp
+
+<span class="c"># Ver logs</span>
+openclaw channels logs <span class="nt">--channel</span> telegram
+
+<span class="c"># Ver capacidades</span>
+openclaw channels capabilities <span class="nt">--channel</span> discord
+
+<span class="c"># Resolver nombre</span>
+openclaw channels resolve <span class="nt">--channel</span> telegram <span class="nt">--name</span> @mychannel</code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_comando_config_configuración">Comando <code>config</code> — Configuración</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_definición_5">Definición</h3>
+<div class="paragraph">
+<p>El comando <code>config</code> gestiona la <strong>configuración de OpenClaw</strong>. Permite obtener, establecer y validar valores de configuración.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_sintaxis_5">Sintaxis</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">openclaw config <span class="o">[</span>options] <span class="o">[</span><span class="nb">command</span><span class="o">]</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_subcomandos_3">Subcomandos</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 80%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Comando</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>file</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Imprime path del config activo</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>get</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Obtiene valor por dot path</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>set</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Establece valores por path</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>unset</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Elimina valor por dot path</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>validate</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Valida config contra schema</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_dot_paths_comunes">Dot Paths Comunes</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 66.6667%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Path</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>agent.model</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Modelo por defecto</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>gateway.port</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Puerto del gateway</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>gateway.bind</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Modo de bind</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>gateway.auth.mode</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Modo de autenticación</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>channels.telegram.botToken</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Token de Telegram</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>channels.slack.botToken</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Bot token de Slack</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>channels.discord.token</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Token de Discord</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>agents.defaults.sandbox.mode</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Modo sandbox</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>agents.defaults.workspace</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Directorio workspace</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_ejemplos_detallados_5">Ejemplos Detallados</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># Ver archivo de config</span>
+openclaw config file
+
+<span class="c"># Obtener valor</span>
+openclaw config get agent.model
+
+<span class="c"># Obtener valor anidado</span>
+openclaw config get channels.telegram.botToken
+
+<span class="c"># Establecer valor simple</span>
+openclaw config <span class="nb">set </span>agent.model <span class="s2">"openai/gpt-4o"</span>
+
+<span class="c"># Establecer con JSON estricto</span>
+openclaw config <span class="nb">set </span>gateway.port 19001 <span class="nt">--strict-json</span>
+
+<span class="c"># Establecer con referencia a env var</span>
+openclaw config <span class="nb">set </span>channels.discord.token <span class="nt">--ref-provider</span> default <span class="nt">--ref-source</span> <span class="nb">env</span> <span class="nt">--ref-id</span> DISCORD_BOT_TOKEN
+
+<span class="c"># Establecer secrets desde archivo</span>
+openclaw config <span class="nb">set </span>secrets.providers.vault <span class="nt">--provider-source</span> file <span class="nt">--provider-path</span> /etc/openclaw/secrets.json <span class="nt">--provider-mode</span> json
+
+<span class="c"># Batch desde archivo</span>
+openclaw config <span class="nb">set</span> <span class="nt">--batch-file</span> ./config-set.batch.json <span class="nt">--dry-run</span>
+
+<span class="c"># Eliminar valor</span>
+openclaw config <span class="nb">unset </span>agents.defaults.model
+
+<span class="c"># Validar config</span>
+openclaw config validate</code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_comando_models_gestión_de_modelos">Comando <code>models</code> — Gestión de Modelos</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_definición_6">Definición</h3>
+<div class="paragraph">
+<p>El comando <code>models</code> gestiona los <strong>modelos de LLM disponibles</strong>. Permite listar, escanear, establecer modelos por defecto, y gestionar fallbacks.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_sintaxis_6">Sintaxis</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">openclaw models <span class="o">[</span>options] <span class="o">[</span><span class="nb">command</span><span class="o">]</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_subcomandos_4">Subcomandos</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 80%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Comando</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>list</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Lista modelos configurados</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>scan</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Escanea modelos OpenRouter gratuitos</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>status</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Estado de modelos configurados</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>set</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Establece modelo por defecto</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>set-image</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Establece modelo de imágenes</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>aliases</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Gestiona aliases de modelos</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>auth</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Gestiona perfiles de autenticación</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>fallbacks</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Gestiona lista de fallbacks</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>image-fallbacks</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Gestiona fallbacks de imágenes</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_ejemplos_detallados_6">Ejemplos Detallados</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># Listar modelos</span>
+openclaw models list
+
+<span class="c"># Ver estado</span>
+openclaw models status
+
+<span class="c"># Estado en JSON</span>
+openclaw models status <span class="nt">--status-json</span>
+
+<span class="c"># Establecer modelo por defecto</span>
+openclaw models <span class="nb">set</span> <span class="s2">"anthropic/claude-opus-4"</span>
+
+<span class="c"># Establecer modelo de imágenes</span>
+openclaw models set-image <span class="s2">"openai/dall-e-3"</span>
+
+<span class="c"># Escanear OpenRouter</span>
+openclaw models scan
+
+<span class="c"># Gestionar aliases</span>
+openclaw models aliases list
+openclaw models aliases add <span class="s2">"my-model"</span> <span class="s2">"anthropic/claude-opus-4"</span>
+
+<span class="c"># Gestionar auth</span>
+openclaw models auth list
+openclaw models auth add <span class="nt">--provider</span> openai <span class="nt">--api-key</span> <span class="s2">"sk-..."</span>
+
+<span class="c"># Gestionar fallbacks</span>
+openclaw models fallbacks list
+openclaw models fallbacks add <span class="s2">"openai/gpt-4o"</span>
+openclaw models fallbacks add <span class="s2">"google/gemini-2.5-pro"</span></code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_comando_skills_habilidades">Comando <code>skills</code> — Habilidades</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_definición_7">Definición</h3>
+<div class="paragraph">
+<p>El comando <code>skills</code> gestiona las <strong>habilidades del agente</strong>. Las skills son módulos extensibles que añaden capacidades específicas.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_sintaxis_7">Sintaxis</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">openclaw skills <span class="o">[</span>options] <span class="o">[</span><span class="nb">command</span><span class="o">]</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_subcomandos_5">Subcomandos</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 80%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Comando</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>list</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Lista todas las skills disponibles</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>search</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Busca skills en ClawHub</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>info</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Información detallada de skill</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>install</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Instala skill desde ClawHub</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>update</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Actualiza skills instaladas</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>check</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Verifica skills listas vs faltantes requisitos</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_ejemplos_detallados_7">Ejemplos Detallados</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># Listar skills</span>
+openclaw skills list
+
+<span class="c"># Buscar skills</span>
+openclaw skills search <span class="s2">"github"</span>
+
+<span class="c"># Info de skill</span>
+openclaw skills info weather
+
+<span class="c"># Instalar skill</span>
+openclaw skills <span class="nb">install </span>github
+
+<span class="c"># Actualizar skills</span>
+openclaw skills update
+
+<span class="c"># Verificar estado</span>
+openclaw skills check</code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_comando_cron_trabajos_programados">Comando <code>cron</code> — Trabajos Programados</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_definición_8">Definición</h3>
+<div class="paragraph">
+<p>El comando <code>cron</code> gestiona los <strong>trabajos programados</strong> via Gateway. Permite crear, editar, eliminar y ejecutar trabajos con expresiones cron.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_sintaxis_8">Sintaxis</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">openclaw cron <span class="o">[</span>options] <span class="o">[</span><span class="nb">command</span><span class="o">]</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_subcomandos_6">Subcomandos</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 80%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Comando</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>list</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Lista trabajos cron</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>add</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Añade trabajo cron</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>edit</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Edita trabajo cron</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>enable</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Habilita trabajo</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>disable</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Deshabilita trabajo</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>rm</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Elimina trabajo</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>run</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Ejecuta trabajo ahora (debug)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>runs</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Historial de ejecuciones</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>status</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Estado del scheduler</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_ejemplos_detallados_8">Ejemplos Detallados</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># Listar trabajos</span>
+openclaw cron list
+
+<span class="c"># Añadir trabajo diario a las 9am</span>
+openclaw cron add <span class="nt">--name</span> <span class="s2">"daily-report"</span> <span class="nt">--cron</span> <span class="s2">"0 9 * * *"</span> <span class="nt">--message</span> <span class="s2">"Genera reporte diario"</span>
+
+<span class="c"># Añadir trabajo one-shot</span>
+openclaw cron add <span class="nt">--name</span> <span class="s2">"reminder"</span> <span class="nt">--at</span> <span class="s2">"2026-04-22T10:00:00Z"</span> <span class="nt">--message</span> <span class="s2">"Recordatorio"</span>
+
+<span class="c"># Añadir con timezone</span>
+openclaw cron add <span class="nt">--name</span> <span class="s2">"eu-meeting"</span> <span class="nt">--at</span> <span class="s2">"2026-04-22T15:00:00"</span> <span class="nt">--tz</span> <span class="s2">"Europe/Madrid"</span> <span class="nt">--message</span> <span class="s2">"Reunión EU"</span>
+
+<span class="c"># Editar trabajo</span>
+openclaw cron edit <span class="s2">"daily-report"</span> <span class="nt">--cron</span> <span class="s2">"0 10 * * *"</span>
+
+<span class="c"># Habilitar/deshabilitar</span>
+openclaw cron <span class="nb">enable</span> <span class="s2">"daily-report"</span>
+openclaw cron disable <span class="s2">"daily-report"</span>
+
+<span class="c"># Eliminar trabajo</span>
+openclaw cron remove <span class="s2">"daily-report"</span>
+
+<span class="c"># Ejecutar ahora (debug)</span>
+openclaw cron run <span class="s2">"daily-report"</span>
+
+<span class="c"># Ver historial</span>
+openclaw cron runs
+
+<span class="c"># Ver estado del scheduler</span>
+openclaw cron status</code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_comando_security_auditoría_de_seguridad">Comando <code>security</code> — Auditoría de Seguridad</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_definición_9">Definición</h3>
+<div class="paragraph">
+<p>El comando <code>security</code> audita la <strong>configuración local y el estado</strong> por foot-guns de seguridad comunes.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_sintaxis_9">Sintaxis</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">openclaw security <span class="o">[</span>options] <span class="o">[</span><span class="nb">command</span><span class="o">]</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_opciones">Opciones</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 12.5%;">
+<col style="width: 25%;">
+<col style="width: 12.5%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Opción</th>
+<th class="tableblock halign-left valign-top">Tipo</th>
+<th class="tableblock halign-left valign-top">Default</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--deep</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">flag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Incluye probes al Gateway live</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--fix</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">flag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Aplica reparaciones automáticas</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--json</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">flag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Output JSON</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--token &lt;token&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Token para deep probe</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--password &lt;password&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Password para deep probe</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_ejemplos_detallados_9">Ejemplos Detallados</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># Auditoría básica</span>
+openclaw security audit
+
+<span class="c"># Auditoría profunda</span>
+openclaw security audit <span class="nt">--deep</span>
+
+<span class="c"># Con token explícito</span>
+openclaw security audit <span class="nt">--deep</span> <span class="nt">--token</span> mi_token
+
+<span class="c"># Con password explícito</span>
+openclaw security audit <span class="nt">--deep</span> <span class="nt">--password</span> mi_password
+
+<span class="c"># Con reparación automática</span>
+openclaw security audit <span class="nt">--fix</span>
+
+<span class="c"># Output JSON</span>
+openclaw security audit <span class="nt">--json</span></code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_comando_doctor_diagnóstico">Comando <code>doctor</code> — Diagnóstico</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_definición_10">Definición</h3>
+<div class="paragraph">
+<p>El comando <code>doctor</code> diagnostica y repara <strong>problemas de configuración</strong> automáticamente.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_sintaxis_10">Sintaxis</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">openclaw doctor <span class="o">[</span>options]</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_opciones_2">Opciones</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 12.5%;">
+<col style="width: 25%;">
+<col style="width: 12.5%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Opción</th>
+<th class="tableblock halign-left valign-top">Tipo</th>
+<th class="tableblock halign-left valign-top">Default</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--fix</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">flag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Aplica reparaciones automáticas</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--json</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">flag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Output JSON</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_ejemplos_detallados_10">Ejemplos Detallados</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># Diagnóstico completo</span>
+openclaw doctor
+
+<span class="c"># Con reparación automática</span>
+openclaw doctor <span class="nt">--fix</span>
+
+<span class="c"># Output JSON</span>
+openclaw doctor <span class="nt">--json</span></code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_comando_status_estado_del_sistema">Comando <code>status</code> — Estado del Sistema</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_definición_11">Definición</h3>
+<div class="paragraph">
+<p>El comando <code>status</code> muestra el <strong>estado del sistema</strong> incluyendo Gateway, canales, y agentes.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_sintaxis_11">Sintaxis</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">openclaw status <span class="o">[</span>options]</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_opciones_3">Opciones</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 12.5%;">
+<col style="width: 25%;">
+<col style="width: 12.5%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Opción</th>
+<th class="tableblock halign-left valign-top">Tipo</th>
+<th class="tableblock halign-left valign-top">Default</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--all</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">flag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Muestra todos los agentes</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--deep</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">flag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Diagnóstico profundo</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--json</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">flag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Output JSON</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_ejemplos_detallados_11">Ejemplos Detallados</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># Estado básico</span>
+openclaw status
+
+<span class="c"># Con todos los agentes</span>
+openclaw status <span class="nt">--all</span>
+
+<span class="c"># Estado profundo</span>
+openclaw status <span class="nt">--deep</span>
+
+<span class="c"># Output JSON</span>
+openclaw status <span class="nt">--json</span></code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_comando_update_actualizaciones">Comando <code>update</code> — Actualizaciones</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_definición_12">Definición</h3>
+<div class="paragraph">
+<p>El comando <code>update</code> gestiona las <strong>actualizaciones de OpenClaw</strong>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_sintaxis_12">Sintaxis</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">openclaw update <span class="o">[</span>options]</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_opciones_4">Opciones</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 12.5%;">
+<col style="width: 25%;">
+<col style="width: 12.5%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Opción</th>
+<th class="tableblock halign-left valign-top">Tipo</th>
+<th class="tableblock halign-left valign-top">Default</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>--channel &lt;channel&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">stable</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Canal: <code>stable</code> | <code>beta</code> | <code>dev</code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_ejemplos_detallados_12">Ejemplos Detallados</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># Verificar actualizaciones</span>
+openclaw update
+
+<span class="c"># Canal stable</span>
+openclaw update <span class="nt">--channel</span> stable
+
+<span class="c"># Canal beta</span>
+openclaw update <span class="nt">--channel</span> beta
+
+<span class="c"># Canal dev</span>
+openclaw update <span class="nt">--channel</span> dev</code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_comandos_de_chat_in_chat">Comandos de Chat (In-Chat)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Estos comandos se envían <strong>directamente en los chats</strong>:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 75%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Comando</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>/status</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Estado compacto de la sesión (modelo + tokens)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>/new</code> o <code>/reset</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Resetea la sesión</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>/compact</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Compacta contexto (resumen)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>/think &lt;level&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Nivel de thinking: off | minimal | low | medium | high | xhigh</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">`/verbose on</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">off`</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Toggle verbose</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">`/usage off</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">tokens</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">full`</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Footer de uso por respuesta</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>/restart</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Reiniciar gateway (owner-only en grupos)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">`/activation mention</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">always`</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Toggle de activación en grupos</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>/tools</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Ver herramientas disponibles</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">`/elevated on</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">off`</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Toggle permisos elevados</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">`/reasoning on</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">off`</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Toggle reasoning mode</p></td>
+</tr>
+</tbody>
+</table>
+<hr>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_canales_soportados">Canales Soportados</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>OpenClaw soporta más de <strong>20 canales</strong>:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Canal</th>
+<th class="tableblock halign-left valign-top">Documentación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>WhatsApp</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">docs.openclaw.ai/channels/whatsapp</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Telegram</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">docs.openclaw.ai/channels/telegram</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Slack</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">docs.openclaw.ai/channels/slack</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Discord</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">docs.openclaw.ai/channels/discord</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Signal</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">docs.openclaw.ai/channels/signal</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>iMessage</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">docs.openclaw.ai/channels/bluebubbles</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Microsoft Teams</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">docs.openclaw.ai/channels/msteams</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Matrix</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">docs.openclaw.ai/channels/matrix</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>IRC</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">docs.openclaw.ai/channels/irc</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Google Chat</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">docs.openclaw.ai/channels/googlechat</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Feishu</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">docs.openclaw.ai/channels/feishu</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>LINE</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">docs.openclaw.ai/channels/line</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Mattermost</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">docs.openclaw.ai/channels/mattermost</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Nostr</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">docs.openclaw.ai/channels/nostr</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Twitch</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">docs.openclaw.ai/channels/twitch</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Zalo</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">docs.openclaw.ai/channels/zalo</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>WebChat</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">docs.openclaw.ai/web/webchat</p></td>
+</tr>
+</tbody>
+</table>
+<hr>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_modelos_soportados">Modelos Soportados</h2>
+<div class="sectionbody">
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Proveedor</th>
+<th class="tableblock halign-left valign-top">Modelos</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>OpenAI</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">GPT-4o, GPT-4.1, GPT-5.2, o4-mini, Codex</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Anthropic</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Claude Opus 4, Claude Sonnet 4, Claude 3.5</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Google</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Gemini 2.5 Pro, Gemini 2.0 Flash</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Mistral</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Mistral Large, Mistral Medium, Codestral</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>DeepSeek</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DeepSeek V3, DeepSeek Coder</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>OpenRouter</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Acceso a 100+ modelos</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Local</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Ollama, LM Studio, vLLM</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>MiniMax</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">M2.7, M2.5</p></td>
+</tr>
+</tbody>
+</table>
+<hr>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_skills_disponibles">Skills Disponibles</h2>
+<div class="sectionbody">
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 66.6667%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Skill</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>weather</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Clima y pronósticos via wttr.in</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>healthcheck</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Auditoría de seguridad del host</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>node-connect</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Diagnóstico de conexión de apps</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>skill-creator</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Crear nuevas skills</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>tmux</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Control remoto de tmux</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>github</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Integración con GitHub</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>1password</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Acceso a 1Password</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>discord</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Comandos avanzados de Discord</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>slack</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Comandos avanzados de Slack</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>obsidian</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Integración con Obsidian</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>apple-notes</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Notas de Apple</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>apple-reminders</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Recordatorios de Apple</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>summarize</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Resumen de contenido</p></td>
+</tr>
+</tbody>
+</table>
+<hr>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_flujos_de_trabajo_comunes">Flujos de Trabajo Comunes</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_flujo_instalación_inicial">Flujo: Instalación Inicial</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># 1. Instalar</span>
+npm <span class="nb">install</span> <span class="nt">-g</span> openclaw@latest
+
+<span class="c"># 2. Onboarding</span>
+openclaw onboard <span class="nt">--install-daemon</span>
+
+<span class="c"># 3. Verificar estado</span>
+openclaw status
+
+<span class="c"># 4. Configurar modelo</span>
+openclaw config <span class="nb">set </span>agent.model <span class="s2">"anthropic/claude-opus-4"</span>
+
+<span class="c"># 5. Iniciar gateway</span>
+openclaw gateway start
+
+<span class="c"># 6. Verificar canales</span>
+openclaw channels list
+
+<span class="c"># 7. Diagnóstico final</span>
+openclaw doctor <span class="nt">--fix</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_flujo_configurar_telegram">Flujo: Configurar Telegram</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># 1. Añadir token</span>
+openclaw channels add <span class="nt">--channel</span> telegram <span class="nt">--token</span> <span class="s2">"123456:ABCDEF"</span>
+
+<span class="c"># 2. Verificar estado</span>
+openclaw channels status <span class="nt">--channel</span> telegram
+
+<span class="c"># 3. Configurar allowlist</span>
+openclaw config <span class="nb">set </span>channels.telegram.allowFrom <span class="nt">--json</span> <span class="s1">'["123456789"]'</span>
+
+<span class="c"># 4. Probar envío</span>
+openclaw message send <span class="nt">--channel</span> telegram <span class="nt">--target</span> 123456789 <span class="nt">--message</span> <span class="s2">"Test"</span>
+
+<span class="c"># 5. Ver logs</span>
+openclaw channels logs <span class="nt">--channel</span> telegram</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_flujo_acceso_remoto_con_tailscale">Flujo: Acceso Remoto con Tailscale</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># 1. Configurar Tailscale serve</span>
+openclaw config <span class="nb">set </span>gateway.tailscale.mode <span class="s2">"serve"</span>
+
+<span class="c"># 2. Reiniciar gateway</span>
+openclaw gateway restart
+
+<span class="c"># 3. Verificar</span>
+openclaw gateway status
+
+<span class="c"># Para acceso público (funnel):</span>
+<span class="c"># openclaw config set gateway.tailscale.mode "funnel"</span>
+<span class="c"># openclaw config set gateway.auth.mode "password"</span>
+<span class="c"># openclaw config set gateway.auth.password "mi_password"</span>
+<span class="c"># openclaw gateway restart</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_flujo_auditoría_de_seguridad">Flujo: Auditoría de Seguridad</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># 1. Auditoría básica</span>
+openclaw security audit
+
+<span class="c"># 2. Auditoría profunda</span>
+openclaw security audit <span class="nt">--deep</span>
+
+<span class="c"># 3. Reparar problemas</span>
+openclaw doctor <span class="nt">--fix</span>
+
+<span class="c"># 4. Verificar config</span>
+openclaw config validate
+
+<span class="c"># 5. Ver estado</span>
+openclaw status <span class="nt">--deep</span></code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_resumen_de_comandos">Resumen de Comandos</h2>
+<div class="sectionbody">
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 66.6667%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Comando</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>gateway</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Control del WebSocket Gateway</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>agent</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Ejecutar turnos del agente</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>message</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Enviar y gestionar mensajes</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>channels</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Gestionar canales conectados</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>config</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Gestionar configuración</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>models</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Gestionar modelos LLM</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>skills</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Gestionar habilidades</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>sessions</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Gestionar sesiones</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>cron</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Gestionar trabajos programados</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>security</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Auditoría de seguridad</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>doctor</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Diagnóstico y reparación</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>status</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Estado del sistema</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>update</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Actualizaciones</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>pairing</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Emparejamiento de usuarios</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>onboard</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Configuración inicial</p></td>
+</tr>
+</tbody>
+</table>
+<hr>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_recursos_y_enlaces">Recursos y Enlaces</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_enlaces_oficiales">Enlaces Oficiales</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 66.6667%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Recurso</th>
+<th class="tableblock halign-left valign-top">URL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Website</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://openclaw.ai" class="bare">https://openclaw.ai</a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Documentación</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://docs.openclaw.ai" class="bare">https://docs.openclaw.ai</a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>GitHub</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://github.com/openclaw/openclaw" class="bare">https://github.com/openclaw/openclaw</a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>ClawHub (Skills)</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://clawhub.ai" class="bare">https://clawhub.ai</a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Discord</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://discord.com/invite/clawd" class="bare">https://discord.com/invite/clawd</a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>NPM</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://www.npmjs.com/package/openclaw" class="bare">https://www.npmjs.com/package/openclaw</a></p></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<div class="paragraph">
+<p><strong>¡Presentación completa!</strong> 🦞</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2026-04-21 21:06:33 +0200
+</div>
+</div>
+</body>
+</html>

@@ -1,5 +1,5 @@
 = MCP TypeScript SDK - Guía Completa
-:author: Bot-Bunnny
+:author: AI Generated
 :version: 1.0
 :toc: left
 :toclevels: 4
