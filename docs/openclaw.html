@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.26">
-<meta name="author" content="Bot-Bunnny">
+<meta name="author" content="AI Generated">
 <title>OpenClaw — Presentación Completa</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -558,7 +558,7 @@ pre.rouge .gs {
 <div id="header">
 <h1>OpenClaw — Presentación Completa</h1>
 <div class="details">
-<span id="author" class="author">Bot-Bunnny</span><br>
+<span id="author" class="author">AI Generated</span><br>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -691,6 +691,111 @@ pre.rouge .gs {
 </ul>
 </li>
 <li><a href="#_resumen_de_comandos">Resumen de Comandos</a></li>
+<li><a href="#_creación_de_agentes_personalizados">Creación de Agentes Personalizados</a>
+<ul class="sectlevel2">
+<li><a href="#_qué_es_un_agente_en_openclaw">¿Qué es un Agente en OpenClaw?</a></li>
+<li><a href="#_estructura_de_un_agente">Estructura de un Agente</a></li>
+<li><a href="#_archivos_de_definición_del_agente">Archivos de Definición del Agente</a>
+<ul class="sectlevel3">
+<li><a href="#_soul_md_personalidad_y_tono">SOUL.md — Personalidad y Tono</a></li>
+<li><a href="#_agents_md_reglas_operativas">AGENTS.md — Reglas Operativas</a></li>
+<li><a href="#_tools_md_herramientas_disponibles">TOOLS.md — Herramientas Disponibles</a></li>
+<li><a href="#_memory_md_memoria_persistente">MEMORY.md — Memoria Persistente</a></li>
+<li><a href="#_identity_md_identidad_del_agente">IDENTITY.md — Identidad del Agente</a></li>
+</ul>
+</li>
+<li><a href="#_crear_un_nuevo_agente">Crear un Nuevo Agente</a>
+<ul class="sectlevel3">
+<li><a href="#_paso_1_crear_directorio">Paso 1: Crear Directorio</a></li>
+<li><a href="#_paso_2_crear_config_json">Paso 2: Crear config.json</a></li>
+<li><a href="#_paso_3_crear_archivos_de_definición">Paso 3: Crear Archivos de Definición</a></li>
+<li><a href="#_paso_4_registrar_en_config_json_global">Paso 4: Registrar en config.json Global</a></li>
+<li><a href="#_paso_5_verificar_configuración">Paso 5: Verificar Configuración</a></li>
+</ul>
+</li>
+<li><a href="#_ejecutar_el_agente">Ejecutar el Agente</a>
+<ul class="sectlevel3">
+<li><a href="#_ejecutar_turno_individual">Ejecutar Turno Individual</a></li>
+<li><a href="#_iniciar_como_servicio">Iniciar como Servicio</a></li>
+</ul>
+</li>
+<li><a href="#_routing_de_canales_a_agentes">Routing de Canales a Agentes</a>
+<ul class="sectlevel3">
+<li><a href="#_configuración_de_routing">Configuración de Routing</a></li>
+</ul>
+</li>
+<li><a href="#_agentes_especializados_ejemplos">Agentes Especializados — Ejemplos</a>
+<ul class="sectlevel3">
+<li><a href="#_agente_de_operaciones_ops">Agente de Operaciones (ops)</a></li>
+<li><a href="#_agente_de_soporte_support">Agente de Soporte (support)</a></li>
+<li><a href="#_agente_creativo_creative">Agente Creativo (creative)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_añadir_servidores_mcp_a_openclaw">Añadir Servidores MCP a OpenClaw</a>
+<ul class="sectlevel2">
+<li><a href="#_qué_es_un_servidor_mcp">¿Qué es un Servidor MCP?</a></li>
+<li><a href="#_configurar_servidor_mcp">Configurar Servidor MCP</a>
+<ul class="sectlevel3">
+<li><a href="#_paso_1_crear_directorio_de_skills">Paso 1: Crear Directorio de Skills</a></li>
+<li><a href="#_paso_2_crear_skill_md">Paso 2: Crear SKILL.md</a></li>
+<li><a href="#_paso_3_configurar_en_config_json">Paso 3: Configurar en config.json</a></li>
+</ul>
+</li>
+<li><a href="#_tipos_de_transporte_mcp">Tipos de Transporte MCP</a>
+<ul class="sectlevel3">
+<li><a href="#_stdio_recomendado">STDIO (Recomendado)</a></li>
+<li><a href="#_http">HTTP</a></li>
+<li><a href="#_websocket">WebSocket</a></li>
+</ul>
+</li>
+<li><a href="#_ejemplos_de_servidores_mcp">Ejemplos de Servidores MCP</a>
+<ul class="sectlevel3">
+<li><a href="#_servidor_de_archivos">Servidor de Archivos</a></li>
+<li><a href="#_servidor_de_github">Servidor de GitHub</a></li>
+<li><a href="#_servidor_de_postgresql">Servidor de PostgreSQL</a></li>
+</ul>
+</li>
+<li><a href="#_crear_un_servidor_mcp_personalizado">Crear un Servidor MCP Personalizado</a>
+<ul class="sectlevel3">
+<li><a href="#_estructura_del_proyecto">Estructura del Proyecto</a></li>
+<li><a href="#_server_js_servidor_básico">server.js — Servidor Básico</a></li>
+<li><a href="#_añadir_a_openclaw">Añadir a OpenClaw</a></li>
+</ul>
+</li>
+<li><a href="#_verificar_servidor_mcp">Verificar Servidor MCP</a>
+<ul class="sectlevel3">
+<li><a href="#_verificar_configuración">Verificar Configuración</a></li>
+<li><a href="#_verificar_tools_disponibles">Verificar Tools Disponibles</a></li>
+</ul>
+</li>
+<li><a href="#_servidores_mcp_populares">Servidores MCP Populares</a>
+<ul class="sectlevel3">
+<li><a href="#_instalar_servidor_oficial">Instalar Servidor Oficial</a></li>
+</ul>
+</li>
+<li><a href="#_debugging_de_servidores_mcp">Debugging de Servidores MCP</a>
+<ul class="sectlevel3">
+<li><a href="#_ver_logs">Ver Logs</a></li>
+<li><a href="#_verificar_conexión">Verificar Conexión</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_flujos_de_trabajo_completos">Flujos de Trabajo Completos</a>
+<ul class="sectlevel2">
+<li><a href="#_flujo_crear_agente_desde_cero">Flujo: Crear Agente desde Cero</a></li>
+<li><a href="#_flujo_añadir_servidor_mcp">Flujo: Añadir Servidor MCP</a></li>
+</ul>
+</li>
+<li><a href="#_checklist_de_configuración">Checklist de Configuración</a>
+<ul class="sectlevel2">
+<li><a href="#_agente_nuevo">Agente Nuevo</a></li>
+<li><a href="#_servidor_mcp_nuevo">Servidor MCP Nuevo</a></li>
+</ul>
+</li>
+<li><a href="#_resumen">Resumen</a></li>
 <li><a href="#_recursos_y_enlaces">Recursos y Enlaces</a>
 <ul class="sectlevel2">
 <li><a href="#_enlaces_oficiales">Enlaces Oficiales</a></li>
@@ -2832,6 +2937,1120 @@ openclaw status <span class="nt">--deep</span></code></pre>
 </div>
 </div>
 <div class="sect1">
+<h2 id="_creación_de_agentes_personalizados">Creación de Agentes Personalizados</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_qué_es_un_agente_en_openclaw">¿Qué es un Agente en OpenClaw?</h3>
+<div class="paragraph">
+<p>Un <strong>agente</strong> en OpenClaw es una instancia aislada con su propia configuración, workspace, y comportamiento. Permite tener múltiples "personalidades" o "roles" que atienden diferentes canales o tareas.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 75%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Componente</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>ID del agente</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Identificador único (ej: <code>default</code>, <code>ops</code>, <code>support</code>)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Configuración</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Modelo, system prompt, temperatura, thinking level</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Workspace</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Directorio de trabajo con archivos de contexto</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Skills</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Habilidades específicas del agente</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Canales</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Routing de canales a este agente</p></td>
+</tr>
+</tbody>
+</table>
+<hr>
+</div>
+<div class="sect2">
+<h3 id="_estructura_de_un_agente">Estructura de un Agente</h3>
+<div class="paragraph">
+<p>Un agente se define mediante varios archivos en su workspace:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>~/.openclaw/
+├── agents/
+│   ├── default/                    # Agente por defecto
+│   │   ├── config.json             # Configuración del agente
+│   │   ├── SOUL.md                 # Personalidad y tono
+│   │   ├── AGENTS.md               # Reglas operativas
+│   │   ├── TOOLS.md                # Herramientas disponibles
+│   │   ├── MEMORY.md               # Memoria persistente
+│   │   ├── USER.md                 # Información de usuarios
+│   │   ├── IDENTITY.md             # Identidad del agente
+│   │   └── skills/                 # Skills específicas
+│   │
+│   └── ops/                        # Agente de operaciones
+│       ├── config.json
+│       ├── SOUL.md
+│       └── ...
+│
+└── config.json                     # Configuración global</pre>
+</div>
+</div>
+<hr>
+</div>
+<div class="sect2">
+<h3 id="_archivos_de_definición_del_agente">Archivos de Definición del Agente</h3>
+<div class="sect3">
+<h4 id="_soul_md_personalidad_y_tono">SOUL.md — Personalidad y Tono</h4>
+<div class="paragraph">
+<p>El archivo <code>SOUL.md</code> define la <strong>personalidad, tono y estilo de comunicación</strong> del agente.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="markdown"><span class="gh"># Soul — Mi Agente</span>
+
+<span class="gu">## Persona</span>
+
+You are <span class="gs">**Mi Agente**</span>, un asistente personal especializado en [dominio].
+Tu estilo base es [nivel de formalidad], pero te adaptas al usuario.
+
+<span class="gu">## Tone &amp; Language</span>
+<span class="p">
+-</span> <span class="gs">**Nivel 0**</span>: Formal, sin slang, profesional
+<span class="p">-</span> <span class="gs">**Nivel 1**</span>: Neutral, internacional
+<span class="p">-</span> <span class="gs">**Nivel 2**</span>: Casual, expressions suaves
+<span class="p">-</span> <span class="gs">**Nivel 3**</span>: Latino medio, Spanglish ocasional
+<span class="p">-</span> <span class="gs">**Nivel 4**</span>: Latino intenso, slang frecuente
+<span class="p">-</span> <span class="gs">**Nivel 5**</span>: Máximo, full Spanglish
+
+<span class="gu">## Core Traits</span>
+<span class="p">
+-</span> <span class="gs">**Creativo**</span>: Propone ideas rápidamente
+<span class="p">-</span> <span class="gs">**Resuelve-rápido**</span>: Va al grano
+<span class="p">-</span> <span class="gs">**Cercano**</span>: Trato amistoso
+<span class="p">-</span> <span class="gs">**Profesional**</span>: Cumple tareas con precisión
+<span class="p">-</span> <span class="gs">**Discreto**</span>: No expone información sensible</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_agents_md_reglas_operativas">AGENTS.md — Reglas Operativas</h4>
+<div class="paragraph">
+<p>El archivo <code>AGENTS.md</code> define las <strong>reglas de operación, prioridades y flujos de trabajo</strong>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="markdown"><span class="gh"># Operational Rules — Mi Agente</span>
+
+<span class="gu">## Priority Order</span>
+<span class="p">
+1.</span> <span class="gs">**Security first**</span> - Nunca exponer datos sensibles
+<span class="p">2.</span> <span class="gs">**User intent**</span> - Ejecutar solicitudes claramente
+<span class="p">3.</span> <span class="gs">**Quality**</span> - Mantener calidad en las respuestas
+<span class="p">4.</span> <span class="gs">**Tone**</span> - Adaptar al nivel del usuario
+
+<span class="gu">## Step 0 — Sender Resolution (Mandatory)</span>
+
+<span class="gu">### 0.1 Lookup sender identity</span>
+Extraer de metadata: <span class="sb">`user_id`</span>, <span class="sb">`channel`</span>, <span class="sb">`display_name`</span>
+
+<span class="gu">### 0.2 Auto-register new sender</span>
+Si no existe:
+<span class="p">-</span> Crear entrada en MEMORY.md
+<span class="p">-</span> Inicializar preferencias
+
+<span class="gu">### 0.3 Update activity</span>
+Actualizar <span class="sb">`last_seen_at`</span> para usuarios existentes
+
+<span class="gu">## Boundaries</span>
+<span class="p">
+-</span> Never bypass access controls
+<span class="p">-</span> Never delete files you don't own
+<span class="p">-</span> Never expose private metadata</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_tools_md_herramientas_disponibles">TOOLS.md — Herramientas Disponibles</h4>
+<div class="paragraph">
+<p>El archivo <code>TOOLS.md</code> describe las <strong>herramientas y capacidades</strong> del agente.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="markdown"><span class="gh"># Tools — Mi Agente</span>
+
+<span class="gu">## 1. User Registry</span>
+
+<span class="gs">**Commands:**</span>
+<span class="p">-</span> <span class="sb">`/users`</span> — Lista usuarios registrados
+<span class="p">-</span> <span class="sb">`/me`</span> — Muestra perfil propio
+<span class="p">-</span> <span class="sb">`/bio &lt;text&gt;`</span> — Actualiza biografía
+
+<span class="gu">## 2. Messaging</span>
+
+<span class="gs">**Commands:**</span>
+<span class="p">-</span> <span class="sb">`/msg @user &lt;text&gt;`</span> — Enviar mensaje directo
+<span class="p">-</span> <span class="sb">`/send-file @user &lt;file_id&gt;`</span> — Enviar archivo
+
+<span class="gu">## 3. Storage</span>
+
+<span class="gs">**Commands:**</span>
+<span class="p">-</span> <span class="sb">`/space ls`</span> — Listar archivos propios
+<span class="p">-</span> <span class="sb">`/space rm &lt;file_id&gt;`</span> — Eliminar archivo propio
+
+<span class="gu">## 4. Skills</span>
+
+Las skills se cargan desde <span class="sb">`~/.agents/skills/`</span>:
+
+| Skill | Descripción
+|-------|-------------
+| <span class="sb">`weather`</span> | Clima y pronósticos
+| <span class="sb">`github`</span> | Operaciones de GitHub</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_memory_md_memoria_persistente">MEMORY.md — Memoria Persistente</h4>
+<div class="paragraph">
+<p>El archivo <code>MEMORY.md</code> almacena <strong>datos persistentes, usuarios y estado</strong>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="markdown"><span class="gh"># Memory — Mi Agente</span>
+
+<span class="gu">## system_settings</span>
+
+<span class="p">```</span><span class="nl">json
+</span><span class="p">{</span><span class="w">
+  </span><span class="nl">"global_default_quota_mb"</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"max_message_length"</span><span class="p">:</span><span class="w"> </span><span class="mi">4000</span><span class="w">
+</span><span class="p">}</span>
+<span class="p">```</span>
+
+<span class="gu">## users_registry</span>
+
+<span class="p">```</span><span class="nl">json
+</span><span class="p">{</span><span class="w">
+  </span><span class="nl">"user_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"telegram:123456789"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"display_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Usuario Ejemplo"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"preferences"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"formality_level"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"language"</span><span class="p">:</span><span class="w"> </span><span class="s2">"es"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span>
+<span class="p">```</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_identity_md_identidad_del_agente">IDENTITY.md — Identidad del Agente</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="markdown"><span class="gh"># Identity</span>
+
+name: Mi Agente
+emoji: "🤖"
+theme: "Asistente personal especializado"
+avatar: ""</code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_crear_un_nuevo_agente">Crear un Nuevo Agente</h3>
+<div class="sect3">
+<h4 id="_paso_1_crear_directorio">Paso 1: Crear Directorio</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># Crear directorio del agente</span>
+<span class="nb">mkdir</span> <span class="nt">-p</span> ~/.openclaw/agents/mi-agente
+
+<span class="c"># Crear workspace</span>
+<span class="nb">mkdir</span> <span class="nt">-p</span> ~/.openclaw/workspace-mi-agente</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_paso_2_crear_config_json">Paso 2: Crear config.json</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">cat</span> <span class="o">&gt;</span> ~/.openclaw/agents/mi-agente/config.json <span class="o">&lt;&lt;</span> <span class="sh">'</span><span class="no">EOF</span><span class="sh">'
+{
+  "agent": {
+    "id": "mi-agente",
+    "name": "Mi Agente",
+    "model": "anthropic/claude-opus-4",
+    "thinking": "medium"
+  },
+  "workspace": "~/.openclaw/workspace-mi-agente",
+  "skills": ["weather", "github"]
+}
+EOF</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_paso_3_crear_archivos_de_definición">Paso 3: Crear Archivos de Definición</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># Crear SOUL.md</span>
+<span class="nb">cat</span> <span class="o">&gt;</span> ~/.openclaw/agents/mi-agente/SOUL.md <span class="o">&lt;&lt;</span> <span class="sh">'</span><span class="no">EOF</span><span class="sh">'
+# Soul — Mi Agente
+
+## Persona
+You are **Mi Agente**, un asistente especializado.
+
+## Tone &amp; Language
+- Nivel base: 3 (Latino medio)
+- Adaptativo al usuario
+</span><span class="no">EOF
+
+</span><span class="c"># Crear AGENTS.md</span>
+<span class="nb">cat</span> <span class="o">&gt;</span> ~/.openclaw/agents/mi-agente/AGENTS.md <span class="o">&lt;&lt;</span> <span class="sh">'</span><span class="no">EOF</span><span class="sh">'
+# Operational Rules — Mi Agente
+
+## Priority Order
+1. **User intent** — Ejecutar solicitudes
+2. **Quality** — Respuestas útiles
+3. **Security** — Proteger datos
+</span><span class="no">EOF
+
+</span><span class="c"># Crear IDENTITY.md</span>
+<span class="nb">cat</span> <span class="o">&gt;</span> ~/.openclaw/agents/mi-agente/IDENTITY.md <span class="o">&lt;&lt;</span> <span class="sh">'</span><span class="no">EOF</span><span class="sh">'
+# Identity
+
+name: Mi Agente
+emoji: "🤖"
+theme: "Asistente especializado"
+</span><span class="no">EOF
+
+</span><span class="c"># Crear MEMORY.md inicial</span>
+<span class="nb">cat</span> <span class="o">&gt;</span> ~/.openclaw/agents/mi-agente/MEMORY.md <span class="o">&lt;&lt;</span> <span class="sh">'</span><span class="no">EOF</span><span class="sh">'
+# Memory — Mi Agente
+
+## system_settings
+```json
+{"version": "1.0.0"}
+```
+
+## users_registry
+```json
+[]
+```
+EOF</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_paso_4_registrar_en_config_json_global">Paso 4: Registrar en config.json Global</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># Añadir agente al config global</span>
+openclaw config <span class="nb">set </span>agents.profiles.mi-agente ~/.openclaw/agents/mi-agente/config.json</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_paso_5_verificar_configuración">Paso 5: Verificar Configuración</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># Verificar que el agente está configurado</span>
+openclaw status
+
+<span class="c"># Debería mostrar:</span>
+<span class="c"># Agents:</span>
+<span class="c">#   - default (active)</span>
+<span class="c">#   - mi-agente (configured)</span></code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ejecutar_el_agente">Ejecutar el Agente</h3>
+<div class="sect3">
+<h4 id="_ejecutar_turno_individual">Ejecutar Turno Individual</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># Ejecutar un mensaje con el agente</span>
+openclaw agent <span class="nt">--agent</span> mi-agente <span class="nt">--message</span> <span class="s2">"Hola"</span>
+
+<span class="c"># Con thinking alto</span>
+openclaw agent <span class="nt">--agent</span> mi-agente <span class="nt">--message</span> <span class="s2">"Analiza esto"</span> <span class="nt">--thinking</span> high
+
+<span class="c"># Con canal de entrega</span>
+openclaw agent <span class="nt">--agent</span> mi-agente <span class="nt">--message</span> <span class="s2">"Reporte"</span> <span class="nt">--deliver</span> <span class="nt">--channel</span> telegram <span class="nt">--to</span> +15555550123</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_iniciar_como_servicio">Iniciar como Servicio</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># El Gateway maneja el routing de canales a agentes</span>
+openclaw gateway start
+
+<span class="c"># Ver estado del Gateway</span>
+openclaw gateway status</code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_routing_de_canales_a_agentes">Routing de Canales a Agentes</h3>
+<div class="paragraph">
+<p>El routing determina qué agente atiende cada canal.</p>
+</div>
+<div class="sect3">
+<h4 id="_configuración_de_routing">Configuración de Routing</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># Establecer routing</span>
+openclaw config <span class="nb">set </span>routing.rules <span class="nt">--json</span> <span class="s1">'[
+  {"channel": "telegram", "chatId": "123456789", "agent": "mi-agente"},
+  {"channel": "discord", "chatId": "channel:789", "agent": "ops"}
+]'</span>
+
+<span class="c"># Agente por defecto</span>
+openclaw config <span class="nb">set </span>routing.defaultAgent <span class="s2">"default"</span></code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_agentes_especializados_ejemplos">Agentes Especializados — Ejemplos</h3>
+<div class="sect3">
+<h4 id="_agente_de_operaciones_ops">Agente de Operaciones (ops)</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="json"><span class="p">{</span><span class="w">
+  </span><span class="nl">"agent"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ops"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Ops Agent"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"model"</span><span class="p">:</span><span class="w"> </span><span class="s2">"anthropic/claude-opus-4"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"thinking"</span><span class="p">:</span><span class="w"> </span><span class="s2">"high"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"elevated"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"skills"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"healthcheck"</span><span class="p">,</span><span class="w"> </span><span class="s2">"tmux"</span><span class="p">,</span><span class="w"> </span><span class="s2">"github"</span><span class="p">]</span><span class="w">
+</span><span class="p">}</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_agente_de_soporte_support">Agente de Soporte (support)</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="json"><span class="p">{</span><span class="w">
+  </span><span class="nl">"agent"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"support"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Support Agent"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"model"</span><span class="p">:</span><span class="w"> </span><span class="s2">"openai/gpt-4o"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"thinking"</span><span class="p">:</span><span class="w"> </span><span class="s2">"medium"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"skills"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"summarize"</span><span class="p">]</span><span class="w">
+</span><span class="p">}</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_agente_creativo_creative">Agente Creativo (creative)</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="json"><span class="p">{</span><span class="w">
+  </span><span class="nl">"agent"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"creative"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Creative Agent"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"model"</span><span class="p">:</span><span class="w"> </span><span class="s2">"anthropic/claude-opus-4"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"thinking"</span><span class="p">:</span><span class="w"> </span><span class="s2">"xhigh"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"temperature"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.9</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span></code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_añadir_servidores_mcp_a_openclaw">Añadir Servidores MCP a OpenClaw</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_qué_es_un_servidor_mcp">¿Qué es un Servidor MCP?</h3>
+<div class="paragraph">
+<p>Un <strong>servidor MCP</strong> (Model Context Protocol) expone <strong>herramientas (tools), recursos (resources) y prompts</strong> a clientes de IA. OpenClaw puede conectarse a servidores MCP para extender sus capacidades.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 75%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Componente</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Tools</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Funciones ejecutables (acciones)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Resources</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Datos accesibles (contexto)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Prompts</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Plantillas predefinidas</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Sampling</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Solicitar generación al LLM</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Elicitation</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Solicitar input al usuario</p></td>
+</tr>
+</tbody>
+</table>
+<hr>
+</div>
+<div class="sect2">
+<h3 id="_configurar_servidor_mcp">Configurar Servidor MCP</h3>
+<div class="sect3">
+<h4 id="_paso_1_crear_directorio_de_skills">Paso 1: Crear Directorio de Skills</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">mkdir</span> <span class="nt">-p</span> ~/.agents/skills/mi-mcp-skill</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_paso_2_crear_skill_md">Paso 2: Crear SKILL.md</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">cat</span> <span class="o">&gt;</span> ~/.agents/skills/mi-mcp-skill/SKILL.md <span class="o">&lt;&lt;</span> <span class="sh">'</span><span class="no">EOF</span><span class="sh">'
+# Mi MCP Skill
+
+## Description
+Integración con servidor MCP personalizado.
+
+## Configuration
+
+### config.json
+Añadir a `~/.openclaw/config.json`:
+
+```json
+{
+  "mcpServers": {
+    "mi-servidor": {
+      "command": "node",
+      "args": ["/path/to/mcp-server/index.js"],
+      "env": {
+        "API_KEY": "tu-api-key"
+      }
+    }
+  }
+}
+```
+
+## MCP Tools Exposed
+
+| Tool | Descripción
+|------|-------------
+| `mi_tool_1` | Descripción de la tool 1
+| `mi_tool_2` | Descripción de la tool 2
+EOF</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_paso_3_configurar_en_config_json">Paso 3: Configurar en config.json</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># Añadir servidor MCP</span>
+openclaw config <span class="nb">set </span>mcpServers.mi-servidor <span class="nt">--json</span> <span class="s1">'{
+  "command": "node",
+  "args": ["/path/to/mcp-server/index.js"],
+  "env": {
+    "API_KEY": "tu-api-key"
+  }
+}'</span></code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_tipos_de_transporte_mcp">Tipos de Transporte MCP</h3>
+<div class="sect3">
+<h4 id="_stdio_recomendado">STDIO (Recomendado)</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="json"><span class="p">{</span><span class="w">
+  </span><span class="nl">"mcpServers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"mi-servidor"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"node"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"args"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"/path/to/server.js"</span><span class="p">],</span><span class="w">
+      </span><span class="nl">"env"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"NODE_ENV"</span><span class="p">:</span><span class="w"> </span><span class="s2">"production"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_http">HTTP</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="json"><span class="p">{</span><span class="w">
+  </span><span class="nl">"mcpServers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"mi-servidor"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:3000/mcp"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"headers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"Authorization"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Bearer tu-token"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_websocket">WebSocket</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="json"><span class="p">{</span><span class="w">
+  </span><span class="nl">"mcpServers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"mi-servidor"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ws://localhost:3000/mcp"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span></code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ejemplos_de_servidores_mcp">Ejemplos de Servidores MCP</h3>
+<div class="sect3">
+<h4 id="_servidor_de_archivos">Servidor de Archivos</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="json"><span class="p">{</span><span class="w">
+  </span><span class="nl">"mcpServers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"filesystem"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"npx"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"args"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="s2">"@modelcontextprotocol/server-filesystem"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"/home/user/documents"</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_servidor_de_github">Servidor de GitHub</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="json"><span class="p">{</span><span class="w">
+  </span><span class="nl">"mcpServers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"github"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"npx"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"args"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"@modelcontextprotocol/server-github"</span><span class="p">],</span><span class="w">
+      </span><span class="nl">"env"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"GITHUB_TOKEN"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ghp_xxx"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_servidor_de_postgresql">Servidor de PostgreSQL</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="json"><span class="p">{</span><span class="w">
+  </span><span class="nl">"mcpServers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"postgres"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"npx"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"args"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"@modelcontextprotocol/server-postgres"</span><span class="p">],</span><span class="w">
+      </span><span class="nl">"env"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"POSTGRES_URL"</span><span class="p">:</span><span class="w"> </span><span class="s2">"postgresql://user:pass@localhost:5432/db"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span></code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_crear_un_servidor_mcp_personalizado">Crear un Servidor MCP Personalizado</h3>
+<div class="sect3">
+<h4 id="_estructura_del_proyecto">Estructura del Proyecto</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">mkdir</span> <span class="nt">-p</span> ~/mcp-servers/mi-servidor
+<span class="nb">cd</span> ~/mcp-servers/mi-servidor
+npm init <span class="nt">-y</span>
+npm <span class="nb">install</span> @modelcontextprotocol/sdk</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_server_js_servidor_básico">server.js — Servidor Básico</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript"><span class="k">import</span> <span class="p">{</span> <span class="nx">Server</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@modelcontextprotocol/sdk/server/index.js</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">StdioServerTransport</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@modelcontextprotocol/sdk/server/transport/stdio.js</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">server</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Server</span><span class="p">({</span>
+  <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">mi-servidor</span><span class="dl">'</span><span class="p">,</span>
+  <span class="na">version</span><span class="p">:</span> <span class="dl">'</span><span class="s1">1.0.0</span><span class="dl">'</span>
+<span class="p">},</span> <span class="p">{</span>
+  <span class="na">capabilities</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">tools</span><span class="p">:</span> <span class="p">{},</span>
+    <span class="na">resources</span><span class="p">:</span> <span class="p">{}</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+
+<span class="c1">// Definir tools</span>
+<span class="nx">server</span><span class="p">.</span><span class="nf">setRequestHandler</span><span class="p">(</span><span class="dl">'</span><span class="s1">tools/list</span><span class="dl">'</span><span class="p">,</span> <span class="k">async </span><span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="p">{</span>
+    <span class="na">tools</span><span class="p">:</span> <span class="p">[</span>
+      <span class="p">{</span>
+        <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">mi_tool</span><span class="dl">'</span><span class="p">,</span>
+        <span class="na">description</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Descripción de la tool</span><span class="dl">'</span><span class="p">,</span>
+        <span class="na">inputSchema</span><span class="p">:</span> <span class="p">{</span>
+          <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">object</span><span class="dl">'</span><span class="p">,</span>
+          <span class="na">properties</span><span class="p">:</span> <span class="p">{</span>
+            <span class="na">parametro</span><span class="p">:</span> <span class="p">{</span> <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">string</span><span class="dl">'</span> <span class="p">}</span>
+          <span class="p">},</span>
+          <span class="na">required</span><span class="p">:</span> <span class="p">[</span><span class="dl">'</span><span class="s1">parametro</span><span class="dl">'</span><span class="p">]</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">]</span>
+  <span class="p">};</span>
+<span class="p">});</span>
+
+<span class="c1">// Manejar ejecución</span>
+<span class="nx">server</span><span class="p">.</span><span class="nf">setRequestHandler</span><span class="p">(</span><span class="dl">'</span><span class="s1">tools/call</span><span class="dl">'</span><span class="p">,</span> <span class="k">async </span><span class="p">(</span><span class="nx">request</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">{</span> <span class="nx">name</span><span class="p">,</span> <span class="na">arguments</span><span class="p">:</span> <span class="nx">args</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">request</span><span class="p">.</span><span class="nx">params</span><span class="p">;</span>
+
+  <span class="k">if </span><span class="p">(</span><span class="nx">name</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">mi_tool</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">{</span>
+      <span class="na">content</span><span class="p">:</span> <span class="p">[{</span>
+        <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">text</span><span class="dl">'</span><span class="p">,</span>
+        <span class="na">text</span><span class="p">:</span> <span class="s2">`Resultado: </span><span class="p">${</span><span class="nx">args</span><span class="p">.</span><span class="nx">parametro</span><span class="p">}</span><span class="s2">`</span>
+      <span class="p">}]</span>
+    <span class="p">};</span>
+  <span class="p">}</span>
+
+  <span class="k">throw</span> <span class="k">new</span> <span class="nc">Error</span><span class="p">(</span><span class="s2">`Tool desconocida: </span><span class="p">${</span><span class="nx">name</span><span class="p">}</span><span class="s2">`</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="c1">// Iniciar</span>
+<span class="kd">const</span> <span class="nx">transport</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">StdioServerTransport</span><span class="p">();</span>
+<span class="k">await</span> <span class="nx">server</span><span class="p">.</span><span class="nf">connect</span><span class="p">(</span><span class="nx">transport</span><span class="p">);</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_añadir_a_openclaw">Añadir a OpenClaw</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># Configurar servidor</span>
+openclaw config <span class="nb">set </span>mcpServers.mi-servidor <span class="nt">--json</span> <span class="s1">'{
+  "command": "node",
+  "args": ["/root/mcp-servers/mi-servidor/server.js"]
+}'</span>
+
+<span class="c"># Reiniciar Gateway</span>
+openclaw gateway restart
+
+<span class="c"># Verificar</span>
+openclaw status <span class="nt">--deep</span></code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_verificar_servidor_mcp">Verificar Servidor MCP</h3>
+<div class="sect3">
+<h4 id="_verificar_configuración">Verificar Configuración</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># Verificar que el servidor está configurado</span>
+openclaw config get mcpServers
+
+<span class="c"># Verificar estado del Gateway</span>
+openclaw gateway status
+
+<span class="c"># Ver estado completo</span>
+openclaw status <span class="nt">--deep</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_verificar_tools_disponibles">Verificar Tools Disponibles</h4>
+<div class="paragraph">
+<p>En un chat con el agente, ejecutar <code>/tools</code> para ver las tools del servidor MCP.</p>
+</div>
+<hr>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_servidores_mcp_populares">Servidores MCP Populares</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 66.6667%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Servidor</th>
+<th class="tableblock halign-left valign-top">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>@modelcontextprotocol/server-filesystem</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Acceso a archivos locales</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>@modelcontextprotocol/server-github</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Operaciones de GitHub</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>@modelcontextprotocol/server-postgres</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Base de datos PostgreSQL</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>@modelcontextprotocol/server-sqlite</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Base de datos SQLite</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>@modelcontextprotocol/server-puppeteer</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Web scraping con Puppeteer</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>@modelcontextprotocol/server-fetch</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Fetch de URLs</p></td>
+</tr>
+</tbody>
+</table>
+<div class="sect3">
+<h4 id="_instalar_servidor_oficial">Instalar Servidor Oficial</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># Instalar servidor de filesystem</span>
+npm <span class="nb">install</span> <span class="nt">-g</span> @modelcontextprotocol/server-filesystem
+
+<span class="c"># Configurar en OpenClaw</span>
+openclaw config <span class="nb">set </span>mcpServers.filesystem <span class="nt">--json</span> <span class="s1">'{
+  "command": "npx",
+  "args": [
+    "@modelcontextprotocol/server-filesystem",
+    "/home/user/documents"
+  ]
+}'</span>
+
+<span class="c"># Reiniciar Gateway</span>
+openclaw gateway restart</code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_debugging_de_servidores_mcp">Debugging de Servidores MCP</h3>
+<div class="sect3">
+<h4 id="_ver_logs">Ver Logs</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># Ver logs del Gateway</span>
+openclaw gateway logs
+
+<span class="c"># Logs en tiempo real</span>
+<span class="nb">tail</span> <span class="nt">-f</span> ~/.openclaw/logs/gateway.log</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_verificar_conexión">Verificar Conexión</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># Verificar estado del Gateway</span>
+openclaw gateway status
+
+<span class="c"># Verificar health</span>
+openclaw gateway health
+
+<span class="c"># Diagnóstico completo</span>
+openclaw doctor</code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_flujos_de_trabajo_completos">Flujos de Trabajo Completos</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_flujo_crear_agente_desde_cero">Flujo: Crear Agente desde Cero</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># 1. Crear estructura</span>
+<span class="nb">mkdir</span> <span class="nt">-p</span> ~/.openclaw/agents/mi-agente
+<span class="nb">mkdir</span> <span class="nt">-p</span> ~/.openclaw/workspace-mi-agente
+
+<span class="c"># 2. Crear config.json</span>
+<span class="nb">cat</span> <span class="o">&gt;</span> ~/.openclaw/agents/mi-agente/config.json <span class="o">&lt;&lt;</span> <span class="sh">'</span><span class="no">EOF</span><span class="sh">'
+{
+  "agent": {
+    "id": "mi-agente",
+    "name": "Mi Agente",
+    "model": "anthropic/claude-opus-4",
+    "thinking": "medium"
+  },
+  "workspace": "~/.openclaw/workspace-mi-agente"
+}
+</span><span class="no">EOF
+
+</span><span class="c"># 3. Crear archivos de definición</span>
+<span class="c"># (Crear SOUL.md, AGENTS.md, TOOLS.md, MEMORY.md)</span>
+
+<span class="c"># 4. Registrar en config global</span>
+openclaw config <span class="nb">set </span>agents.profiles.mi-agente ~/.openclaw/agents/mi-agente/config.json
+
+<span class="c"># 5. Reiniciar Gateway</span>
+openclaw gateway restart
+
+<span class="c"># 6. Verificar</span>
+openclaw status
+
+<span class="c"># 7. Probar</span>
+openclaw agent <span class="nt">--agent</span> mi-agente <span class="nt">--message</span> <span class="s2">"Hola"</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_flujo_añadir_servidor_mcp">Flujo: Añadir Servidor MCP</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># 1. Crear servidor MCP</span>
+<span class="nb">cd</span> ~/mcp-servers/mi-servidor
+npm <span class="nb">install</span> @modelcontextprotocol/sdk
+<span class="c"># (Crear server.js)</span>
+
+<span class="c"># 2. Probar servidor</span>
+npm start
+
+<span class="c"># 3. Añadir a OpenClaw</span>
+openclaw config <span class="nb">set </span>mcpServers.mi-servidor <span class="nt">--json</span> <span class="s1">'{
+  "command": "node",
+  "args": ["/root/mcp-servers/mi-servidor/server.js"]
+}'</span>
+
+<span class="c"># 4. Reiniciar Gateway</span>
+openclaw gateway restart
+
+<span class="c"># 5. Verificar</span>
+openclaw status <span class="nt">--deep</span></code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_checklist_de_configuración">Checklist de Configuración</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_agente_nuevo">Agente Nuevo</h3>
+<div class="ulist checklist">
+<ul class="checklist">
+<li>
+<p><i class="fa fa-square-o"></i> Directorio creado (<code>~/.openclaw/agents/mi-agente</code>)</p>
+</li>
+<li>
+<p><i class="fa fa-square-o"></i> <code>config.json</code> configurado</p>
+</li>
+<li>
+<p><i class="fa fa-square-o"></i> <code>SOUL.md</code> creado</p>
+</li>
+<li>
+<p><i class="fa fa-square-o"></i> <code>AGENTS.md</code> creado</p>
+</li>
+<li>
+<p><i class="fa fa-square-o"></i> <code>TOOLS.md</code> creado</p>
+</li>
+<li>
+<p><i class="fa fa-square-o"></i> <code>MEMORY.md</code> inicializado</p>
+</li>
+<li>
+<p><i class="fa fa-square-o"></i> <code>IDENTITY.md</code> creado</p>
+</li>
+<li>
+<p><i class="fa fa-square-o"></i> Workspace creado</p>
+</li>
+<li>
+<p><i class="fa fa-square-o"></i> Agente registrado en config global</p>
+</li>
+<li>
+<p><i class="fa fa-square-o"></i> Gateway reiniciado</p>
+</li>
+<li>
+<p><i class="fa fa-square-o"></i> Verificado con <code>openclaw status</code></p>
+</li>
+<li>
+<p><i class="fa fa-square-o"></i> Probado con <code>openclaw agent --agent mi-agente</code></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_servidor_mcp_nuevo">Servidor MCP Nuevo</h3>
+<div class="ulist checklist">
+<ul class="checklist">
+<li>
+<p><i class="fa fa-square-o"></i> Proyecto creado</p>
+</li>
+<li>
+<p><i class="fa fa-square-o"></i> Dependencias instaladas</p>
+</li>
+<li>
+<p><i class="fa fa-square-o"></i> <code>server.js</code> implementado</p>
+</li>
+<li>
+<p><i class="fa fa-square-o"></i> Tools definidas</p>
+</li>
+<li>
+<p><i class="fa fa-square-o"></i> Probado localmente</p>
+</li>
+<li>
+<p><i class="fa fa-square-o"></i> Añadido a <code>config.json</code></p>
+</li>
+<li>
+<p><i class="fa fa-square-o"></i> Gateway reiniciado</p>
+</li>
+<li>
+<p><i class="fa fa-square-o"></i> Verificado con <code>openclaw status --deep</code></p>
+</li>
+<li>
+<p><i class="fa fa-square-o"></i> Tools visibles en <code>/tools</code></p>
+</li>
+</ul>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_resumen">Resumen</h2>
+<div class="sectionbody">
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 66.6667%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Archivo</th>
+<th class="tableblock halign-left valign-top">Propósito</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>config.json</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Configuración del agente/servidor</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>SOUL.md</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Personalidad y tono</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>AGENTS.md</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Reglas operativas</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>TOOLS.md</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Herramientas disponibles</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>MEMORY.md</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Memoria persistente</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>IDENTITY.md</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Identidad básica</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>USER.md</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Gestión de usuarios</p></td>
+</tr>
+</tbody>
+</table>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 66.6667%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Comando</th>
+<th class="tableblock halign-left valign-top">Propósito</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>openclaw agent</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Ejecutar agente</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>openclaw config set mcpServers.xxx</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Añadir servidor MCP</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>openclaw gateway restart</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Reiniciar Gateway</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>openclaw status --deep</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Verificar configuración</p></td>
+</tr>
+</tbody>
+</table>
+<hr>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_recursos_y_enlaces">Recursos y Enlaces</h2>
 <div class="sectionbody">
 <div class="sect2">
@@ -2876,6 +4095,9 @@ openclaw status <span class="nt">--deep</span></code></pre>
 </table>
 <hr>
 <div class="paragraph">
+<p><strong>¡Capítulo completo!</strong> 🦞</p>
+</div>
+<div class="paragraph">
 <p><strong>¡Presentación completa!</strong> 🦞</p>
 </div>
 </div>
@@ -2884,7 +4106,7 @@ openclaw status <span class="nt">--deep</span></code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-04-21 21:06:33 +0200
+Last updated 2026-04-22 17:52:53 +0200
 </div>
 </div>
 </body>

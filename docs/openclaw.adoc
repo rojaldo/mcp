@@ -1,5 +1,5 @@
 = OpenClaw — Presentación Completa
-:author: Bot-Bunnny
+:author: AI Generated
 :version: 2.0
 :toc: left
 :toclevels: 3
@@ -1557,6 +1557,941 @@ openclaw status --deep
 
 ---
 
+== Creación de Agentes Personalizados
+
+=== ¿Qué es un Agente en OpenClaw?
+
+Un **agente** en OpenClaw es una instancia aislada con su propia configuración, workspace, y comportamiento. Permite tener múltiples "personalidades" o "roles" que atienden diferentes canales o tareas.
+
+[cols="1,3"]
+|===
+| Componente | Descripción
+
+| **ID del agente**
+| Identificador único (ej: `default`, `ops`, `support`)
+
+| **Configuración**
+| Modelo, system prompt, temperatura, thinking level
+
+| **Workspace**
+| Directorio de trabajo con archivos de contexto
+
+| **Skills**
+| Habilidades específicas del agente
+
+| **Canales**
+| Routing de canales a este agente
+|===
+
+---
+
+=== Estructura de un Agente
+
+Un agente se define mediante varios archivos en su workspace:
+
+----
+~/.openclaw/
+├── agents/
+│   ├── default/                    # Agente por defecto
+│   │   ├── config.json             # Configuración del agente
+│   │   ├── SOUL.md                 # Personalidad y tono
+│   │   ├── AGENTS.md               # Reglas operativas
+│   │   ├── TOOLS.md                # Herramientas disponibles
+│   │   ├── MEMORY.md               # Memoria persistente
+│   │   ├── USER.md                 # Información de usuarios
+│   │   ├── IDENTITY.md             # Identidad del agente
+│   │   └── skills/                 # Skills específicas
+│   │
+│   └── ops/                        # Agente de operaciones
+│       ├── config.json
+│       ├── SOUL.md
+│       └── ...
+│
+└── config.json                     # Configuración global
+----
+
+---
+
+=== Archivos de Definición del Agente
+
+==== SOUL.md — Personalidad y Tono
+
+El archivo `SOUL.md` define la **personalidad, tono y estilo de comunicación** del agente.
+
+[source,markdown]
+----
+# Soul — Mi Agente
+
+## Persona
+
+You are **Mi Agente**, un asistente personal especializado en [dominio].
+Tu estilo base es [nivel de formalidad], pero te adaptas al usuario.
+
+## Tone & Language
+
+- **Nivel 0**: Formal, sin slang, profesional
+- **Nivel 1**: Neutral, internacional
+- **Nivel 2**: Casual, expressions suaves
+- **Nivel 3**: Latino medio, Spanglish ocasional
+- **Nivel 4**: Latino intenso, slang frecuente
+- **Nivel 5**: Máximo, full Spanglish
+
+## Core Traits
+
+- **Creativo**: Propone ideas rápidamente
+- **Resuelve-rápido**: Va al grano
+- **Cercano**: Trato amistoso
+- **Profesional**: Cumple tareas con precisión
+- **Discreto**: No expone información sensible
+----
+
+==== AGENTS.md — Reglas Operativas
+
+El archivo `AGENTS.md` define las **reglas de operación, prioridades y flujos de trabajo**.
+
+[source,markdown]
+----
+# Operational Rules — Mi Agente
+
+## Priority Order
+
+1. **Security first** - Nunca exponer datos sensibles
+2. **User intent** - Ejecutar solicitudes claramente
+3. **Quality** - Mantener calidad en las respuestas
+4. **Tone** - Adaptar al nivel del usuario
+
+## Step 0 — Sender Resolution (Mandatory)
+
+### 0.1 Lookup sender identity
+Extraer de metadata: `user_id`, `channel`, `display_name`
+
+### 0.2 Auto-register new sender
+Si no existe:
+- Crear entrada en MEMORY.md
+- Inicializar preferencias
+
+### 0.3 Update activity
+Actualizar `last_seen_at` para usuarios existentes
+
+## Boundaries
+
+- Never bypass access controls
+- Never delete files you don't own
+- Never expose private metadata
+----
+
+==== TOOLS.md — Herramientas Disponibles
+
+El archivo `TOOLS.md` describe las **herramientas y capacidades** del agente.
+
+[source,markdown]
+----
+# Tools — Mi Agente
+
+## 1. User Registry
+
+**Commands:**
+- `/users` — Lista usuarios registrados
+- `/me` — Muestra perfil propio
+- `/bio <text>` — Actualiza biografía
+
+## 2. Messaging
+
+**Commands:**
+- `/msg @user <text>` — Enviar mensaje directo
+- `/send-file @user <file_id>` — Enviar archivo
+
+## 3. Storage
+
+**Commands:**
+- `/space ls` — Listar archivos propios
+- `/space rm <file_id>` — Eliminar archivo propio
+
+## 4. Skills
+
+Las skills se cargan desde `~/.agents/skills/`:
+
+| Skill | Descripción
+|-------|-------------
+| `weather` | Clima y pronósticos
+| `github` | Operaciones de GitHub
+----
+
+==== MEMORY.md — Memoria Persistente
+
+El archivo `MEMORY.md` almacena **datos persistentes, usuarios y estado**.
+
+[source,markdown]
+----
+# Memory — Mi Agente
+
+## system_settings
+
+```json
+{
+  "global_default_quota_mb": 100,
+  "max_message_length": 4000
+}
+```
+
+## users_registry
+
+```json
+{
+  "user_id": "telegram:123456789",
+  "display_name": "Usuario Ejemplo",
+  "preferences": {
+    "formality_level": 3,
+    "language": "es"
+  }
+}
+```
+----
+
+==== IDENTITY.md — Identidad del Agente
+
+[source,markdown]
+----
+# Identity
+
+name: Mi Agente
+emoji: "🤖"
+theme: "Asistente personal especializado"
+avatar: ""
+----
+
+---
+
+=== Crear un Nuevo Agente
+
+==== Paso 1: Crear Directorio
+
+[source,bash]
+----
+# Crear directorio del agente
+mkdir -p ~/.openclaw/agents/mi-agente
+
+# Crear workspace
+mkdir -p ~/.openclaw/workspace-mi-agente
+----
+
+==== Paso 2: Crear config.json
+
+[source,bash]
+----
+cat > ~/.openclaw/agents/mi-agente/config.json << 'EOF'
+{
+  "agent": {
+    "id": "mi-agente",
+    "name": "Mi Agente",
+    "model": "anthropic/claude-opus-4",
+    "thinking": "medium"
+  },
+  "workspace": "~/.openclaw/workspace-mi-agente",
+  "skills": ["weather", "github"]
+}
+EOF
+----
+
+==== Paso 3: Crear Archivos de Definición
+
+[source,bash]
+----
+# Crear SOUL.md
+cat > ~/.openclaw/agents/mi-agente/SOUL.md << 'EOF'
+# Soul — Mi Agente
+
+## Persona
+You are **Mi Agente**, un asistente especializado.
+
+## Tone & Language
+- Nivel base: 3 (Latino medio)
+- Adaptativo al usuario
+EOF
+
+# Crear AGENTS.md
+cat > ~/.openclaw/agents/mi-agente/AGENTS.md << 'EOF'
+# Operational Rules — Mi Agente
+
+## Priority Order
+1. **User intent** — Ejecutar solicitudes
+2. **Quality** — Respuestas útiles
+3. **Security** — Proteger datos
+EOF
+
+# Crear IDENTITY.md
+cat > ~/.openclaw/agents/mi-agente/IDENTITY.md << 'EOF'
+# Identity
+
+name: Mi Agente
+emoji: "🤖"
+theme: "Asistente especializado"
+EOF
+
+# Crear MEMORY.md inicial
+cat > ~/.openclaw/agents/mi-agente/MEMORY.md << 'EOF'
+# Memory — Mi Agente
+
+## system_settings
+```json
+{"version": "1.0.0"}
+```
+
+## users_registry
+```json
+[]
+```
+EOF
+----
+
+==== Paso 4: Registrar en config.json Global
+
+[source,bash]
+----
+# Añadir agente al config global
+openclaw config set agents.profiles.mi-agente ~/.openclaw/agents/mi-agente/config.json
+----
+
+==== Paso 5: Verificar Configuración
+
+[source,bash]
+----
+# Verificar que el agente está configurado
+openclaw status
+
+# Debería mostrar:
+# Agents:
+#   - default (active)
+#   - mi-agente (configured)
+----
+
+---
+
+=== Ejecutar el Agente
+
+==== Ejecutar Turno Individual
+
+[source,bash]
+----
+# Ejecutar un mensaje con el agente
+openclaw agent --agent mi-agente --message "Hola"
+
+# Con thinking alto
+openclaw agent --agent mi-agente --message "Analiza esto" --thinking high
+
+# Con canal de entrega
+openclaw agent --agent mi-agente --message "Reporte" --deliver --channel telegram --to +15555550123
+----
+
+==== Iniciar como Servicio
+
+[source,bash]
+----
+# El Gateway maneja el routing de canales a agentes
+openclaw gateway start
+
+# Ver estado del Gateway
+openclaw gateway status
+----
+
+---
+
+=== Routing de Canales a Agentes
+
+El routing determina qué agente atiende cada canal.
+
+==== Configuración de Routing
+
+[source,bash]
+----
+# Establecer routing
+openclaw config set routing.rules --json '[
+  {"channel": "telegram", "chatId": "123456789", "agent": "mi-agente"},
+  {"channel": "discord", "chatId": "channel:789", "agent": "ops"}
+]'
+
+# Agente por defecto
+openclaw config set routing.defaultAgent "default"
+----
+
+---
+
+=== Agentes Especializados — Ejemplos
+
+==== Agente de Operaciones (ops)
+
+[source,json]
+----
+{
+  "agent": {
+    "id": "ops",
+    "name": "Ops Agent",
+    "model": "anthropic/claude-opus-4",
+    "thinking": "high",
+    "elevated": true
+  },
+  "skills": ["healthcheck", "tmux", "github"]
+}
+----
+
+==== Agente de Soporte (support)
+
+[source,json]
+----
+{
+  "agent": {
+    "id": "support",
+    "name": "Support Agent",
+    "model": "openai/gpt-4o",
+    "thinking": "medium"
+  },
+  "skills": ["summarize"]
+}
+----
+
+==== Agente Creativo (creative)
+
+[source,json]
+----
+{
+  "agent": {
+    "id": "creative",
+    "name": "Creative Agent",
+    "model": "anthropic/claude-opus-4",
+    "thinking": "xhigh",
+    "temperature": 0.9
+  }
+}
+----
+
+---
+
+== Añadir Servidores MCP a OpenClaw
+
+=== ¿Qué es un Servidor MCP?
+
+Un **servidor MCP** (Model Context Protocol) expone **herramientas (tools), recursos (resources) y prompts** a clientes de IA. OpenClaw puede conectarse a servidores MCP para extender sus capacidades.
+
+[cols="1,3"]
+|===
+| Componente | Descripción
+
+| **Tools**
+| Funciones ejecutables (acciones)
+
+| **Resources**
+| Datos accesibles (contexto)
+
+| **Prompts**
+| Plantillas predefinidas
+
+| **Sampling**
+| Solicitar generación al LLM
+
+| **Elicitation**
+| Solicitar input al usuario
+|===
+
+---
+
+=== Configurar Servidor MCP
+
+==== Paso 1: Crear Directorio de Skills
+
+[source,bash]
+----
+mkdir -p ~/.agents/skills/mi-mcp-skill
+----
+
+==== Paso 2: Crear SKILL.md
+
+[source,bash]
+----
+cat > ~/.agents/skills/mi-mcp-skill/SKILL.md << 'EOF'
+# Mi MCP Skill
+
+## Description
+Integración con servidor MCP personalizado.
+
+## Configuration
+
+### config.json
+Añadir a `~/.openclaw/config.json`:
+
+```json
+{
+  "mcpServers": {
+    "mi-servidor": {
+      "command": "node",
+      "args": ["/path/to/mcp-server/index.js"],
+      "env": {
+        "API_KEY": "tu-api-key"
+      }
+    }
+  }
+}
+```
+
+## MCP Tools Exposed
+
+| Tool | Descripción
+|------|-------------
+| `mi_tool_1` | Descripción de la tool 1
+| `mi_tool_2` | Descripción de la tool 2
+EOF
+----
+
+==== Paso 3: Configurar en config.json
+
+[source,bash]
+----
+# Añadir servidor MCP
+openclaw config set mcpServers.mi-servidor --json '{
+  "command": "node",
+  "args": ["/path/to/mcp-server/index.js"],
+  "env": {
+    "API_KEY": "tu-api-key"
+  }
+}'
+----
+
+---
+
+=== Tipos de Transporte MCP
+
+==== STDIO (Recomendado)
+
+[source,json]
+----
+{
+  "mcpServers": {
+    "mi-servidor": {
+      "command": "node",
+      "args": ["/path/to/server.js"],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}
+----
+
+==== HTTP
+
+[source,json]
+----
+{
+  "mcpServers": {
+    "mi-servidor": {
+      "url": "http://localhost:3000/mcp",
+      "headers": {
+        "Authorization": "Bearer tu-token"
+      }
+    }
+  }
+}
+----
+
+==== WebSocket
+
+[source,json]
+----
+{
+  "mcpServers": {
+    "mi-servidor": {
+      "url": "ws://localhost:3000/mcp"
+    }
+  }
+}
+----
+
+---
+
+=== Ejemplos de Servidores MCP
+
+==== Servidor de Archivos
+
+[source,json]
+----
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "@modelcontextprotocol/server-filesystem",
+        "/home/user/documents"
+      ]
+    }
+  }
+}
+----
+
+==== Servidor de GitHub
+
+[source,json]
+----
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "ghp_xxx"
+      }
+    }
+  }
+}
+----
+
+==== Servidor de PostgreSQL
+
+[source,json]
+----
+{
+  "mcpServers": {
+    "postgres": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-postgres"],
+      "env": {
+        "POSTGRES_URL": "postgresql://user:pass@localhost:5432/db"
+      }
+    }
+  }
+}
+----
+
+---
+
+=== Crear un Servidor MCP Personalizado
+
+==== Estructura del Proyecto
+
+[source,bash]
+----
+mkdir -p ~/mcp-servers/mi-servidor
+cd ~/mcp-servers/mi-servidor
+npm init -y
+npm install @modelcontextprotocol/sdk
+----
+
+==== server.js — Servidor Básico
+
+[source,javascript]
+----
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/transport/stdio.js';
+
+const server = new Server({
+  name: 'mi-servidor',
+  version: '1.0.0'
+}, {
+  capabilities: {
+    tools: {},
+    resources: {}
+  }
+});
+
+// Definir tools
+server.setRequestHandler('tools/list', async () => {
+  return {
+    tools: [
+      {
+        name: 'mi_tool',
+        description: 'Descripción de la tool',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            parametro: { type: 'string' }
+          },
+          required: ['parametro']
+        }
+      }
+    ]
+  };
+});
+
+// Manejar ejecución
+server.setRequestHandler('tools/call', async (request) => {
+  const { name, arguments: args } = request.params;
+  
+  if (name === 'mi_tool') {
+    return {
+      content: [{
+        type: 'text',
+        text: `Resultado: ${args.parametro}`
+      }]
+    };
+  }
+  
+  throw new Error(`Tool desconocida: ${name}`);
+});
+
+// Iniciar
+const transport = new StdioServerTransport();
+await server.connect(transport);
+----
+
+==== Añadir a OpenClaw
+
+[source,bash]
+----
+# Configurar servidor
+openclaw config set mcpServers.mi-servidor --json '{
+  "command": "node",
+  "args": ["/root/mcp-servers/mi-servidor/server.js"]
+}'
+
+# Reiniciar Gateway
+openclaw gateway restart
+
+# Verificar
+openclaw status --deep
+----
+
+---
+
+=== Verificar Servidor MCP
+
+==== Verificar Configuración
+
+[source,bash]
+----
+# Verificar que el servidor está configurado
+openclaw config get mcpServers
+
+# Verificar estado del Gateway
+openclaw gateway status
+
+# Ver estado completo
+openclaw status --deep
+----
+
+==== Verificar Tools Disponibles
+
+En un chat con el agente, ejecutar `/tools` para ver las tools del servidor MCP.
+
+---
+
+=== Servidores MCP Populares
+
+[cols="1,2"]
+|===
+| Servidor | Descripción
+
+| `@modelcontextprotocol/server-filesystem`
+| Acceso a archivos locales
+
+| `@modelcontextprotocol/server-github`
+| Operaciones de GitHub
+
+| `@modelcontextprotocol/server-postgres`
+| Base de datos PostgreSQL
+
+| `@modelcontextprotocol/server-sqlite`
+| Base de datos SQLite
+
+| `@modelcontextprotocol/server-puppeteer`
+| Web scraping con Puppeteer
+
+| `@modelcontextprotocol/server-fetch`
+| Fetch de URLs
+|===
+
+==== Instalar Servidor Oficial
+
+[source,bash]
+----
+# Instalar servidor de filesystem
+npm install -g @modelcontextprotocol/server-filesystem
+
+# Configurar en OpenClaw
+openclaw config set mcpServers.filesystem --json '{
+  "command": "npx",
+  "args": [
+    "@modelcontextprotocol/server-filesystem",
+    "/home/user/documents"
+  ]
+}'
+
+# Reiniciar Gateway
+openclaw gateway restart
+----
+
+---
+
+=== Debugging de Servidores MCP
+
+==== Ver Logs
+
+[source,bash]
+----
+# Ver logs del Gateway
+openclaw gateway logs
+
+# Logs en tiempo real
+tail -f ~/.openclaw/logs/gateway.log
+----
+
+==== Verificar Conexión
+
+[source,bash]
+----
+# Verificar estado del Gateway
+openclaw gateway status
+
+# Verificar health
+openclaw gateway health
+
+# Diagnóstico completo
+openclaw doctor
+----
+
+---
+
+== Flujos de Trabajo Completos
+
+=== Flujo: Crear Agente desde Cero
+
+[source,bash]
+----
+# 1. Crear estructura
+mkdir -p ~/.openclaw/agents/mi-agente
+mkdir -p ~/.openclaw/workspace-mi-agente
+
+# 2. Crear config.json
+cat > ~/.openclaw/agents/mi-agente/config.json << 'EOF'
+{
+  "agent": {
+    "id": "mi-agente",
+    "name": "Mi Agente",
+    "model": "anthropic/claude-opus-4",
+    "thinking": "medium"
+  },
+  "workspace": "~/.openclaw/workspace-mi-agente"
+}
+EOF
+
+# 3. Crear archivos de definición
+# (Crear SOUL.md, AGENTS.md, TOOLS.md, MEMORY.md)
+
+# 4. Registrar en config global
+openclaw config set agents.profiles.mi-agente ~/.openclaw/agents/mi-agente/config.json
+
+# 5. Reiniciar Gateway
+openclaw gateway restart
+
+# 6. Verificar
+openclaw status
+
+# 7. Probar
+openclaw agent --agent mi-agente --message "Hola"
+----
+
+=== Flujo: Añadir Servidor MCP
+
+[source,bash]
+----
+# 1. Crear servidor MCP
+cd ~/mcp-servers/mi-servidor
+npm install @modelcontextprotocol/sdk
+# (Crear server.js)
+
+# 2. Probar servidor
+npm start
+
+# 3. Añadir a OpenClaw
+openclaw config set mcpServers.mi-servidor --json '{
+  "command": "node",
+  "args": ["/root/mcp-servers/mi-servidor/server.js"]
+}'
+
+# 4. Reiniciar Gateway
+openclaw gateway restart
+
+# 5. Verificar
+openclaw status --deep
+----
+
+---
+
+== Checklist de Configuración
+
+=== Agente Nuevo
+
+- [ ] Directorio creado (`~/.openclaw/agents/mi-agente`)
+- [ ] `config.json` configurado
+- [ ] `SOUL.md` creado
+- [ ] `AGENTS.md` creado
+- [ ] `TOOLS.md` creado
+- [ ] `MEMORY.md` inicializado
+- [ ] `IDENTITY.md` creado
+- [ ] Workspace creado
+- [ ] Agente registrado en config global
+- [ ] Gateway reiniciado
+- [ ] Verificado con `openclaw status`
+- [ ] Probado con `openclaw agent --agent mi-agente`
+
+=== Servidor MCP Nuevo
+
+- [ ] Proyecto creado
+- [ ] Dependencias instaladas
+- [ ] `server.js` implementado
+- [ ] Tools definidas
+- [ ] Probado localmente
+- [ ] Añadido a `config.json`
+- [ ] Gateway reiniciado
+- [ ] Verificado con `openclaw status --deep`
+- [ ] Tools visibles en `/tools`
+
+---
+
+== Resumen
+
+[cols="1,2"]
+|===
+| Archivo | Propósito
+
+| `config.json`
+| Configuración del agente/servidor
+
+| `SOUL.md`
+| Personalidad y tono
+
+| `AGENTS.md`
+| Reglas operativas
+
+| `TOOLS.md`
+| Herramientas disponibles
+
+| `MEMORY.md`
+| Memoria persistente
+
+| `IDENTITY.md`
+| Identidad básica
+
+| `USER.md`
+| Gestión de usuarios
+|===
+
+[cols="1,2"]
+|===
+| Comando | Propósito
+
+| `openclaw agent`
+| Ejecutar agente
+
+| `openclaw config set mcpServers.xxx`
+| Añadir servidor MCP
+
+| `openclaw gateway restart`
+| Reiniciar Gateway
+
+| `openclaw status --deep`
+| Verificar configuración
+|===
+
+---
+
 == Recursos y Enlaces
 
 === Enlaces Oficiales
@@ -1586,4 +2521,7 @@ openclaw status --deep
 
 ---
 
+**¡Capítulo completo!** 🦞
+
 **¡Presentación completa!** 🦞
+
