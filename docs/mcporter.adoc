@@ -1,0 +1,790 @@
+= MCPorter — El Gestor de Servidores MCP 🔌
+:author: Bot-Bunnny 🐰
+:version: 1.0
+:toc: left
+:toclevels: 2
+:icons: font
+:source-highlighter: rouge
+
+== ¿Qué es MCPorter? 🔥
+
+**MCPorter** es un **runtime TypeScript, CLI y toolkit de generación de código** para el Model Context Protocol (MCP).
+
+Creado por **Peter Steinberger**, MCPorter te permite:
+
+[cols="1,3"]
+|===
+| Característica | Descripción
+
+| **Zero-config discovery**
+| Detecta automáticamente servidores MCP configurados en Cursor, Claude Desktop, Codex, Windsurf, VS Code
+
+| **CLI generation**
+| Convierte cualquier servidor MCP en una CLI lista para usar
+
+| **Typed tool clients**
+| Genera interfaces TypeScript tipadas para llamar servidores MCP
+
+| **Friendly API**
+| API componible con camelCase, validación de esquemas, y helpers
+
+| **OAuth + stdio**
+| Soporte nativo para OAuth y servidores stdio
+
+| **Ad-hoc connections**
+| Conecta a cualquier endpoint MCP sin tocar la configuración
+|===
+
+**En resumen: MCPorter hace que usar MCPs sea fácil.** 💯
+
+---
+
+== ¿Por Qué MCPorter? 🤔
+
+El **Model Context Protocol** es poderoso, pero tiene fricción:
+
+|===
+| Problema | Solución MCPorter
+
+| Descubrir qué MCPs tienes configurados
+| `mcporter list` — detecta todos automáticamente
+
+| Llamar un tool MCP desde la terminal
+| `mcporter call server.tool` — invocación simple
+
+| Escribir código TypeScript para MCP
+| `mcporter emit-ts` — genera tipos automáticamente
+
+| Crear una CLI para un MCP
+| `mcporter generate-cli` — genera CLI lista para usar
+
+| Manejar OAuth de MCPs
+| `mcporter auth` — cachea y gestiona OAuth
+
+| Descubrir tools de un MCP remoto
+| `mcporter list URL --schema` — obtiene esquema completo
+|===
+
+---
+
+== Instalación 📦
+
+=== Con npx (Sin Instalación)
+
+```bash
+# Ejecutar directamente sin instalar
+npx mcporter list
+npx mcporter call linear.create_comment issueId:ENG-123 body:"Hola!"
+```
+
+=== Con npm (Instalación Global)
+
+```bash
+npm install -g mcporter
+
+# Verificar
+mcporter --version
+```
+
+=== Con Homebrew (macOS)
+
+```bash
+brew install mcporter
+```
+
+---
+
+== Descubrimiento Automático de MCPs 🔍
+
+MCPorter **detecta automáticamente** los servidores MCP que ya tienes configurados:
+
+=== Orden de Detección
+
+|===
+| Prioridad | Fuente
+
+| 1
+| `~/.mcporter/mcporter.json` (config home)
+
+| 2
+| `./config/mcporter.json` (proyecto local)
+
+| 3
+| Cursor (`~/.cursor/mcp.json`)
+
+| 4
+| Claude Desktop (`~/Library/Application Support/Claude/claude_desktop_config.json`)
+
+| 5
+| Codex (`~/.codex/mcp.json`)
+
+| 6
+| Windsurf (`~/.windsurf/mcp.json`)
+
+| 7
+| VS Code (`~/.vscode/mcp.json`)
+|===
+
+=== Ejemplo de Detección
+
+```bash
+npx mcporter list
+```
+
+Output:
+
+```
+linear - Hosted Linear MCP; exposes issue search, create, and workflow tooling.
+ 23 tools · 1654ms · HTTP https://mcp.linear.app/mcp
+
+vercel - Vercel MCP (requires OAuth).
+ 15 tools · 892ms · HTTP https://vercel.com/api/mcp
+
+context7 - Context7 documentation search.
+ 8 tools · 423ms · HTTP https://mcp.context7.com/mcp
+```
+
+---
+
+== Comandos Principales 🛠️
+
+=== mcporter list — Listar Servidores y Tools
+
+```bash
+# Listar todos los servidores MCP detectados
+npx mcporter list
+
+# Listar tools de un servidor específico
+npx mcporter list linear
+
+# Ver esquema completo de un servidor
+npx mcporter list linear --schema
+
+# Ver todos los parámetros (incluidos opcionales)
+npx mcporter list linear --all-parameters
+
+# Listar servidor remoto directamente
+npx mcporter list https://mcp.linear.app/mcp
+
+# Servidor stdio local
+npx mcporter list --stdio "bun run ./local-server.ts" --env TOKEN=xyz
+```
+
+=== mcporter call — Llamar Tools MCP
+
+```bash
+# Sintaxis simple
+npx mcporter call context7.resolve-library-id libraryName=react
+
+# Sintaxis con parámetros múltiples
+npx mcporter call context7.get-library-docs context7CompatibleLibraryID=/websites/react_dev topic=hooks
+
+# Sintaxis tipo función
+npx mcporter call 'linear.create_comment(issueId: "LNR-123", body: "Hello world")'
+
+# Con variable de entorno
+LINEAR_API_KEY=sk_linear_example npx mcporter call linear.search_documentation query="automations"
+
+# Servidor remoto directamente
+npx mcporter call https://mcp.linear.app/mcp.list_issues assignee=me
+
+# Servidor stdio local
+npx mcporter call "npx -y vercel-domains-mcp" domain=example.com
+```
+
+=== mcporter auth — Autenticación OAuth
+
+```bash
+# Autenticar con un servidor que requiere OAuth
+npx mcporter auth linear
+
+# Autenticar con servidor remoto
+npx mcporter auth https://mcp.linear.app/mcp
+
+# Ver estado de autenticación
+npx mcporter auth --json
+```
+
+=== mcporter emit-ts — Generar TypeScript
+
+```bash
+# Generar interfaces TypeScript para un servidor
+npx mcporter emit-ts linear
+
+# Generar con un nombre específico
+npx mcporter emit-ts linear --output ./generated/linear.d.ts
+```
+
+Output ejemplo:
+
+```typescript
+/**
+ * Create a comment on a specific Linear issue
+ * @param issueId The issue ID
+ * @param body The content of the comment as Markdown
+ * @param parentId? A parent comment ID to reply to
+ */
+function create_comment(issueId: string, body: string, parentId?: string): Promise<CallResult>;
+
+/**
+ * List documents in the user's Linear workspace
+ * @param query? An optional search query
+ * @param projectId? Filter by project ID
+ */
+function list_documents(query?: string, projectId?: string): Promise<CallResult>;
+```
+
+=== mcporter generate-cli — Generar CLI
+
+```bash
+# Generar CLI para un servidor MCP
+npx mcporter generate-cli linear --output ./linear-cli
+
+# Compilar CLI a binario
+npx mcporter generate-cli linear --output ./linear-cli --compile
+```
+
+---
+
+== API TypeScript 📝
+
+=== createRuntime()
+
+```typescript
+import { createRuntime } from 'mcporter';
+
+// Detecta automáticamente todos los MCPs configurados
+const runtime = await createRuntime();
+
+// Listar servidores disponibles
+const servers = await runtime.listServers();
+console.log(servers);
+// ['linear', 'vercel', 'context7', ...]
+
+// Llamar un tool
+const result = await runtime.call('linear.create_comment', {
+  issueId: 'ENG-123',
+  body: 'Looks good!'
+});
+
+// Procesar resultado
+console.log(result.text());
+console.log(result.json());
+console.log(result.markdown());
+```
+
+=== createServerProxy()
+
+```typescript
+import { createServerProxy } from 'mcporter';
+
+// Crear proxy tipado para un servidor específico
+const linear = await createServerProxy('linear');
+
+// Llamar tools con API ergonómica
+await linear.create_comment({
+  issueId: 'ENG-123',
+  body: 'Hello world!'
+});
+
+// Los métodos se convierten automáticamente a camelCase
+await linear.list_documents({ query: 'react hooks' });
+
+// Validación automática de argumentos
+// Los errores de validación se lanzan antes de la llamada
+```
+
+=== CallResult
+
+```typescript
+interface CallResult {
+  // Obtener resultado como texto plano
+  text(): string;
+  
+  // Obtener resultado como Markdown
+  markdown(): string;
+  
+  // Obtener resultado como JSON
+  json(): any;
+  
+  // Obtener imágenes
+  images(): ImageContent[];
+  
+  // Obtener todo el contenido
+  content(): Content[];
+}
+```
+
+---
+
+== Conexiones Ad-Hoc 🔌
+
+MCPorter permite conectarse a servidores MCP **sin configuración previa**:
+
+=== Servidor HTTP Remoto
+
+```bash
+# Conectar directamente a un servidor HTTP
+npx mcporter list https://mcp.linear.app/mcp
+
+# Llamar tool sin persistir configuración
+npx mcporter call https://mcp.linear.app/mcp.list_issues assignee=me
+```
+
+=== Servidor stdio Local
+
+```bash
+# Servidor stdio con comando
+npx mcporter list --stdio "npx -y @modelcontextprotocol/server-filesystem /home/user"
+
+# Con variables de entorno
+npx mcporter list --stdio "node server.js" --env API_KEY=xyz --env DEBUG=true
+
+# Con directorio de trabajo
+npx mcporter list --stdio "./server" --cwd /path/to/server
+```
+
+=== Persistir Conexión Ad-Hoc
+
+```bash
+# Guardar servidor en la configuración
+npx mcporter list https://mcp.example.com/mcp --persist
+
+# O guardar con nombre personalizado
+npx mcporter list https://mcp.example.com/mcp --name mi-servidor --persist
+
+# Elegir scope (home o project)
+npx mcporter list https://mcp.example.com/mcp --persist --scope project
+```
+
+---
+
+== Filtrado de Tools 🛡️
+
+MCPorter permite **filtrar tools** por servidor:
+
+=== Permitir Solo Ciertos Tools
+
+```json
+// config/mcporter.json
+{
+  "servers": {
+    "linear": {
+      "url": "https://mcp.linear.app/mcp",
+      "allowedTools": ["create_issue", "search_issues", "get_issue"]
+    }
+  }
+}
+```
+
+=== Bloquear Tools Riesgosos
+
+```json
+{
+  "servers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem"],
+      "blockedTools": ["delete_file", "write_file"]
+    }
+  }
+}
+```
+
+---
+
+== Configuración ⚙️
+
+=== Estructura de Configuración
+
+```json
+// ~/.mcporter/mcporter.json o ./config/mcporter.json
+{
+  "servers": {
+    "linear": {
+      "url": "https://mcp.linear.app/mcp"
+    },
+    "vercel": {
+      "url": "https://vercel.com/api/mcp"
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/projects"],
+      "env": {
+        "LOG_LEVEL": "debug"
+      }
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      }
+    }
+  }
+}
+```
+
+=== Variables de Entorno
+
+MCPorter expande automáticamente `${ENV_VAR}`:
+
+```json
+{
+  "servers": {
+    "linear": {
+      "url": "https://mcp.linear.app/mcp",
+      "headers": {
+        "Authorization": "Bearer ${LINEAR_API_KEY}"
+      }
+    }
+  }
+}
+```
+
+```bash
+# Configurar variable de entorno
+export LINEAR_API_KEY=sk_linear_xxx
+
+# MCPorter la expande automáticamente
+npx mcporter call linear.list_issues
+```
+
+---
+
+== OAuth y Autenticación 🔐
+
+=== Flujo OAuth
+
+MCPorter detecta automáticamente servidores que requieren OAuth (Supabase, Vercel, Linear, etc.):
+
+```bash
+# Iniciar flujo OAuth
+npx mcporter auth linear
+
+# Esto abre el navegador para autenticación
+# Después cachea el token automáticamente
+```
+
+=== Configurar OAuth Manualmente
+
+```json
+{
+  "servers": {
+    "vercel": {
+      "url": "https://vercel.com/api/mcp",
+      "oauth": {
+        "clientId": "xxx",
+        "clientSecret": "${VERCEL_CLIENT_SECRET}",
+        "scope": "read write"
+      }
+    }
+  }
+}
+```
+
+=== Cache de OAuth
+
+Los tokens OAuth se guardan en:
+
+```
+~/.mcporter/oauth-cache/
+```
+
+---
+
+== Integración con OpenClaw 🦞
+
+MCPorter está diseñado para integrarse con **OpenClaw**:
+
+=== Como Skill de OpenClaw
+
+```bash
+# Instalar como skill
+openclaw skills install mcporter
+```
+
+=== Uso desde OpenClaw
+
+```bash
+# Desde OpenClaw, usar mcporter directamente
+openclaw --message "Lista los issues de Linear usando mcporter"
+```
+
+=== Configuración Compartida
+
+MCPorter lee la configuración de OpenClaw automáticamente:
+
+```bash
+# OpenClaw guarda MCPs en:
+~/.openclaw/openclaw.json
+
+# MCPorter los detecta automáticamente
+npx mcporter list
+```
+
+---
+
+== Casos de Uso 🎯
+
+=== 1. Gestión de Issues (Linear)
+
+```bash
+# Buscar issues
+npx mcporter call linear.search_issues query:"bug priority:high"
+
+# Crear issue
+npx mcporter call linear.create_issue title:"Fix login bug" description:"..."
+
+# Añadir comentario
+npx mcporter call 'linear.create_comment(issueId: "ENG-123", body: "Fixed!")'
+```
+
+=== 2. Búsqueda de Documentación (Context7)
+
+```bash
+# Buscar librería
+npx mcporter call context7.resolve-library-id libraryName=react
+
+# Obtener documentación
+npx mcporter call context7.get-library-docs context7CompatibleLibraryID=/websites/react_dev topic=hooks
+```
+
+=== 3. Deploy (Vercel)
+
+```bash
+# Autenticar
+npx mcporter auth vercel
+
+# Buscar en docs
+npx mcporter call vercel.search_vercel_documentation topic="routing"
+
+# Hacer deploy
+npx mcporter call vercel.deploy_to_vercel
+```
+
+=== 4. Gestión de Dominios
+
+```bash
+# Con variable de entorno
+VERCEL_ACCESS_TOKEN=xxx npx mcporter call "npx -y vercel-domains-mcp" domain=example.com
+```
+
+---
+
+== Comparativa: MCPorter vs Alternativas ⚖️
+
+[cols="1,2,2,2"]
+|===
+| Característica | MCPorter | Claude Desktop | Cursor
+
+| **Descubrimiento automático**
+| ✅ Detecta todos
+| ❌ Solo Claude
+| ❌ Solo Cursor
+
+| **CLI generation**
+| ✅ Sí
+| ❌ No
+| ❌ No
+
+| **TypeScript types**
+| ✅ Sí
+| ❌ No
+| ❌ No
+
+| **Ad-hoc connections**
+| ✅ Sí
+| ❌ No
+| ❌ No
+
+| **OAuth caching**
+| ✅ Sí
+| ✅ Sí
+| ⚠️ Parcial
+
+| **Tool filtering**
+| ✅ allowedTools/blockedTools
+| ❌ No
+| ❌ No
+
+| **API programática**
+| ✅ TypeScript
+| ❌ No
+| ❌ No
+
+| **Cross-platform**
+| ✅ Windows/macOS/Linux
+| ✅ macOS/Windows
+| ✅ macOS/Windows/Linux
+|===
+
+---
+
+== Arquitectura 🏗️
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        MCPorter                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  │
+│  │  CLI Commands   │  │  TypeScript API │  │  Code Gen      │  │
+│  │  list           │  │  createRuntime  │  │  emit-ts       │  │
+│  │  call           │  │  createProxy    │  │  generate-cli   │  │
+│  │  auth           │  │  CallResult     │  │                 │  │
+│  │  emit-ts        │  │                  │  │                 │  │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘  │
+├─────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────────────────────────────────────────────────┐│
+│  │                    Config Discovery                          ││
+│  │  ~/.mcporter/ → ./config/ → Cursor → Claude → Codex → ...   ││
+│  └─────────────────────────────────────────────────────────────┘│
+├─────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  │
+│  │  HTTP Transport │  │  SSE Transport  │  │  Stdio Transport │  │
+│  │  (Remote MCPs)  │  │  (Streaming)    │  │  (Local MCPs)   │  │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘  │
+├─────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────────────────────────────────────────────────┐│
+│  │                    MCP Servers                               ││
+│  │  Linear • Vercel • Context7 • GitHub • Filesystem • ...     ││
+│  └─────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+== Flags Útiles 🚩
+
+```bash
+# Configuración personalizada
+npx mcporter list --config ./my-config.json
+
+# Directorio raíz para stdio
+npx mcporter call --root /path/to/project
+
+# Nivel de log
+npx mcporter list --log-level debug
+
+# Timeout de OAuth
+npx mcporter auth linear --oauth-timeout 60000
+
+# Ver logs del servidor
+npx mcporter call linear.list_issues --tail-log
+
+# Formato de salida
+npx mcporter list --output json
+npx mcporter list --output raw
+
+# Guardar imágenes de respuestas
+npx mcporter call server.generate_image --save-images ./output/
+```
+
+---
+
+== Troubleshooting 🔧
+
+=== Error: "Cannot connect to MCP server"
+
+```bash
+# Verificar que el servidor está accesible
+curl https://mcp.linear.app/mcp
+
+# Verificar configuración
+npx mcporter list --verbose
+
+# Ver logs
+npx mcporter list --log-level debug
+```
+
+=== Error: "OAuth timeout"
+
+```bash
+# Aumentar timeout
+npx mcporter auth linear --oauth-timeout 120000
+
+# O usar variable de entorno
+export MCPORTER_OAUTH_TIMEOUT_MS=120000
+npx mcporter auth linear
+```
+
+=== Error: "stdio server not found"
+
+```bash
+# Verificar que el comando funciona
+npx -y @modelcontextprotocol/server-filesystem --help
+
+# Verificar PATH
+which npx
+```
+
+=== Ver Configuración Detectada
+
+```bash
+# Ver todas las fuentes de configuración
+npx mcporter list --verbose
+
+# Ver configuración JSON
+npx mcporter list --json
+```
+
+---
+
+== Resumen 📝
+
+|===
+| Concepto | Resumen
+
+| **Qué es**
+| Runtime TypeScript + CLI para MCP
+
+| **Para qué sirve**
+| Descubrir, llamar y gestionar servidores MCP
+
+| **Instalación**
+| `npx mcporter` o `npm install -g mcporter`
+
+| **Comandos principales**
+| `list`, `call`, `auth`, `emit-ts`, `generate-cli`
+
+| **API TypeScript**
+| `createRuntime()`, `createServerProxy()`
+
+| **Descubrimiento**
+| Detecta Cursor, Claude, Codex, VS Code, Windsurf
+
+| **OAuth**
+| Flujo automático con cache
+
+| **Filtrado**
+| `allowedTools`, `blockedTools`
+|===
+
+---
+
+== Links 🔗
+
+|===
+| Recurso | URL
+
+| **GitHub**
+| https://github.com/steipete/mcporter
+
+| **npm**
+| https://www.npmjs.com/package/mcporter
+
+| **ClawVerse**
+| https://www.clawverse.dev/en/tools/mcporter/
+
+| **OpenClaw Skill**
+| https://openclawai.io/skills/skill/mcporter/
+
+| **Documentación**
+| https://github.com/steipete/mcporter/tree/main/docs
+|===
+
+---
+
+**Creado por Bot-Bunnny** 🐰🔥
+
+> *"MCPorter hace que MCP sea fácil, pana. Sin configuración, sin drama."* 💯

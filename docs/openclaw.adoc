@@ -2521,6 +2521,593 @@ openclaw status --deep
 
 ---
 
+== MCP Servers — Los que tienes que tener 🛠️
+
+=== Productividad y Gestión de Proyectos
+
+|===
+| Servidor MCP | Descripción | Instalación
+
+| **Linear**
+| Gestión de issues, proyectos, workflows
+| `npx mcporter auth linear`
+
+| **GitHub**
+| Repos, issues, PRs, commits
+| `npx @modelcontextprotocol/server-github`
+
+| **GitLab**
+| Repos, issues, MRs, pipelines
+| `npx @modelcontextprotocol/server-gitlab`
+
+| **Jira**
+| Issues, sprints, boards
+| `npx @modelcontextprotocol/server-jira`
+
+| **Notion**
+| Páginas, bases de datos, blocks
+| `npx @modelcontextprotocol/server-notion`
+
+| **Slack**
+| Mensajes, canales, archivos
+| `npx @modelcontextprotocol/server-slack`
+|===
+
+=== Desarrollo y Código
+
+|===
+| Servidor MCP | Descripción | Instalación
+
+| **Context7**
+| Búsqueda de documentación de librerías
+| `npx mcporter list context7`
+
+| **Vercel**
+| Deploy, docs, configuración
+| `npx mcporter auth vercel`
+
+| **Filesystem**
+| Acceso a archivos locales
+| `npx @modelcontextprotocol/server-filesystem ./`
+
+| **PostgreSQL**
+| Base de datos PostgreSQL
+| `npx @modelcontextprotocol/server-postgres`
+
+| **SQLite**
+| Base de datos SQLite
+| `npx @modelcontextprotocol/server-sqlite`
+
+| **Puppeteer**
+| Web scraping, screenshots
+| `npx @modelcontextprotocol/server-puppeteer`
+|===
+
+=== IA y Búsqueda
+
+|===
+| Servidor MCP | Descripción | Instalación
+
+| **Brave Search**
+| Búsqueda web con Brave
+| `npx @modelcontextprotocol/server-brave-search`
+
+| **Exa**
+| Búsqueda semántica web
+| Config manual
+
+| **Perplexity**
+| Búsqueda con IA
+| Config manual
+
+| **Memory**
+| Memoria persistente para agentes
+| `npx @modelcontextprotocol/server-memory`
+|===
+
+---
+
+== Skills Recomendadas — Las que te cambian el juego 🎮
+
+=== Skills Oficiales de OpenClaw
+
+|===
+| Skill | Descripción | Instalación
+
+| **healthcheck**
+| Auditoría de seguridad del host
+| `openclaw skills install healthcheck`
+
+| **tmux**
+| Control remoto de sesiones tmux
+| `openclaw skills install tmux`
+
+| **weather**
+| Clima y pronósticos
+| `openclaw skills install weather`
+|===
+
+=== Skills de la Comunidad (ClawHub)
+
+|===
+| Skill | Descripción | Categoría
+
+| **agent-browser**
+| Automatización de navegador headless
+| Browser
+
+| **searxng**
+| Búsqueda web autoalojada
+| Search
+
+| **github-operations**
+| Operaciones avanzadas de GitHub
+| Development
+
+| **docker-manager**
+| Gestión de contenedores Docker
+| DevOps
+
+| **kubernetes**
+| Gestión de clusters K8s
+| DevOps
+
+| **aws-cli**
+| Operaciones de AWS
+| Cloud
+
+| **gcp-cli**
+| Operaciones de Google Cloud
+| Cloud
+
+| **database**
+| Operaciones de base de datos
+| Data
+
+| **markdown**
+| Procesamiento de Markdown
+| Content
+
+| **email**
+| Envío y gestión de emails
+| Communication
+|===
+
+---
+
+== Herramientas CLI Esenciales 💻
+
+=== Gestión de OpenClaw
+
+```bash
+# Ver estado
+openclaw status
+
+# Verificar health
+openclaw doctor
+
+# Ver logs
+openclaw logs --follow
+
+# Ver configuración
+openclaw config get
+
+# Editar configuración
+openclaw config set key value
+```
+
+=== Gestión de MCP
+
+```bash
+# Listar servidores MCP
+openclaw mcp list
+
+# Ver detalles de un servidor
+openclaw mcp show github
+
+# Añadir servidor MCP
+openclaw mcp set github '{"command":"npx","args":["@modelcontextprotocol/server-github"]}'
+
+# Eliminar servidor
+openclaw mcp unset github
+```
+
+=== Gestión de Skills
+
+```bash
+# Listar skills disponibles
+openclaw skills list
+
+# Instalar skill
+openclaw skills install healthcheck
+
+# Buscar skills
+openclaw skills search kubernetes
+
+# Ejecutar skill
+openclaw --skill healthcheck
+```
+
+=== Gestión de Agentes
+
+```bash
+# Listar agentes
+openclaw agents list
+
+# Crear agente
+openclaw agents create mi-agente
+
+# Ejecutar agente específico
+openclaw --agent mi-agente --message "Hola"
+
+# Ver estado del agente
+openclaw agent status
+```
+
+=== Gestión del Gateway
+
+```bash
+# Iniciar gateway
+openclaw gateway start
+
+# Ver estado
+openclaw gateway status
+
+# Reiniciar
+openclaw gateway restart
+
+# Detener
+openclaw gateway stop
+
+# Ver logs del gateway
+openclaw gateway logs
+```
+
+---
+
+== Configuración MCP Recomendada ⚙️
+
+=== config/mcporter.json Completo
+
+```json
+{
+  "servers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "${HOME}/projects"],
+      "allowedTools": ["read_file", "write_file", "list_directory"]
+    },
+    "postgres": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres"],
+      "env": {
+        "POSTGRES_URL": "${DATABASE_URL}"
+      }
+    },
+    "linear": {
+      "url": "https://mcp.linear.app/mcp"
+    },
+    "vercel": {
+      "url": "https://vercel.com/api/mcp"
+    },
+    "context7": {
+      "url": "https://mcp.context7.com/mcp"
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+      }
+    }
+  }
+}
+```
+
+---
+
+== Integraciones Útiles 🔌
+
+=== Telegram Bot
+
+```bash
+# Configurar bot de Telegram
+openclaw config set channels.telegram.enabled true
+openclaw config set channels.telegram.botToken "TU_BOT_TOKEN"
+
+# Iniciar gateway
+openclaw gateway start
+```
+
+=== Discord Bot
+
+```bash
+# Configurar bot de Discord
+openclaw config set channels.discord.enabled true
+openclaw config set channels.discord.botToken "TU_BOT_TOKEN"
+
+# Iniciar gateway
+openclaw gateway start
+```
+
+=== Slack App
+
+```bash
+# Configurar Slack
+openclaw config set channels.slack.enabled true
+openclaw config set channels.slack.botToken "xoxb-..."
+openclaw config set channels.slack.appToken "xapp-..."
+
+# Iniciar gateway
+openclaw gateway start
+```
+
+---
+
+== Herramientas de Desarrollo 🛠️
+
+=== MCPorter — Gestor de MCPs
+
+```bash
+# Instalar
+npm install -g mcporter
+
+# Listar todos los MCPs detectados
+npx mcporter list
+
+# Llamar tool MCP
+npx mcporter call github.list_repos
+
+# Autenticar
+npx mcporter auth linear
+
+# Generar TypeScript
+npx mcporter emit-ts linear
+```
+
+=== Lobster — Workflow Engine
+
+```bash
+# Instalar
+openclaw skills install lobster
+
+# Crear workflow
+cat > workflow.yaml << EOF
+name: daily-report
+steps:
+  - skill: weather
+    args: { location: "Madrid" }
+  - skill: github
+    args: { action: "list-prs" }
+EOF
+
+# Ejecutar
+openclaw workflow run workflow.yaml
+```
+
+=== ClawFlow — Multi-agent Orchestration
+
+```bash
+# Instalar
+openclaw skills install clawflow
+
+# Crear pipeline multi-agente
+openclaw clawflow create mi-pipeline
+
+# Añadir pasos
+openclaw clawflow add-step --agent researcher --task "Buscar información"
+openclaw clawflow add-step --agent writer --task "Escribir resumen"
+
+# Ejecutar
+openclaw clawflow run mi-pipeline
+```
+
+---
+
+== Servicios Cloud ☁️
+
+=== MCP360 — Gateway Unificado
+
+|===
+| Característica | Descripción
+
+| **100+ MCPs**
+| Acceso a más de 100 servidores MCP
+
+| **Endpoint único**
+| Una sola URL para todos los MCPs
+
+| **Autenticación**
+| OAuth gestionado automáticamente
+
+| **Rate limiting**
+| Límites de uso por plan
+|===
+
+```bash
+# Configurar MCP360
+openclaw mcp set mcp360 '{"url":"https://api.mcp360.ai/mcp","headers":{"Authorization":"Bearer TU_API_KEY"}}'
+```
+
+---
+
+== Herramientas de Seguridad 🛡️
+
+=== healthcheck Skill
+
+```bash
+# Auditoría de seguridad del host
+openclaw --skill healthcheck
+
+# Verificar:
+# - Firewall configurado
+# - SSH hardening
+# - Actualizaciones pendientes
+# - Servicios expuestos
+# - Permisos de archivos
+```
+
+=== Auditoría de Dependencias
+
+```bash
+# Con GitHub MCP
+npx mcporter call github.security_advisories owner=mi-org repo=mi-repo
+
+# Con npm audit
+npm audit
+
+# Con Snyk
+npx snyk test
+```
+
+---
+
+== Herramientas de Monitorización 📊
+
+=== Logs y Diagnóstico
+
+```bash
+# Ver logs de OpenClaw
+openclaw logs --follow
+
+# Ver logs del gateway
+openclaw gateway logs --follow
+
+# Diagnóstico completo
+openclaw doctor --deep
+
+# Ver estado de canales
+openclaw channels status --probe
+```
+
+=== Métricas
+
+```bash
+# Uso de memoria y CPU
+openclaw status
+
+# Uso de tokens (si aplica)
+openclaw usage --today
+
+# Estado de MCPs
+openclaw mcp list --json | jq '.[] | {name, status}'
+```
+
+---
+
+== Herramientas de Backup y Migración 🔄
+
+=== Backup de Configuración
+
+```bash
+# Backup de configuración de OpenClaw
+cp -r ~/.openclaw ./openclaw-backup-$(date +%Y%m%d)
+
+# Backup de MCPs
+cp ~/.mcporter/mcporter.json ./mcporter-backup-$(date +%Y%m%d).json
+
+# Backup de skills
+cp -r ~/.agents/skills ./skills-backup-$(date +%Y%m%d)
+```
+
+=== Migración desde Otros Agentes
+
+```bash
+# Migrar desde Claude Code
+openclaw migrate --from claude-code
+
+# Migrar desde Cursor
+openclaw migrate --from cursor
+
+# Migrar desde Windsurf
+openclaw migrate --from windsurf
+```
+
+---
+
+== Resumen Rápido 📝
+
+=== MCPs Esenciales (Top 5)
+
+|===
+| # | MCP | Para qué sirve
+
+| 1 | **GitHub** | Repos, issues, PRs
+| 2 | **Filesystem** | Archivos locales
+| 3 | **Context7** | Documentación de librerías
+| 4 | **Linear** | Gestión de proyectos
+| 5 | **Puppeteer** | Web scraping
+|===
+
+=== Skills Esenciales (Top 5)
+
+|===
+| # | Skill | Para qué sirve
+
+| 1 | **healthcheck** | Seguridad del host
+| 2 | **tmux** | Control de sesiones
+| 3 | **weather** | Clima
+| 4 | **agent-browser** | Navegador headless
+| 5 | **searxng** | Búsqueda web
+|===
+
+=== Comandos CLI Esenciales
+
+```bash
+# Estado y diagnóstico
+openclaw status
+openclaw doctor
+
+# MCPs
+openclaw mcp list
+openclaw mcp set github '{...}'
+
+# Skills
+openclaw skills list
+openclaw skills install healthcheck
+
+# Gateway
+openclaw gateway start
+openclaw gateway status
+
+# Agentes
+openclaw agents list
+openclaw --agent mi-agente
+```
+
+---
+
+== Links Útiles 🔗
+
+|===
+| Recurso | URL
+
+| **OpenClaw Docs**
+| https://docs.openclaw.ai
+
+| **ClawHub (Skills)**
+| https://clawhub.ai
+
+| **MCPorter**
+| https://github.com/steipete/mcporter
+
+| **MCP Servers List**
+| https://github.com/modelcontextprotocol/servers
+
+| **ClawVerse**
+| https://clawverse.dev
+
+| **OpenClaw Skills Repo**
+| https://openclawai.io/skills
+|===
+
 **¡Capítulo completo!** 🦞
 
 **¡Presentación completa!** 🦞
