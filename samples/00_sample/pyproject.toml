@@ -1,0 +1,13 @@
+[project]
+name = "apod-mcp-server"
+version = "0.1.0"
+description = "MCP server for NASA APOD (Astronomy Picture of the Day) using FastMCP"
+requires-python = ">=3.10"
+dependencies = [
+    "fastmcp",
+    "httpx",
+    "cachetools>=5.3.0",
+]
+
+[project.scripts]
+apod-server = "server:mcp.run"
